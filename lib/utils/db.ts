@@ -1,7 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
 import os from "os";
-import { hasFirestoreConfig, env } from "./env";
 import type { Plan } from "@/lib/ai/schemas";
 
 const STATE_PATH = (() => {
@@ -219,112 +218,13 @@ async function writeLocalState(state: MemoryState) {
   cachedState = state;
 }
 
-let firestorePromise: Promise<import("firebase-admin/firestore").Firestore> | null = null;
-
-async function getFirestore() {
-  if (!hasFirestoreConfig) {
-    throw new Error("Firestore configuration missing");
-  }
-  if (!firestorePromise) {
-    firestorePromise = (async () => {
-      const { getApps, initializeApp, cert } = await import("firebase-admin/app");
-      const { getFirestore } = await import("firebase-admin/firestore");
-      if (!getApps().length) {
-        initializeApp({
-          credential: cert({
-            projectId: env.FIREBASE_PROJECT_ID,
-            clientEmail: env.FIREBASE_CLIENT_EMAIL,
-            privateKey: env.FIREBASE_PRIVATE_KEY,
-          }),
-        });
-      }
-      return getFirestore();
-    })();
-  }
-  return firestorePromise;
-}
-
-async function ensureAnchorProfileFirestore() {
-  const db = await getFirestore();
-  const doc = await db.collection("lifeengine_profiles").doc(defaultProfile.id).get();
-  if (!doc.exists) {
-    await db.collection("lifeengine_profiles").doc(defaultProfile.id).set(defaultProfile);
-  }
-}
-
-async function getProfilesFirestore(): Promise<ProfileRow[]> {
-  await ensureAnchorProfileFirestore();
-  const db = await getFirestore();
-  const snap = await db.collection("lifeengine_profiles").orderBy("createdAt", "desc").get();
-  return snap.docs.map((doc) => doc.data() as ProfileRow);
-}
-
-async function saveProfileFirestore(profile: ProfileRow) {
-  const db = await getFirestore();
-  await db.collection("lifeengine_profiles").doc(profile.id).set({
-    ...profile,
-    createdAt: profile.createdAt ?? new Date().toISOString(),
-  });
-}
-
-async function updateProfileFirestore(profile: ProfileRow) {
-  const db = await getFirestore();
-  await db.collection("lifeengine_profiles").doc(profile.id).set({
-    ...profile,
-    createdAt: profile.createdAt ?? new Date().toISOString(),
-  });
-}
-
-async function deleteProfileFirestore(id: string) {
-  if (id === defaultProfile.id) return; // keep anchor profile in remote store
-  const db = await getFirestore();
-  await db.collection("lifeengine_profiles").doc(id).delete();
-}
-
-async function savePlanFirestore(plan: PlanRow) {
-  const db = await getFirestore();
-  await db.collection("lifeengine_plans").doc(plan.planId).set({
-    ...plan,
-    createdAt: plan.createdAt ?? new Date().toISOString(),
-  });
-}
-
-async function listPlansFirestore(profileId: string): Promise<PlanRow[]> {
-  const db = await getFirestore();
-  const snap = await db
-    .collection("lifeengine_plans")
-    .where("profileId", "==", profileId)
-    .orderBy("createdAt", "desc")
-    .get();
-  return snap.docs.map((doc) => doc.data() as PlanRow);
-}
-
-async function getPlanFirestore(planId: string): Promise<PlanRow | null> {
-  const db = await getFirestore();
-  const doc = await db.collection("lifeengine_plans").doc(planId).get();
-  return doc.exists ? (doc.data() as PlanRow) : null;
-}
-
-async function listAllPlansFirestore(): Promise<PlanRow[]> {
-  const db = await getFirestore();
-  const snap = await db.collection("lifeengine_plans").orderBy("createdAt", "desc").get();
-  return snap.docs.map((doc) => doc.data() as PlanRow);
-}
-
 export const db = {
   async getProfiles(): Promise<ProfileRow[]> {
-    if (hasFirestoreConfig) {
-      return getProfilesFirestore();
-    }
     const state = await readLocalState();
     return [...state.profiles].sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
   },
   async saveProfile(profile: ProfileRow) {
     const payload = { ...profile, createdAt: profile.createdAt ?? new Date().toISOString() };
-    if (hasFirestoreConfig) {
-      await saveProfileFirestore(payload);
-      return;
-    }
     const state = await readLocalState();
     const filtered = state.profiles.filter((p) => p.id !== profile.id);
     state.profiles = [payload, ...filtered];
@@ -332,19 +232,11 @@ export const db = {
   },
   async updateProfile(profile: ProfileRow) {
     const payload = { ...profile, createdAt: profile.createdAt ?? new Date().toISOString() };
-    if (hasFirestoreConfig) {
-      await updateProfileFirestore(payload);
-      return;
-    }
     const state = await readLocalState();
     state.profiles = state.profiles.map((p) => (p.id === profile.id ? { ...p, ...payload } : p));
     await writeLocalState(state);
   },
   async deleteProfile(id: string) {
-    if (hasFirestoreConfig) {
-      await deleteProfileFirestore(id);
-      return;
-    }
     if (id === defaultProfile.id) {
       return;
     }
@@ -352,37 +244,24 @@ export const db = {
     state.profiles = state.profiles.filter((profile) => profile.id !== id);
     state.plans = state.plans.filter((plan) => plan.profileId !== id);
     await writeLocalState(state);
-  },
+},
   async savePlan(plan: PlanRow) {
     const payload = { ...plan, createdAt: plan.createdAt ?? new Date().toISOString() };
-    if (hasFirestoreConfig) {
-      await savePlanFirestore(payload);
-      return;
-    }
     const state = await readLocalState();
     state.plans = [payload, ...state.plans];
     await writeLocalState(state);
   },
   async listPlans(profileId: string): Promise<PlanRow[]> {
-    if (hasFirestoreConfig) {
-      return listPlansFirestore(profileId);
-    }
     const state = await readLocalState();
     return state.plans
       .filter((plan) => plan.profileId === profileId)
       .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
   },
   async listAllPlans(): Promise<PlanRow[]> {
-    if (hasFirestoreConfig) {
-      return listAllPlansFirestore();
-    }
     const state = await readLocalState();
     return [...state.plans].sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
   },
   async getPlan(planId: string): Promise<PlanRow | null> {
-    if (hasFirestoreConfig) {
-      return getPlanFirestore(planId);
-    }
     const state = await readLocalState();
     return state.plans.find((plan) => plan.planId === planId) ?? null;
   },
