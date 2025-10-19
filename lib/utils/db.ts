@@ -1,16 +1,8 @@
-import fs from "fs/promises";
-import path from "path";
-import os from "os";
+import { put, list, head, del } from "@vercel/blob";
 import type { Plan } from "@/lib/ai/schemas";
+import { hasVercelBlobStorage } from "./env";
 
-const STATE_PATH = (() => {
-  const override = process.env.LIFEENGINE_STATE_PATH;
-  if (override) return override;
-  if (process.env.VERCEL) {
-    return path.join(os.tmpdir(), "lifeengine.state.json");
-  }
-  return path.join(process.cwd(), "lifeengine.state.json");
-})();
+const BLOB_KEY = "lifeengine.state.json";
 
 export type Sex = "F" | "M" | "Other";
 
@@ -188,81 +180,99 @@ function defaultState(): MemoryState {
 let cachedState: MemoryState | null = null;
 let loadingPromise: Promise<MemoryState> | null = null;
 
-async function readLocalState(): Promise<MemoryState> {
+async function readState(): Promise<MemoryState> {
+  if (!hasVercelBlobStorage) {
+    // This is a fallback for local development if blob storage is not configured.
+    // It is not a recommended production path.
+    console.warn("Vercel Blob Storage not configured. Using fallback.");
+    return defaultState();
+  }
   if (cachedState) return cachedState;
   if (loadingPromise) return loadingPromise;
+
   loadingPromise = (async () => {
     try {
-      const file = await fs.readFile(STATE_PATH, "utf8");
-      const parsed = JSON.parse(file) as MemoryState;
+      const blob = await head(BLOB_KEY);
+      if (!blob) {
+        const fresh = defaultState();
+        await writeState(fresh);
+        return fresh;
+      }
+      const response = await fetch(blob.url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch state from blob: ${response.statusText}`);
+      }
+      const parsed = (await response.json()) as MemoryState;
       return ensureAnchorProfile(parsed);
     } catch (error) {
+      console.error("Error reading from blob, returning default state:", error);
       const fresh = defaultState();
-      await writeLocalState(fresh);
+      await writeState(fresh);
       return fresh;
     }
   })();
+
   cachedState = await loadingPromise;
   loadingPromise = null;
   return cachedState;
 }
 
-async function writeLocalState(state: MemoryState) {
+async function writeState(state: MemoryState) {
   ensureAnchorProfile(state);
-  try {
-    await fs.mkdir(path.dirname(STATE_PATH), { recursive: true });
-  } catch (error) {
-    // directory may already exist or be unwritable; we'll rely on write failing if so
+  if (hasVercelBlobStorage) {
+    await put(BLOB_KEY, JSON.stringify(state, null, 2), {
+      access: "public", // 'public' is required for the free tier.
+      addRandomSuffix: false,
+    });
   }
-  await fs.writeFile(STATE_PATH, JSON.stringify(state, null, 2), "utf8");
   cachedState = state;
 }
 
 export const db = {
   async getProfiles(): Promise<ProfileRow[]> {
-    const state = await readLocalState();
+    const state = await readState();
     return [...state.profiles].sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
   },
   async saveProfile(profile: ProfileRow) {
     const payload = { ...profile, createdAt: profile.createdAt ?? new Date().toISOString() };
-    const state = await readLocalState();
+    const state = await readState();
     const filtered = state.profiles.filter((p) => p.id !== profile.id);
     state.profiles = [payload, ...filtered];
-    await writeLocalState(state);
+    await writeState(state);
   },
   async updateProfile(profile: ProfileRow) {
     const payload = { ...profile, createdAt: profile.createdAt ?? new Date().toISOString() };
-    const state = await readLocalState();
+    const state = await readState();
     state.profiles = state.profiles.map((p) => (p.id === profile.id ? { ...p, ...payload } : p));
-    await writeLocalState(state);
+    await writeState(state);
   },
   async deleteProfile(id: string) {
     if (id === defaultProfile.id) {
       return;
     }
-    const state = await readLocalState();
+    const state = await readState();
     state.profiles = state.profiles.filter((profile) => profile.id !== id);
     state.plans = state.plans.filter((plan) => plan.profileId !== id);
-    await writeLocalState(state);
+    await writeState(state);
 },
   async savePlan(plan: PlanRow) {
     const payload = { ...plan, createdAt: plan.createdAt ?? new Date().toISOString() };
-    const state = await readLocalState();
+    const state = await readState();
     state.plans = [payload, ...state.plans];
-    await writeLocalState(state);
+    await writeState(state);
   },
   async listPlans(profileId: string): Promise<PlanRow[]> {
-    const state = await readLocalState();
+    const state = await readState();
     return state.plans
       .filter((plan) => plan.profileId === profileId)
       .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
   },
   async listAllPlans(): Promise<PlanRow[]> {
-    const state = await readLocalState();
+    const state = await readState();
     return [...state.plans].sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
   },
   async getPlan(planId: string): Promise<PlanRow | null> {
-    const state = await readLocalState();
+    const state = await readState();
     return state.plans.find((plan) => plan.planId === planId) ?? null;
   },
 };

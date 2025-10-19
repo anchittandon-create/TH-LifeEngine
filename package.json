@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.8.0",
+    "@vercel/blob": "^2.0.0",
     "axios": "^1.7.2",
     "clsx": "^2.1.0",
     "date-fns": "^3.6.0",
