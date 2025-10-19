@@ -1,11 +1,15 @@
 "use client";
 import useSWR from "swr";
+import { PlanRow } from "@/lib/utils/db";
 import { fetcher } from "@/lib/utils/fetcher";
-type PlanRow = { planId:string; days:number; confidence:number; warnings:string[]; profileId:string; createdAt?:string; goals?:string[] };
-export default function Dashboard(){
-  const { data, isLoading, error } = useSWR<{ plans: PlanRow[] }>("/api/lifeengine/plan/listByProfile?profileId=all", fetcher);
+export default function Dashboard() {
+  const { data, isLoading, error } = useSWR<{ plans: PlanRow[] }>(
+    "/api/lifeengine/plan/listByProfile?profileId=all",
+    fetcher,
+  );
   return (
     <div className="space-y-4">
+// ... existing code ...
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Dashboard</h1>
       </div>

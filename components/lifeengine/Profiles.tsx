@@ -1,32 +1,8 @@
 "use client";
 
 import useSWR from "swr";
-import clsx from "clsx";
 import { useState } from "react";
-
-type Sex = "F" | "M" | "Other";
-
-type Profile = {
-  id: string;
-  name: string;
-  demographics?: {
-    age?: number;
-    sex?: Sex;
-    height?: number;
-    weight?: number;
-  };
-  contact?: {
-    email?: string;
-    phone?: string;
-    location?: string;
-  };
-  lifestyle?: {
-    occupation?: string;
-    timeZone?: string;
-    activityLevel?: string;
-    primaryGoal?: string;
-  };
-};
+import { ProfileRow, Sex } from "@/lib/utils/db";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -46,10 +22,16 @@ const defaultForm = {
   timeZone: "Asia/Kolkata",
   activityLevel: "moderate",
   primaryGoal: "",
+  secondaryGoals: "",
+  healthFlags: "",
+  allergies: "",
+  dietType: "vegetarian",
+  cuisinePreference: "",
+  coachingNotes: "",
 };
 
 export default function Profiles() {
-  const { data, mutate, isLoading } = useSWR<{ profiles: Profile[] }>("/api/lifeengine/profiles/list", fetcher);
+  const { data, mutate, isLoading } = useSWR<{ profiles: ProfileRow[] }>("/api/lifeengine/profiles/list", fetcher);
   const profiles = data?.profiles ?? [];
 
   const [form, setForm] = useState(defaultForm);
@@ -67,7 +49,7 @@ export default function Profiles() {
     setError(null);
   }
 
-  function loadProfile(profile: Profile) {
+  function loadProfile(profile: ProfileRow) {
     setForm({
       name: profile.name ?? "",
       age: profile.demographics?.age ?? 30,
@@ -81,6 +63,12 @@ export default function Profiles() {
       timeZone: profile.lifestyle?.timeZone ?? "Asia/Kolkata",
       activityLevel: profile.lifestyle?.activityLevel ?? "moderate",
       primaryGoal: profile.lifestyle?.primaryGoal ?? "",
+      secondaryGoals: (profile.lifestyle?.secondaryGoals ?? []).join(", "),
+      healthFlags: (profile.health?.flags ?? []).join(", "),
+      allergies: (profile.health?.allergies ?? []).join(", "),
+      dietType: profile.nutrition?.dietType ?? "vegetarian",
+      cuisinePreference: profile.nutrition?.cuisinePreference ?? "",
+      coachingNotes: profile.coachingNotes ?? "",
     });
     setEditingId(profile.id);
   }
@@ -111,7 +99,17 @@ export default function Profiles() {
         timeZone: form.timeZone,
         activityLevel: form.activityLevel,
         primaryGoal: form.primaryGoal.trim(),
+        secondaryGoals: form.secondaryGoals.split(",").map((s) => s.trim()).filter(Boolean),
       },
+      health: {
+        flags: form.healthFlags.split(",").map((s) => s.trim()).filter(Boolean),
+        allergies: form.allergies.split(",").map((s) => s.trim()).filter(Boolean),
+      },
+      nutrition: {
+        dietType: form.dietType,
+        cuisinePreference: form.cuisinePreference.trim(),
+      },
+      coachingNotes: form.coachingNotes.trim(),
     };
 
     try {
@@ -217,8 +215,8 @@ export default function Profiles() {
           </div>
         </InputCard>
 
-        <InputCard title="Contact">
-          <FormField label="Email" required>
+        <InputCard title="Contact & Lifestyle">
+          <FormField label="Email">
             <input
               type="email"
               value={form.email}
@@ -227,40 +225,13 @@ export default function Profiles() {
               className={INPUT_CLASS}
             />
           </FormField>
-          <FormField label="Phone" required>
-            <input
-              value={form.phone}
-              onChange={(e) => updateForm("phone", e.target.value)}
-              placeholder="+91-90000-00000"
-              className={INPUT_CLASS}
-            />
-          </FormField>
-          <FormField label="Location" required>
+          <FormField label="Location">
             <input
               value={form.location}
               onChange={(e) => updateForm("location", e.target.value)}
               placeholder="Mumbai, IN"
               className={INPUT_CLASS}
             />
-          </FormField>
-        </InputCard>
-
-        <InputCard title="Lifestyle">
-          <FormField label="Occupation">
-            <input
-              value={form.occupation}
-              onChange={(e) => updateForm("occupation", e.target.value)}
-              placeholder="Product Manager"
-              className={INPUT_CLASS}
-            />
-          </FormField>
-          <FormField label="Time zone">
-            <select value={form.timeZone} onChange={(e) => updateForm("timeZone", e.target.value)} className={INPUT_CLASS}>
-              <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
-              <option value="Asia/Singapore">Asia/Singapore (SGT)</option>
-              <option value="Asia/Dubai">Asia/Dubai (GST)</option>
-              <option value="Europe/London">Europe/London (BST)</option>
-            </select>
           </FormField>
           <FormField label="Activity level">
             <select
@@ -284,7 +255,52 @@ export default function Profiles() {
           </FormField>
         </InputCard>
 
-        <div className="flex flex-col justify-end gap-3">
+        <InputCard title="Health & Nutrition">
+          <FormField label="Health Flags (comma-separated)">
+            <input
+              value={form.healthFlags}
+              onChange={(e) => updateForm("healthFlags", e.target.value)}
+              placeholder="e.g. pcos, thyroid"
+              className={INPUT_CLASS}
+            />
+          </FormField>
+          <FormField label="Allergies (comma-separated)">
+            <input
+              value={form.allergies}
+              onChange={(e) => updateForm("allergies", e.target.value)}
+              placeholder="e.g. almonds, gluten"
+              className={INPUT_CLASS}
+            />
+          </FormField>
+          <FormField label="Diet Type">
+            <select value={form.dietType} onChange={(e) => updateForm("dietType", e.target.value)} className={INPUT_CLASS}>
+              <option value="vegetarian">Vegetarian</option>
+              <option value="vegan">Vegan</option>
+              <option value="keto">Keto</option>
+              <option value="paleo">Paleo</option>
+              <option value="unrestricted">Unrestricted</option>
+            </select>
+          </FormField>
+          <FormField label="Cuisine Preference">
+            <input
+              value={form.cuisinePreference}
+              onChange={(e) => updateForm("cuisinePreference", e.target.value)}
+              placeholder="e.g. Indian home-cooked"
+              className={INPUT_CLASS}
+            />
+          </FormField>
+        </InputCard>
+
+        <div className="flex flex-col gap-3">
+          <InputCard title="Coach Notes">
+            <textarea
+              value={form.coachingNotes}
+              onChange={(e) => updateForm("coachingNotes", e.target.value)}
+              rows={5}
+              className={INPUT_CLASS}
+              placeholder="Add any specific notes for the coach..."
+            />
+          </InputCard>
           {error ? <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs text-rose-700">{error}</p> : null}
           <div className="flex flex-wrap items-center gap-3">
             <button
@@ -314,7 +330,6 @@ export default function Profiles() {
           <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {profiles.map((profile) => {
               const isAnchor = profile.id === "prof_anchit";
-              const lifestyle = profile.lifestyle ?? {};
               return (
                 <li key={profile.id} className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow">
                   <div className="flex items-start justify-between gap-3">
@@ -348,16 +363,13 @@ export default function Profiles() {
                       </div>
                     </div>
                   </div>
-                  <div className="grid gap-2 text-[11px] text-slate-500">
+                  <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-500">
                     <Stat label="Email" value={profile.contact?.email ?? "—"} />
-                    <Stat label="Phone" value={profile.contact?.phone ?? "—"} />
                     <Stat label="Location" value={profile.contact?.location ?? "—"} />
-                    <Stat label="Height" value={profile.demographics?.height ? `${profile.demographics.height} cm` : "—"} />
                     <Stat label="Weight" value={profile.demographics?.weight ? `${profile.demographics.weight} kg` : "—"} />
-                    <Stat label="Occupation" value={lifestyle.occupation ?? "—"} />
-                    <Stat label="Time zone" value={lifestyle.timeZone ?? "—"} />
-                    <Stat label="Activity" value={lifestyle.activityLevel ?? "—"} />
-                    <Stat label="Primary goal" value={lifestyle.primaryGoal ?? "—"} />
+                    <Stat label="Primary goal" value={profile.lifestyle?.primaryGoal ?? "—"} />
+                    <Stat label="Health Flags" value={(profile.health?.flags ?? []).join(", ") || "—"} />
+                    <Stat label="Allergies" value={(profile.health?.allergies ?? []).join(", ") || "—"} />
                   </div>
                 </li>
               );

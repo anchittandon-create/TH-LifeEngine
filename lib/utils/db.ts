@@ -17,7 +17,7 @@ type PreferredSlot = {
   end?: string;
 };
 
-type ProfileRow = {
+export type ProfileRow = {
   id: string;
   name: string;
   demographics?: {
