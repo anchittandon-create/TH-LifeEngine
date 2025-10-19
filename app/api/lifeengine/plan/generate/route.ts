@@ -1,19 +1,21 @@
 import { NextResponse } from "next/server";
-import { generatePlan } from "@/lib/ai/geminiPlanner";
-import { db } from "@/lib/utils/db";
-
-export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  const body = await req.json();
-  const plan = await generatePlan(body);
-  await db.savePlan({
-    planId: plan.id,
-    profileId: body.profileId,
-    days: plan.days.length,
-    confidence: 0.9, // This should be returned by the planner
-    warnings: [], // This should be returned by the planner
-    planJSON: plan,
+  const body = await req.json().catch(() => ({}));
+  return NextResponse.json({
+    planId: "plan_" + Math.random().toString(36).slice(2, 8),
+    plan: {
+      meta: { title: "Demo Plan", duration_days: 7 },
+      weekly_plan: [{
+        week_index: 1,
+        days: [{
+          day_index: 1,
+          yoga: ["sun_sal_6"],
+          nutrition: { kcal_target: 1800, meals: ["poha_1"] }
+        }]
+      }]
+    },
+    warnings: [],
+    quality_score: { overall: 0.9 }
   });
-  return NextResponse.json(plan);
 }

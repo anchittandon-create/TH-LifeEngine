@@ -2,15 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: light;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
 body {
-  @apply bg-slate-100 text-slate-900;
-}
-
-::selection {
-  @apply bg-indigo-500/80 text-white;
+  @apply bg-gray-50 text-gray-900;
 }
