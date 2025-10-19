@@ -1,7 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/utils/db";
 
-export async function GET() {
-  return NextResponse.json({ plans: [
-    { planId:"plan_abc123", profileId:"prof_anchit", days:7, confidence:0.9, warnings:[] }
-  ]});
+export async function GET(req: NextRequest) {
+  const profileId = req.nextUrl.searchParams.get("profileId");
+  
+  if (profileId && profileId !== "all") {
+    const plans = await db.listPlans(profileId);
+    return NextResponse.json({ plans });
+  } else {
+    const plans = await db.listAllPlans();
+    return NextResponse.json({ plans });
+  }
 }
