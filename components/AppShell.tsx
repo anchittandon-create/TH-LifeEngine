@@ -9,7 +9,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen bg-[var(--bg)]">
-      <Sidebar className="hidden md:flex" />
+      <Sidebar />
       <SidebarDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
