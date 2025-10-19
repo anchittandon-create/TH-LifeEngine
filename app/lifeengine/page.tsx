@@ -1,55 +1,33 @@
-import Link from "next/link";
-import styles from "./Home.module.css";
-
-const highlights = [
-  {
-    title: "Verbal RAG",
-    text: "Embedded safety and diet rules keep every Gemini plan grounded in TH+ guidance.",
-  },
-  {
-    title: "Profile Smart",
-    text: "Gender, age, region, and medical flags personalise every recommendation.",
-  },
-  {
-    title: "On-Page Plans",
-    text: "Create a plan and see the structured JSON output instantly—export when ready.",
-  },
-  {
-    title: "Offline Friendly",
-    text: "Profiles live in localStorage, while the server mirrors them for live sessions.",
-  },
-];
-
-export default function LifeengineHome() {
+export default function Home() {
   return (
     <div>
-      <section className={styles.hero}>
-        <h1 className={styles.heroTitle}>
-          TH+ LifeEngine — Verbal Edition
-        </h1>
-        <p className={styles.heroText}>
-          A streamlined wellness director that blends conversational rule tables with
-          Gemini 1.5 Flash. Build, review, and refine personalised plans without any
-          external databases or vector stores.
-        </p>
-        <div className={styles.ctaRow}>
-          <Link href="/lifeengine/create" className={styles.primary}>
-            Launch Plan Wizard
-          </Link>
-          <Link href="/lifeengine/dashboard" className={styles.secondary}>
-            View Dashboard
-          </Link>
-        </div>
-      </section>
-
-      <section className={styles.grid}>
-        {highlights.map((item) => (
-          <article key={item.title} className={styles.card}>
-            <h2 className={styles.cardTitle}>{item.title}</h2>
-            <p className={styles.cardText}>{item.text}</p>
-          </article>
-        ))}
-      </section>
+      <h1 className="text-2xl font-bold mb-4">Welcome to TH+ LifeEngine</h1>
+      <p className="text-[var(--muted)] mb-6">
+        Create personalised wellness plans with AI-powered insights.
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <a
+          href="/lifeengine/profiles"
+          className="block p-6 bg-[var(--card)] border border-[var(--border)] rounded-md hover:shadow-md transition-shadow"
+        >
+          <h2 className="text-lg font-semibold mb-2">Profiles</h2>
+          <p className="text-[var(--muted)]">Manage your wellness profiles.</p>
+        </a>
+        <a
+          href="/lifeengine/create"
+          className="block p-6 bg-[var(--card)] border border-[var(--border)] rounded-md hover:shadow-md transition-shadow"
+        >
+          <h2 className="text-lg font-semibold mb-2">Create Plan</h2>
+          <p className="text-[var(--muted)]">Generate a new wellness plan.</p>
+        </a>
+        <a
+          href="/lifeengine/dashboard"
+          className="block p-6 bg-[var(--card)] border border-[var(--border)] rounded-md hover:shadow-md transition-shadow"
+        >
+          <h2 className="text-lg font-semibold mb-2">Dashboard</h2>
+          <p className="text-[var(--muted)]">View your plans and progress.</p>
+        </a>
+      </div>
     </div>
   );
 }

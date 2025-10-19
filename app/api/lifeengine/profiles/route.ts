@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   }
   const nextProfile: Profile = {
     ...profile,
-    id: profile.id ?? createId("prof"),
+    id: profile.id ?? createId(),
   };
   PROFILE_STORE.set(nextProfile.id, nextProfile);
   return NextResponse.json({

@@ -1,5 +1,5 @@
 export const PROGRESSION = {
-  maxWeeklyIncreasePct: 10,
-  deloadEveryWeeks: 5,
-  deloadDropPct: 30,
-} as const;
+  maxWeeklyIncreasePct: 20,
+  deloadEveryWeeks: 4,
+  deloadDropPct: 40,
+};

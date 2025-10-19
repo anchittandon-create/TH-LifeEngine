@@ -38,9 +38,9 @@ export async function GET(request: Request) {
     .map(([id, record]) => ({
       id,
       profileId: record.profileId,
-      title: record.plan.meta.title,
+      title: record.plan.meta?.title || 'Untitled Plan',
       createdAt: record.createdAt,
-      goals: record.plan.meta.goals,
+      goals: record.plan.meta?.goals || [],
       warnings: record.warnings.length,
       analytics: record.analytics,
     }))

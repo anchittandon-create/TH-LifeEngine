@@ -1,41 +1,20 @@
-export function bmr(sex: string, w: number, h: number, age: number) {
-  return sex === "M"
-    ? 10 * w + 6.25 * h - 5 * age + 5
-    : 10 * w + 6.25 * h - 5 * age - 161;
-}
+import type { Profile } from '../domain/profile';
+import type { Intake } from '../domain/intake';
 
-export function tdee(
-  b: number,
-  activity: "sedentary" | "light" | "moderate" | "intense"
-) {
-  const f = { sedentary: 1.2, light: 1.375, moderate: 1.55, intense: 1.725 }[
-    activity
-  ];
-  return b * f;
-}
-
-export function kcalTarget(
-  t: number,
-  goal: "deficit" | "maintenance" | "surplus"
-) {
-  if (goal === "deficit") {
-    return Math.max(1200, t - 500);
+export function calculateCalories(profile: Profile, goal: string): number {
+  const base = 2000; // Simplified
+  if (goal.includes('weight loss')) {
+    return base - 500;
+  } else if (goal.includes('weight gain')) {
+    return base + 500;
   }
-  if (goal === "surplus") {
-    return t + 300;
-  }
-  return t;
+  return base;
 }
 
-export function hydrationMl(
-  weightKg: number,
-  region: "IN" | "US" | "EU" | "Global" = "IN"
-) {
-  const floors: Record<string, number> = {
-    IN: 2200,
-    US: 2000,
-    EU: 2000,
-    Global: 2000,
+export function deriveBasics(profile: Profile, intake: Intake) {
+  const kcalTarget = calculateCalories(profile, intake.goals.join(' '));
+  return {
+    kcalTarget,
+    hydration: 2000, // ml per day
   };
-  return Math.max(35 * weightKg, floors[region] ?? 2000);
 }

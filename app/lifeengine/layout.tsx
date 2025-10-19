@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import AppShell from "@/components/layout/AppShell";
+
+import AppShell from "@/components/AppShell";
 
 export const metadata: Metadata = {
   title: "TH+ LifeEngine",
-  description: "Verbal Edition: Gemini-guided personalised planning.",
+  description: "Personalised wellness planning with Gemini AI.",
 };
 
 export default function LifeengineLayout({

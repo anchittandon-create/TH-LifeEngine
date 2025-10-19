@@ -85,7 +85,7 @@ export default function CreatePlanPage() {
   const [durationValue, setDurationValue] = useState(8);
   const [experience, setExperience] = useState<Intake["experience_level"]>("intermediate");
   const [equipment, setEquipment] = useState<Record<string, boolean>>({ mat: true });
-  const [overrideDietType, setOverrideDietType] = useState<Profile["dietary"]["type"] | "">("");
+  const [overrideDietType, setOverrideDietType] = useState<string>("");
   const [overrideAllergies, setOverrideAllergies] = useState<string>("");
   const [overrideFlags, setOverrideFlags] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
@@ -143,9 +143,9 @@ export default function CreatePlanPage() {
   useEffect(() => {
     const profile = profiles.find((p) => p.id === selectedProfileId);
     if (profile) {
-      setOverrideDietType(profile.dietary.type);
-      setOverrideAllergies(profile.dietary.allergies.join(", "));
-      setOverrideFlags(profile.medical_flags.join(", "));
+      setOverrideDietType(profile.dietary?.type || "");
+      setOverrideAllergies(profile.dietary?.allergies?.join(", ") || "");
+      setOverrideFlags(profile.medicalConditions?.join(", ") || "");
     }
   }, [profiles, selectedProfileId]);
 
@@ -178,15 +178,15 @@ export default function CreatePlanPage() {
 
     const profileSnapshot: Profile = {
       ...selectedProfile,
-      medical_flags: parseList(overrideFlags).length
+      medicalConditions: parseList(overrideFlags).length
         ? parseList(overrideFlags)
-        : selectedProfile.medical_flags,
+        : selectedProfile.medicalConditions,
       dietary: {
         ...selectedProfile.dietary,
-        type: overrideDietType || selectedProfile.dietary.type,
+        type: overrideDietType || selectedProfile.dietary?.type,
         allergies: parseList(overrideAllergies).length
           ? parseList(overrideAllergies)
-          : selectedProfile.dietary.allergies,
+          : selectedProfile.dietary?.allergies,
       },
     };
 
@@ -256,7 +256,7 @@ export default function CreatePlanPage() {
         const record: StoredPlan = {
           id: parsed.planId,
           plan: parsed.plan,
-          profileId: selectedProfileId || parsed.plan.meta.flags?.[0] || "unknown",
+          profileId: selectedProfileId || "unknown",
           warnings: parsed.warnings ?? [],
           analytics: parsed.analytics,
           createdAt: Date.now(),
@@ -403,7 +403,7 @@ export default function CreatePlanPage() {
             <Input
               value={overrideDietType}
               onChange={(event) =>
-                setOverrideDietType(event.target.value as Profile["dietary"]["type"] | "")
+                setOverrideDietType(event.target.value)
               }
               placeholder="veg"
             />

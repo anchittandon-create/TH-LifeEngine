@@ -78,9 +78,9 @@ export default function PlanDetailPage({ params }: Props) {
   const flattenedDays = useMemo(() => {
     if (!data) return [];
     const days: { week: Week; dayIndex: number; weekIndex: number }[] = [];
-    data.plan.weekly_plan.forEach((week) => {
+    data.plan.weeks.forEach((week) => {
       week.days.forEach((day) => {
-        days.push({ week, dayIndex: day.day_index, weekIndex: week.week_index });
+        days.push({ week, dayIndex: day.dayNumber, weekIndex: week.weekNumber });
       });
     });
     return days;
@@ -104,9 +104,9 @@ export default function PlanDetailPage({ params }: Props) {
     <div className={styles.page}>
       <header className={styles.header}>
         <div>
-          <h1 className={styles.title}>{plan.meta.title}</h1>
+          <h1 className={styles.title}>{plan.meta?.title || 'Untitled Plan'}</h1>
           <div className={styles.badges}>
-            {plan.meta.goals.map((goal) => (
+            {(plan.meta?.goals ?? []).map((goal) => (
               <span key={goal} className={styles.badge}>
                 {goal}
               </span>
@@ -119,13 +119,13 @@ export default function PlanDetailPage({ params }: Props) {
       <section className={styles.overviewCard}>
         <div className={styles.metaGrid}>
           <div className={styles.metaItem}>
-            Duration: {plan.meta.duration_days} days
+            Duration: {plan.meta?.duration_days || 'N/A'} days
           </div>
           <div className={styles.metaItem}>
-            Weeks: {plan.meta.weeks}
+            Weeks: {plan.meta?.weeks || 'N/A'}
           </div>
           <div className={styles.metaItem}>
-            Daily Budget: {plan.meta.time_budget_min_per_day} minutes
+            Daily Budget: {plan.meta?.time_budget_min_per_day || 'N/A'} minutes
           </div>
           <div className={styles.metaItem}>
             Hydration ensured &bull; Analytics overall {analytics.overall}
@@ -147,13 +147,13 @@ export default function PlanDetailPage({ params }: Props) {
         <section className={styles.sectionCard}>
           <h2>Coach Messages</h2>
           <ul className={styles.list}>
-            {plan.coach_messages.map((message) => (
+            {(plan.coach_messages ?? []).map((message) => (
               <li key={message}>{message}</li>
             ))}
           </ul>
           <h3>Adherence Tips</h3>
           <ul className={styles.list}>
-            {plan.adherence_tips.map((tip) => (
+            {(plan.adherence_tips ?? []).map((tip) => (
               <li key={tip}>{tip}</li>
             ))}
           </ul>
@@ -164,17 +164,17 @@ export default function PlanDetailPage({ params }: Props) {
         <section className={styles.sectionCard}>
           <h2>Weekly Progression</h2>
           <div className={styles.dayGrid}>
-            {plan.weekly_plan.map((week) => (
-              <article key={week.week_index} className={styles.week}>
+            {plan.weeks.map((week) => (
+              <article key={week.weekNumber} className={styles.week}>
                 <div className={styles.weekHeader}>
-                  <span>Week {week.week_index}</span>
+                  <span>Week {week.weekNumber}</span>
                   <span>{week.focus}</span>
                 </div>
                 <p>{week.progression_note}</p>
                 <ul className={styles.list}>
                   {week.days.map((day) => (
-                    <li key={day.day_index}>
-                      Day {day.day_index} · {day.theme ?? "Theme pending"}
+                    <li key={day.dayNumber}>
+                      Day {day.dayNumber} · {day.theme ?? "Theme pending"}
                     </li>
                   ))}
                 </ul>
@@ -189,12 +189,12 @@ export default function PlanDetailPage({ params }: Props) {
           <h2>Daily Detail</h2>
           <div className={styles.dayGrid}>
             {flattenedDays.map(({ week, dayIndex }) => {
-              const day = week.days.find((item) => item.day_index === dayIndex);
+              const day = week.days.find((item) => item.dayNumber === dayIndex);
               if (!day) return null;
               return (
-                <div key={`${week.week_index}-${day.day_index}`} className={styles.dayCard}>
+                <div key={`${week.weekNumber}-${day.dayNumber}`} className={styles.dayCard}>
                   <div className={styles.dayTitle}>
-                    Week {week.week_index} · Day {day.day_index} {day.theme ? `· ${day.theme}` : ""}
+                    Week {week.weekNumber} · Day {day.dayNumber} {day.theme ? `· ${day.theme}` : ""}
                   </div>
                   {day.yoga && day.yoga.length > 0 && (
                     <div>
@@ -264,8 +264,8 @@ export default function PlanDetailPage({ params }: Props) {
         <section className={styles.sectionCard}>
           <h2>Citations</h2>
           <div className={styles.citations}>
-            {plan.citations.length === 0 && <p>No citations provided.</p>}
-            {plan.citations.map((citation) => (
+            {(plan.citations ?? []).length === 0 && <p>No citations provided.</p>}
+            {(plan.citations ?? []).map((citation) => (
               <div key={citation} className={styles.citation}>
                 {citation}
               </div>

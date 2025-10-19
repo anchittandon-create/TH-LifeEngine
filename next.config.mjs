@@ -1,1 +1,5 @@
-export default {};
+export default {
+  experimental: {
+    serverComponentsExternalPackages: ['@google/generative-ai'],
+  },
+};

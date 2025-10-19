@@ -141,10 +141,10 @@ export default function DashboardPage() {
 function toLocalCard(plan: StoredPlan): PlanCard {
   return {
     id: plan.id,
-    title: plan.plan.meta.title,
+    title: plan.plan.meta?.title || 'Untitled',
     profileId: plan.profileId,
     createdAt: plan.createdAt,
-    goals: plan.plan.meta.goals ?? [],
+    goals: plan.plan.meta?.goals ?? [],
     warnings: plan.warnings.length,
     analytics: plan.analytics,
     source: "local",

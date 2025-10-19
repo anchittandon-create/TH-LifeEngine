@@ -1,83 +1,48 @@
-import type { ButtonHTMLAttributes, FormHTMLAttributes, ReactNode } from "react";
-import styles from "./Form.module.css";
+'use client';
 
-export function Form(props: FormHTMLAttributes<HTMLFormElement>) {
-  const { className, ...rest } = props;
+import { FormEvent, ReactNode, useState } from 'react';
+
+interface FormProps {
+  onSubmit: (data: Record<string, any>) => void | Promise<void>;
+  children: ReactNode;
+  className?: string;
+}
+
+export default function Form({ onSubmit, children, className = '' }: FormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const formData = new FormData(e.currentTarget);
+      const data = Object.fromEntries(formData.entries());
+      await onSubmit(data);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <form className={`${styles.form} ${className ?? ""}`} {...rest}>
-      {props.children}
+    <form onSubmit={handleSubmit} className={`space-y-4 ${className}`}>
+      {children}
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full px-4 py-2 bg-[var(--accent)] text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+      >
+        {isSubmitting ? 'Submitting...' : 'Submit'}
+      </button>
     </form>
   );
 }
 
-export function Field({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return <div className={`${styles.field} ${className ?? ""}`}>{children}</div>;
-}
-
-export function Label({ children }: { children: ReactNode }) {
-  return <label className={styles.label}>{children}</label>;
-}
-
-export function HelpText({ children }: { children: ReactNode }) {
-  return <span className={styles.help}>{children}</span>;
-}
-
-export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
-  const { className, ...rest } = props;
-  return <input className={`${styles.input} ${className ?? ""}`} {...rest} />;
-}
-
-export function Textarea(
-  props: React.TextareaHTMLAttributes<HTMLTextAreaElement>
-) {
-  const { className, ...rest } = props;
-  return (
-    <textarea className={`${styles.textarea} ${className ?? ""}`} {...rest} />
-  );
-}
-
-export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
-  const { className, ...rest } = props;
-  return <select className={`${styles.select} ${className ?? ""}`} {...rest} />;
-}
-
-export function Chips({ items }: { items: string[] }) {
-  if (!items.length) {
-    return null;
-  }
-  return (
-    <div className={styles.chips}>
-      {items.map((chip) => (
-        <span key={chip} className={styles.chip}>
-          {chip}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-export function Actions({ children }: { children: ReactNode }) {
-  return <div className={styles.actions}>{children}</div>;
-}
-
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary";
-};
-
-export function Button({ variant = "primary", className, ...rest }: ButtonProps) {
-  const classes =
-    variant === "primary" ? styles.buttonPrimary : styles.buttonSecondary;
-  return (
-    <button
-      type="button"
-      className={`${classes} ${className ?? ""}`}
-      {...rest}
-    />
-  );
-}
+export { default as Form } from './Form';
+export { Field } from './Field';
+export { Label } from './Label';
+export { Input } from './Input';
+export { Select } from './Select';
+export { Textarea } from './Textarea';
+export { HelpText } from './HelpText';
+export { Actions } from './Actions';
+export { Button } from './Button';
