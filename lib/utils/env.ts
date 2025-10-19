@@ -1,14 +1,14 @@
 import { z } from "zod";
 
 const EnvSchema = z.object({
-  GOOGLE_API_KEY: z.string().optional(),
+  GEMINI_API_KEY: z.string().optional(),
   FIREBASE_PROJECT_ID: z.string().optional(),
   FIREBASE_CLIENT_EMAIL: z.string().optional(),
   FIREBASE_PRIVATE_KEY: z.string().optional(),
-  OPENAI_API_KEY: z.string().optional(),
   LIFEENGINE_ENABLED: z.string().optional(),
-  LIFEENGINE_ROLLOUT_PERCENT: z.string().optional(),
   LIFEENGINE_COACH_MINI_ENABLED: z.string().optional(),
+  SHOW_CITATIONS_UI: z.string().optional(),
+  RAG_MATCHING_ENGINE: z.string().optional(),
 });
 
 const parsed = EnvSchema.parse(process.env);
@@ -19,14 +19,14 @@ function normalizePrivateKey(key?: string) {
 }
 
 export const env = {
-  GOOGLE_API_KEY: parsed.GOOGLE_API_KEY,
+  GEMINI_API_KEY: parsed.GEMINI_API_KEY,
   FIREBASE_PROJECT_ID: parsed.FIREBASE_PROJECT_ID,
   FIREBASE_CLIENT_EMAIL: parsed.FIREBASE_CLIENT_EMAIL,
   FIREBASE_PRIVATE_KEY: normalizePrivateKey(parsed.FIREBASE_PRIVATE_KEY),
-  OPENAI_API_KEY: parsed.OPENAI_API_KEY,
-  LIFEENGINE_ENABLED: parsed.LIFEENGINE_ENABLED === "true",
-  LIFEENGINE_ROLLOUT_PERCENT: Number(parsed.LIFEENGINE_ROLLOUT_PERCENT ?? 0),
+  LIFEENGINE_ENABLED: parsed.LIFEENGINE_ENABLED !== "false", // default to true
   LIFEENGINE_COACH_MINI_ENABLED: parsed.LIFEENGINE_COACH_MINI_ENABLED === "true",
+  SHOW_CITATIONS_UI: parsed.SHOW_CITATIONS_UI !== "false", // default to true
+  RAG_MATCHING_ENGINE: parsed.RAG_MATCHING_ENGINE === "true",
 };
 
 export const hasFirestoreConfig =
