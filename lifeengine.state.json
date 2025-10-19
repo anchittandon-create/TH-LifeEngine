@@ -1,0 +1,253 @@
+{
+  "profiles": [
+    {
+      "id": "prof_anchit",
+      "name": "Anchit Tandon",
+      "demographics": {
+        "age": 27,
+        "sex": "M",
+        "height": 178,
+        "weight": 87
+      },
+      "contact": {
+        "email": "anchit.tandon@gmail.com",
+        "phone": "+919873945238",
+        "location": "Delhi, IN"
+      },
+      "lifestyle": {
+        "occupation": "Senior Product Manager",
+        "timeZone": "Asia/Kolkata",
+        "activityLevel": "light",
+        "primaryGoal": "Weight Loss"
+      },
+      "createdAt": "2025-10-19T10:30:51.756Z"
+    }
+  ],
+  "plans": [
+    {
+      "planId": "plan_72e02311795945c3",
+      "profileId": "prof_anchit",
+      "confidence": 0.95,
+      "warnings": [
+        "Flow back_relief may violate flags back_pain,anxiety,insomnia (deep_forward_folds)"
+      ],
+      "planJSON": {
+        "id": "fallback-plan-1760869923281",
+        "days": [
+          {
+            "date": "2025-10-19",
+            "yoga": [
+              {
+                "flowId": "sun_sal_6",
+                "durationMin": 20
+              }
+            ],
+            "meals": [
+              {
+                "itemId": "poha_1",
+                "qty": "1 serving"
+              },
+              {
+                "itemId": "dal_rice",
+                "qty": "1 serving"
+              },
+              {
+                "itemId": "curd_roti",
+                "qty": "1 serving"
+              }
+            ],
+            "habits": [
+              "Hydration 3L",
+              "10 min stretching"
+            ],
+            "sleep": {
+              "windDownMin": 30
+            }
+          },
+          {
+            "date": "2025-10-20",
+            "yoga": [
+              {
+                "flowId": "pcod_calm",
+                "durationMin": 20
+              }
+            ],
+            "meals": [
+              {
+                "itemId": "dal_rice",
+                "qty": "1 serving"
+              },
+              {
+                "itemId": "curd_roti",
+                "qty": "1 serving"
+              },
+              {
+                "itemId": "salad_bowl",
+                "qty": "1 serving"
+              }
+            ],
+            "habits": [
+              "Hydration 3L",
+              "10 min stretching"
+            ],
+            "sleep": {
+              "windDownMin": 30
+            }
+          },
+          {
+            "date": "2025-10-21",
+            "yoga": [
+              {
+                "flowId": "back_relief",
+                "durationMin": 20
+              }
+            ],
+            "meals": [
+              {
+                "itemId": "curd_roti",
+                "qty": "1 serving"
+              },
+              {
+                "itemId": "salad_bowl",
+                "qty": "1 serving"
+              },
+              {
+                "itemId": "poha_1",
+                "qty": "1 serving"
+              }
+            ],
+            "habits": [
+              "Hydration 3L",
+              "10 min stretching"
+            ],
+            "sleep": {
+              "windDownMin": 30
+            }
+          },
+          {
+            "date": "2025-10-22",
+            "yoga": [
+              {
+                "flowId": "sleep_yin",
+                "durationMin": 20
+              }
+            ],
+            "meals": [
+              {
+                "itemId": "salad_bowl",
+                "qty": "1 serving"
+              },
+              {
+                "itemId": "poha_1",
+                "qty": "1 serving"
+              },
+              {
+                "itemId": "dal_rice",
+                "qty": "1 serving"
+              }
+            ],
+            "habits": [
+              "Hydration 3L",
+              "10 min stretching"
+            ],
+            "sleep": {
+              "windDownMin": 30
+            }
+          },
+          {
+            "date": "2025-10-23",
+            "yoga": [
+              {
+                "flowId": "core_stability",
+                "durationMin": 20
+              }
+            ],
+            "meals": [
+              {
+                "itemId": "poha_1",
+                "qty": "1 serving"
+              },
+              {
+                "itemId": "dal_rice",
+                "qty": "1 serving"
+              },
+              {
+                "itemId": "curd_roti",
+                "qty": "1 serving"
+              }
+            ],
+            "habits": [
+              "Hydration 3L",
+              "10 min stretching"
+            ],
+            "sleep": {
+              "windDownMin": 30
+            }
+          },
+          {
+            "date": "2025-10-24",
+            "yoga": [
+              {
+                "flowId": "sun_sal_6",
+                "durationMin": 20
+              }
+            ],
+            "meals": [
+              {
+                "itemId": "dal_rice",
+                "qty": "1 serving"
+              },
+              {
+                "itemId": "curd_roti",
+                "qty": "1 serving"
+              },
+              {
+                "itemId": "salad_bowl",
+                "qty": "1 serving"
+              }
+            ],
+            "habits": [
+              "Hydration 3L",
+              "10 min stretching"
+            ],
+            "sleep": {
+              "windDownMin": 30
+            }
+          },
+          {
+            "date": "2025-10-25",
+            "yoga": [
+              {
+                "flowId": "pcod_calm",
+                "durationMin": 20
+              }
+            ],
+            "meals": [
+              {
+                "itemId": "curd_roti",
+                "qty": "1 serving"
+              },
+              {
+                "itemId": "salad_bowl",
+                "qty": "1 serving"
+              },
+              {
+                "itemId": "poha_1",
+                "qty": "1 serving"
+              }
+            ],
+            "habits": [
+              "Hydration 3L",
+              "10 min stretching"
+            ],
+            "sleep": {
+              "windDownMin": 30
+            }
+          }
+        ]
+      },
+      "days": 7,
+      "createdAt": "2025-10-19T10:32:03.285Z"
+    }
+  ]
+}

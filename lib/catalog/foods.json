@@ -1,0 +1,42 @@
+[
+  {
+    "id": "poha_1",
+    "name": "Poha (1 plate)",
+    "macros": {
+      "kcal": 320,
+      "p": 6,
+      "c": 55,
+      "f": 8
+    }
+  },
+  {
+    "id": "dal_rice",
+    "name": "Dal + Rice (1 bowl each)",
+    "macros": {
+      "kcal": 450,
+      "p": 16,
+      "c": 75,
+      "f": 8
+    }
+  },
+  {
+    "id": "curd_roti",
+    "name": "Curd + Roti (2)",
+    "macros": {
+      "kcal": 380,
+      "p": 12,
+      "c": 60,
+      "f": 10
+    }
+  },
+  {
+    "id": "salad_bowl",
+    "name": "Veg Salad Bowl",
+    "macros": {
+      "kcal": 200,
+      "p": 6,
+      "c": 24,
+      "f": 8
+    }
+  }
+]
