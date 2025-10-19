@@ -207,10 +207,9 @@ async function writeLocalState(state: MemoryState) {
 }
 
 let firestorePromise: Promise<import("firebase-admin/firestore").Firestore> | null = null;
-let firestoreDisabled = false;
 
 async function getFirestore() {
-  if (!hasFirestoreConfig || firestoreDisabled) {
+  if (!hasFirestoreConfig) {
     throw new Error("Firestore configuration missing");
   }
   if (!firestorePromise) {
@@ -301,27 +300,17 @@ async function listAllPlansFirestore(): Promise<PlanRow[]> {
 
 export const db = {
   async getProfiles(): Promise<ProfileRow[]> {
-    if (hasFirestoreConfig && !firestoreDisabled) {
-      try {
-        return await getProfilesFirestore();
-      } catch (error) {
-        console.warn("Firestore getProfiles failed; falling back to local store.", error);
-        firestoreDisabled = true;
-      }
+    if (hasFirestoreConfig) {
+      return getProfilesFirestore();
     }
     const state = await readLocalState();
     return [...state.profiles].sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
   },
   async saveProfile(profile: ProfileRow) {
     const payload = { ...profile, createdAt: profile.createdAt ?? new Date().toISOString() };
-    if (hasFirestoreConfig && !firestoreDisabled) {
-      try {
-        await saveProfileFirestore(payload);
-        return;
-      } catch (error) {
-        console.warn("Firestore saveProfile failed; falling back to local store.", error);
-        firestoreDisabled = true;
-      }
+    if (hasFirestoreConfig) {
+      await saveProfileFirestore(payload);
+      return;
     }
     const state = await readLocalState();
     const filtered = state.profiles.filter((p) => p.id !== profile.id);
@@ -330,28 +319,18 @@ export const db = {
   },
   async updateProfile(profile: ProfileRow) {
     const payload = { ...profile, createdAt: profile.createdAt ?? new Date().toISOString() };
-    if (hasFirestoreConfig && !firestoreDisabled) {
-      try {
-        await updateProfileFirestore(payload);
-        return;
-      } catch (error) {
-        console.warn("Firestore updateProfile failed; falling back to local store.", error);
-        firestoreDisabled = true;
-      }
+    if (hasFirestoreConfig) {
+      await updateProfileFirestore(payload);
+      return;
     }
     const state = await readLocalState();
     state.profiles = state.profiles.map((p) => (p.id === profile.id ? { ...p, ...payload } : p));
     await writeLocalState(state);
   },
   async deleteProfile(id: string) {
-    if (hasFirestoreConfig && !firestoreDisabled) {
-      try {
-        await deleteProfileFirestore(id);
-        return;
-      } catch (error) {
-        console.warn("Firestore deleteProfile failed; falling back to local store.", error);
-        firestoreDisabled = true;
-      }
+    if (hasFirestoreConfig) {
+      await deleteProfileFirestore(id);
+      return;
     }
     if (id === defaultProfile.id) {
       return;
@@ -363,27 +342,17 @@ export const db = {
   },
   async savePlan(plan: PlanRow) {
     const payload = { ...plan, createdAt: plan.createdAt ?? new Date().toISOString() };
-    if (hasFirestoreConfig && !firestoreDisabled) {
-      try {
-        await savePlanFirestore(payload);
-        return;
-      } catch (error) {
-        console.warn("Firestore savePlan failed; falling back to local store.", error);
-        firestoreDisabled = true;
-      }
+    if (hasFirestoreConfig) {
+      await savePlanFirestore(payload);
+      return;
     }
     const state = await readLocalState();
     state.plans = [payload, ...state.plans];
     await writeLocalState(state);
   },
   async listPlans(profileId: string): Promise<PlanRow[]> {
-    if (hasFirestoreConfig && !firestoreDisabled) {
-      try {
-        return await listPlansFirestore(profileId);
-      } catch (error) {
-        console.warn("Firestore listPlans failed; falling back to local store.", error);
-        firestoreDisabled = true;
-      }
+    if (hasFirestoreConfig) {
+      return listPlansFirestore(profileId);
     }
     const state = await readLocalState();
     return state.plans
@@ -391,25 +360,15 @@ export const db = {
       .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
   },
   async listAllPlans(): Promise<PlanRow[]> {
-    if (hasFirestoreConfig && !firestoreDisabled) {
-      try {
-        return await listAllPlansFirestore();
-      } catch (error) {
-        console.warn("Firestore listAllPlans failed; falling back to local store.", error);
-        firestoreDisabled = true;
-      }
+    if (hasFirestoreConfig) {
+      return listAllPlansFirestore();
     }
     const state = await readLocalState();
     return [...state.plans].sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
   },
   async getPlan(planId: string): Promise<PlanRow | null> {
-    if (hasFirestoreConfig && !firestoreDisabled) {
-      try {
-        return await getPlanFirestore(planId);
-      } catch (error) {
-        console.warn("Firestore getPlan failed; falling back to local store.", error);
-        firestoreDisabled = true;
-      }
+    if (hasFirestoreConfig) {
+      return getPlanFirestore(planId);
     }
     const state = await readLocalState();
     return state.plans.find((plan) => plan.planId === planId) ?? null;

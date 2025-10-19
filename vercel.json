@@ -1,7 +1,12 @@
 {
-  "name": "th-lifeengine",
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "rewrites": [
+    {
+      "source": "/application/TH_LifeEngine/(.*)",
+      "destination": "/$1"
+    }
+  ]
 }

@@ -9,9 +9,9 @@ let client: GoogleGenerativeAI | null = null;
 
 function getClient() {
   if (client) return client;
-  const apiKey = env.GEMINI_API_KEY;
+  const apiKey = env.GOOGLE_API_KEY;
   if (!apiKey) {
-    throw new Error("Missing GEMINI_API_KEY");
+    throw new Error("Missing GOOGLE_API_KEY");
   }
   client = new GoogleGenerativeAI(apiKey);
   return client;
