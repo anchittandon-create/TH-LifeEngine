@@ -1,8 +1,11 @@
 import { put, list, head, del } from "@vercel/blob";
+import { promises as fs } from 'fs';
+import path from 'path';
 import type { Plan } from "@/lib/domain/plan";
 import { hasVercelBlobStorage } from "./env";
 
 const BLOB_KEY = "lifeengine.state.json";
+const LOCAL_STORAGE_PATH = path.join(process.cwd(), 'lifeengine.state.json');
 
 export type Sex = "F" | "M" | "Other";
 
@@ -184,8 +187,17 @@ async function readState(): Promise<MemoryState> {
   if (!hasVercelBlobStorage) {
     // This is a fallback for local development if blob storage is not configured.
     // It is not a recommended production path.
-    console.warn("Vercel Blob Storage not configured. Using fallback.");
-    return defaultState();
+    console.warn("Vercel Blob Storage not configured. Using local file fallback.");
+    try {
+      const data = await fs.readFile(LOCAL_STORAGE_PATH, 'utf-8');
+      const parsed = JSON.parse(data) as MemoryState;
+      return ensureAnchorProfile(parsed);
+    } catch (error) {
+      console.warn("Error reading local state file, using default:", error);
+      const fresh = defaultState();
+      await writeState(fresh);
+      return fresh;
+    }
   }
   if (cachedState) return cachedState;
   if (loadingPromise) return loadingPromise;
@@ -224,6 +236,13 @@ async function writeState(state: MemoryState) {
       access: "public", // 'public' is required for the free tier.
       addRandomSuffix: false,
     });
+  } else {
+    // Fallback to local file for local development
+    try {
+      await fs.writeFile(LOCAL_STORAGE_PATH, JSON.stringify(state, null, 2), 'utf-8');
+    } catch (error) {
+      console.error("Error writing to local state file:", error);
+    }
   }
   cachedState = state;
 }

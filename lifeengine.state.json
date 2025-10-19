@@ -1,0 +1,89 @@
+{
+  "profiles": [
+    {
+      "id": "prof_anchit",
+      "name": "Anchit",
+      "demographics": {
+        "age": 34,
+        "sex": "M",
+        "height": 178,
+        "weight": 78
+      },
+      "contact": {
+        "email": "anchit@timesgroup.com",
+        "phone": "+91-90000-00000",
+        "location": "Mumbai, IN"
+      },
+      "lifestyle": {
+        "occupation": "Senior Product Manager",
+        "timeZone": "Asia/Kolkata",
+        "activityLevel": "moderate",
+        "primaryGoal": "PCOD-friendly lean gain",
+        "secondaryGoals": [
+          "stress_balance",
+          "gut_health"
+        ]
+      },
+      "health": {
+        "flags": [
+          "pcod"
+        ],
+        "allergies": [
+          "almonds"
+        ],
+        "chronicConditions": [
+          "thyroid"
+        ],
+        "injuries": [],
+        "medications": [],
+        "notes": "Prefers low-impact flows during luteal phase."
+      },
+      "nutrition": {
+        "dietType": "vegetarian",
+        "cuisinePreference": "Indian home-cooked",
+        "dislikes": [
+          "raw onion"
+        ],
+        "supplements": [
+          "vitamin_d3"
+        ],
+        "hydrationTargetMl": 2800,
+        "fastingWindow": "14:10"
+      },
+      "schedule": {
+        "timeBudgetMin": 45,
+        "daysPerWeek": 5,
+        "preferredSlots": [
+          {
+            "start": "19:30",
+            "end": "21:00"
+          }
+        ],
+        "notes": "Avoid late-night sessions on Fridays."
+      },
+      "equipment": [
+        "mat",
+        "blocks"
+      ],
+      "preferences": {
+        "modules": [
+          "yoga",
+          "nutrition",
+          "mindfulness",
+          "sleep"
+        ],
+        "tone": "balanced",
+        "indoorOnly": true,
+        "level": "intermediate",
+        "coachingNotes": "Enjoys metrics and weekly progress summaries.",
+        "focusAreas": [
+          "pelvic_floor",
+          "core_strength"
+        ]
+      },
+      "coachingNotes": "Cycle-sensitive programming required; integrate hydration reminders.",
+      "createdAt": "2025-10-19T22:07:08.425Z"
+    }
+  ],
+  "plans": []
+}

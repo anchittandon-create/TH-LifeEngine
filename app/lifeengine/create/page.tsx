@@ -16,7 +16,13 @@ import {
 import type { Profile } from "@/lib/domain/profile";
 import type { Plan } from "@/lib/domain/plan";
 import type { Intake } from "@/lib/domain/intake";
-import { getProfiles, savePlanRecord, StoredPlan } from "@/lib/utils/store";
+import {
+  getProfiles,
+  saveProfile,
+  savePlanRecord,
+  StoredPlan,
+  LOCAL_CHANGE_EVENT,
+} from "@/lib/utils/store";
 import { createId } from "@/lib/utils/ids";
 
 const DRAFT_KEY = "th_lifeengine_create_draft";
@@ -95,7 +101,42 @@ export default function CreatePlanPage() {
   const planFileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setProfiles(getProfiles());
+    const loadProfiles = async () => {
+      // First try to get profiles from localStorage
+      const localProfiles = getProfiles();
+      setProfiles(localProfiles);
+
+      // If no local profiles, try to fetch from server
+      if (localProfiles.length === 0) {
+        try {
+          const response = await fetch('/api/lifeengine/profiles');
+          if (response.ok) {
+            const serverProfiles = await response.json();
+            if (serverProfiles && serverProfiles.length > 0) {
+              setProfiles(serverProfiles);
+              // Also save to localStorage for future use
+              serverProfiles.forEach((profile: Profile) => {
+                saveProfile(profile);
+              });
+            }
+          }
+        } catch (error) {
+          console.warn('Failed to fetch profiles from server:', error);
+        }
+      }
+    };
+    loadProfiles();
+
+    const handleLocalChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ key?: string }>).detail;
+      if (!detail || detail.key === undefined || detail.key === "th_profiles") {
+        loadProfiles();
+      }
+    };
+
+    window.addEventListener(LOCAL_CHANGE_EVENT, handleLocalChange);
+    window.addEventListener("storage", loadProfiles);
+
     const draft = loadDraft();
     if (draft) {
       setSelectedProfileId(draft.selectedProfileId ?? "");
@@ -110,6 +151,10 @@ export default function CreatePlanPage() {
       setOverrideFlags(draft.overrideFlags ?? "");
       setNotes(draft.notes ?? "");
     }
+    return () => {
+      window.removeEventListener(LOCAL_CHANGE_EVENT, handleLocalChange);
+      window.removeEventListener("storage", loadProfiles);
+    };
   }, []);
 
   useEffect(() => {
@@ -145,7 +190,7 @@ export default function CreatePlanPage() {
     if (profile) {
       setOverrideDietType(profile.dietary?.type || "");
       setOverrideAllergies(profile.dietary?.allergies?.join(", ") || "");
-      setOverrideFlags(profile.medicalConditions?.join(", ") || "");
+      setOverrideFlags(profile.medical_flags?.join(", ") || "");
     }
   }, [profiles, selectedProfileId]);
 
@@ -176,17 +221,24 @@ export default function CreatePlanPage() {
     setLoading(true);
     setError(null);
 
+    const overrideFlagList = parseList(overrideFlags);
+    const overrideAllergyList = parseList(overrideAllergies);
+    const resolvedDietType =
+      (overrideDietType ||
+        selectedProfile.dietary?.type ||
+        "veg") as NonNullable<NonNullable<Profile["dietary"]>["type"]>;
+
     const profileSnapshot: Profile = {
       ...selectedProfile,
-      medicalConditions: parseList(overrideFlags).length
-        ? parseList(overrideFlags)
-        : selectedProfile.medicalConditions,
+      medical_flags: overrideFlagList.length
+        ? overrideFlagList
+        : selectedProfile.medical_flags ?? [],
       dietary: {
-        ...selectedProfile.dietary,
-        type: overrideDietType || selectedProfile.dietary?.type,
-        allergies: parseList(overrideAllergies).length
-          ? parseList(overrideAllergies)
-          : selectedProfile.dietary?.allergies,
+        ...(selectedProfile.dietary ?? {}),
+        type: resolvedDietType,
+        allergies: overrideAllergyList.length
+          ? overrideAllergyList
+          : selectedProfile.dietary?.allergies ?? [],
       },
     };
 

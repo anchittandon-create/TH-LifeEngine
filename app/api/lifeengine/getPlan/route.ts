@@ -1,29 +1,5 @@
 import { NextResponse } from "next/server";
-import type { Intake } from "@/lib/domain/intake";
-import type { Plan } from "@/lib/domain/plan";
-
-type PlanRecord = {
-  plan: Plan;
-  warnings: string[];
-  analytics: Plan["analytics"];
-  profileId: string;
-  createdAt: number;
-  intake: Intake;
-};
-
-const globalState = globalThis as unknown as {
-  __LIFEENGINE_RUNTIME__?: {
-    plans: Map<string, PlanRecord>;
-  };
-};
-
-if (!globalState.__LIFEENGINE_RUNTIME__) {
-  globalState.__LIFEENGINE_RUNTIME__ = {
-    plans: new Map<string, PlanRecord>(),
-  };
-}
-
-const PLAN_STORE = globalState.__LIFEENGINE_RUNTIME__.plans;
+import { db } from "@/lib/utils/db";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -31,15 +7,22 @@ export async function GET(request: Request) {
   if (!id) {
     return NextResponse.json({ error: "Missing plan id" }, { status: 400 });
   }
-  const record = PLAN_STORE.get(id);
-  if (!record) {
-    return NextResponse.json({ error: "Plan not found" }, { status: 404 });
+
+  try {
+    const planRecord = await db.getPlan(id);
+    if (!planRecord) {
+      return NextResponse.json({ error: "Plan not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      planId: id,
+      plan: planRecord.planJSON,
+      warnings: planRecord.warnings,
+      analytics: planRecord.planJSON.analytics,
+      profileId: planRecord.profileId,
+    });
+  } catch (error) {
+    console.error("Error fetching plan:", error);
+    return NextResponse.json({ error: "Failed to fetch plan" }, { status: 500 });
   }
-  return NextResponse.json({
-    planId: id,
-    plan: record.plan,
-    warnings: record.warnings,
-    analytics: record.analytics,
-    profileId: record.profileId,
-  });
 }

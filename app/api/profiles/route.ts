@@ -14,9 +14,9 @@ export async function POST(request: NextRequest) {
     id: createId(),
     name: data.name,
     age: data.age,
-    gender: data.gender,
+    gender: data.gender === 'male' ? 'M' : data.gender === 'female' ? 'F' : 'Other',
     region: data.region,
-    medicalConditions: data.medicalConditions,
+    medical_flags: data.medicalConditions ? data.medicalConditions.split(',').map((s: string) => s.trim()) : [],
   };
   saveProfile(profile);
   return NextResponse.json(profile);

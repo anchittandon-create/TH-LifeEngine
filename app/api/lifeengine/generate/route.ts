@@ -1,32 +1,10 @@
 import { NextResponse } from "next/server";
-import { generatePlan } from "@/lib/ai/planner";
+import { generatePlan } from "@/lib/ai/geminiPlanner";
 import { verifyAndPatch } from "@/lib/ai/verifier";
 import type { Intake } from "@/lib/domain/intake";
 import type { Plan } from "@/lib/domain/plan";
 import { createId } from "@/lib/utils/ids";
-
-type PlanRecord = {
-  plan: Plan;
-  warnings: string[];
-  analytics: Plan["analytics"];
-  profileId: string;
-  createdAt: number;
-  intake: Intake;
-};
-
-const globalState = globalThis as unknown as {
-  __LIFEENGINE_RUNTIME__?: {
-    plans: Map<string, PlanRecord>;
-  };
-};
-
-if (!globalState.__LIFEENGINE_RUNTIME__) {
-  globalState.__LIFEENGINE_RUNTIME__ = {
-    plans: new Map<string, PlanRecord>(),
-  };
-}
-
-const PLAN_STORE = globalState.__LIFEENGINE_RUNTIME__.plans;
+import { db } from "@/lib/utils/db";
 
 export async function POST(request: Request) {
   const { intake } = await request.json();
@@ -46,14 +24,22 @@ export async function POST(request: Request) {
   }
 
   const planId = createId();
-  PLAN_STORE.set(planId, {
-    plan: verified.plan,
-    warnings: verified.warnings,
-    analytics: verified.analytics,
+  const planRecord = {
+    planId,
     profileId: (intake as Intake).profileId,
-    createdAt: Date.now(),
-    intake,
-  });
+    days: verified.plan.meta?.duration_days || 7,
+    confidence: verified.analytics?.confidence || 0.8,
+    warnings: verified.warnings,
+    planJSON: verified.plan,
+    createdAt: new Date().toISOString(),
+  };
+
+  try {
+    await db.savePlan(planRecord);
+  } catch (error) {
+    console.error("Error saving plan:", error);
+    return NextResponse.json({ error: "Failed to save plan" }, { status: 500 });
+  }
 
   return NextResponse.json({
     planId,
