@@ -1,0 +1,20 @@
+[
+  {
+    "id": "oatmeal",
+    "name": "Oatmeal",
+    "calories": 300,
+    "type": "breakfast"
+  },
+  {
+    "id": "salad",
+    "name": "Vegetable Salad",
+    "calories": 200,
+    "type": "lunch"
+  },
+  {
+    "id": "chicken",
+    "name": "Grilled Chicken",
+    "calories": 400,
+    "type": "dinner"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "id": "stretch",
+    "name": "Basic Stretch",
+    "duration": 15,
+    "type": "yoga"
+  },
+  {
+    "id": "flow",
+    "name": "Morning Flow",
+    "duration": 30,
+    "type": "yoga"
+  }
+]

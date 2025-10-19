@@ -20,6 +20,7 @@ export function getProfiles(): Profile[] {
 }
 
 export function saveProfile(profile: Profile) {
+  if (typeof window === 'undefined') return;
   const profiles = getProfiles().filter(p => p.id !== profile.id);
   profiles.push(profile);
   localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
@@ -32,6 +33,7 @@ export function getPlans(): StoredPlan[] {
 }
 
 export function savePlan(plan: StoredPlan) {
+  if (typeof window === 'undefined') return;
   const plans = getPlans().filter(p => p.id !== plan.id);
   plans.push(plan);
   localStorage.setItem(PLANS_KEY, JSON.stringify(plans));
