@@ -3,7 +3,7 @@ import NavLink from "./NavLink";
 import { ReactNode } from "react";
 type NavItem = { label: string; href: string; icon?: ReactNode; match?: "exact"|"startsWith" };
 const NAV: NavItem[] = [
-  { label: "Home", href: "/lifeengine" },
+  { label: "Home", href: "/lifeengine", match: "exact" },
   { label: "Profiles", href: "/lifeengine/profiles" },
   { label: "Create Plan", href: "/lifeengine/create" },
   { label: "Dashboard", href: "/lifeengine/dashboard" },
