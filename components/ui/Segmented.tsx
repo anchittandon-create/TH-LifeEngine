@@ -1,10 +1,47 @@
 "use client";
-export default function Segmented({value,onChange,options}:{value:string;onChange:(v:string)=>void;options:{value:string;label:string}[]}) {
-  return <div role="tablist" className="inline-flex rounded-xl border bg-white p-1">
-    {options.map(o=>{const a=value===o.value; return (
-      <button key={o.value} role="tab" aria-selected={a} data-active={a?"true":"false"}
-        onClick={()=>onChange(o.value)} className="px-3 py-1.5 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 data-[active=true]:bg-gray-900 data-[active=true]:text-white">
-        {o.label}
-      </button> );})}
-  </div>;
+
+import styles from "./Segmented.module.css";
+
+type Option = {
+  value: string;
+  label: string;
+};
+
+type SegmentedProps = {
+  value: string;
+  onChange: (value: string) => void;
+  options: Option[];
+  ariaLabel?: string;
+};
+
+export default function Segmented({
+  value,
+  onChange,
+  options,
+  ariaLabel,
+}: SegmentedProps) {
+  return (
+    <div
+      role="tablist"
+      aria-label={ariaLabel ?? "Segmented navigation"}
+      className={styles.segmented}
+    >
+      {options.map((option) => {
+        const active = option.value === value;
+        return (
+          <button
+            key={option.value}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            data-active={active ? "true" : "false"}
+            className={`${styles.option} ${active ? styles.active : ""}`}
+            onClick={() => onChange(option.value)}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
 }

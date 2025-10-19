@@ -1,28 +1,55 @@
 import Link from "next/link";
+import styles from "./Home.module.css";
 
-export default function Home() {
+const highlights = [
+  {
+    title: "Verbal RAG",
+    text: "Embedded safety and diet rules keep every Gemini plan grounded in TH+ guidance.",
+  },
+  {
+    title: "Profile Smart",
+    text: "Gender, age, region, and medical flags personalise every recommendation.",
+  },
+  {
+    title: "On-Page Plans",
+    text: "Create a plan and see the structured JSON output instantly—export when ready.",
+  },
+  {
+    title: "Offline Friendly",
+    text: "Profiles live in localStorage, while the server mirrors them for live sessions.",
+  },
+];
+
+export default function LifeengineHome() {
   return (
-    <div className="text-center">
-      <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-        Welcome to LifeEngine
-      </h1>
-      <p className="mt-6 text-lg leading-8 text-gray-600">
-        Your personalized health and wellness planner.
-      </p>
-      <div className="mt-10 flex items-center justify-center gap-x-6">
-        <Link
-          href="/lifeengine/create"
-          className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-        >
-          Create a New Plan
-        </Link>
-        <Link
-          href="/lifeengine/profiles"
-          className="text-sm font-semibold leading-6 text-gray-900"
-        >
-          Manage Profiles <span aria-hidden="true">→</span>
-        </Link>
-      </div>
+    <div>
+      <section className={styles.hero}>
+        <h1 className={styles.heroTitle}>
+          TH+ LifeEngine — Verbal Edition
+        </h1>
+        <p className={styles.heroText}>
+          A streamlined wellness director that blends conversational rule tables with
+          Gemini 1.5 Flash. Build, review, and refine personalised plans without any
+          external databases or vector stores.
+        </p>
+        <div className={styles.ctaRow}>
+          <Link href="/lifeengine/create" className={styles.primary}>
+            Launch Plan Wizard
+          </Link>
+          <Link href="/lifeengine/dashboard" className={styles.secondary}>
+            View Dashboard
+          </Link>
+        </div>
+      </section>
+
+      <section className={styles.grid}>
+        {highlights.map((item) => (
+          <article key={item.title} className={styles.card}>
+            <h2 className={styles.cardTitle}>{item.title}</h2>
+            <p className={styles.cardText}>{item.text}</p>
+          </article>
+        ))}
+      </section>
     </div>
   );
 }

@@ -1,0 +1,27 @@
+.segmented {
+  display: inline-flex;
+  background: #e2e8f0;
+  border-radius: 9999px;
+  padding: 0.25rem;
+  gap: 0.25rem;
+}
+
+.option {
+  border: none;
+  background: transparent;
+  border-radius: 9999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.85rem;
+  color: #475569;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.option:hover {
+  background: rgba(37, 99, 235, 0.15);
+}
+
+.active {
+  background: #1e293b;
+  color: #ffffff;
+}

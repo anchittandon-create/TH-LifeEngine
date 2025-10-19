@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TH+ LifeEngine",
-  description: "AI-powered personalised wellness planning for Times Health+.",
+  title: "TH+ LifeEngine — Verbal Edition",
+  description: "Personalised wellness planning with verbal RAG and Gemini.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-slate-100 text-slate-900 antialiased">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }

@@ -3,9 +3,13 @@ import AppShell from "@/components/layout/AppShell";
 
 export const metadata: Metadata = {
   title: "TH+ LifeEngine",
-  description: "Personalized health booster",
+  description: "Verbal Edition: Gemini-guided personalised planning.",
 };
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function LifeengineLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return <AppShell>{children}</AppShell>;
 }

@@ -1,13 +1,27 @@
 "use client";
-import Link from "next/link"; import { usePathname } from "next/navigation";
-export default function NavLink({ href, label }:{href:string;label:string}) {
-  const p = usePathname() || "/";
-  const active = p===href || p.startsWith(href + "/");
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import styles from "./NavLink.module.css";
+
+type NavLinkProps = {
+  href: string;
+  label: string;
+  onClick?: () => void;
+};
+
+export default function NavLink({ href, label, onClick }: NavLinkProps) {
+  const pathname = usePathname() || "/";
+  const active = pathname === href || pathname.startsWith(`${href}/`);
+
   return (
-    <Link href={href}
+    <Link
+      href={href}
       aria-current={active ? "page" : undefined}
       data-active={active ? "true" : "false"}
-      className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 data-[active=true]:bg-gray-900 data-[active=true]:text-white">
+      onClick={onClick}
+      className={`${styles.link} ${active ? styles.active : ""}`}
+    >
       <span>{label}</span>
     </Link>
   );

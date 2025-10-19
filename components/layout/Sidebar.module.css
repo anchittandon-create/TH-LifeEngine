@@ -1,0 +1,30 @@
+.container {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .container {
+    display: flex;
+    flex-direction: column;
+    width: 16rem;
+    min-height: 100vh;
+    background: #ffffff;
+    border-right: 1px solid rgba(15, 23, 42, 0.08);
+    position: sticky;
+    top: 0;
+    padding: 1.5rem 1rem;
+  }
+}
+
+.heading {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  margin-bottom: 1rem;
+}
+
+.nav {
+  display: grid;
+  gap: 0.5rem;
+}
