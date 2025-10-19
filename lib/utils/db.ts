@@ -1,9 +1,18 @@
 import fs from "fs/promises";
 import path from "path";
+import os from "os";
 import { hasFirestoreConfig, env } from "./env";
 import type { Plan } from "@/lib/ai/schemas";
 
-const STATE_PATH = path.join(process.cwd(), "lifeengine.state.json");
+const STATE_PATH = (() => {
+  if (process.env.LIFEENGINE_STATE_PATH) {
+    return process.env.LIFEENGINE_STATE_PATH;
+  }
+  if (process.env.VERCEL) {
+    return path.join(os.tmpdir(), "lifeengine.state.json");
+  }
+  return path.join(process.cwd(), "lifeengine.state.json");
+})();
 
 export type Sex = "F" | "M" | "Other";
 
@@ -202,6 +211,11 @@ async function readLocalState(): Promise<MemoryState> {
 
 async function writeLocalState(state: MemoryState) {
   ensureAnchorProfile(state);
+  try {
+    await fs.mkdir(path.dirname(STATE_PATH), { recursive: true });
+  } catch (error) {
+    // ignore mkdir failures (likely already exists)
+  }
   await fs.writeFile(STATE_PATH, JSON.stringify(state, null, 2), "utf8");
   cachedState = state;
 }
