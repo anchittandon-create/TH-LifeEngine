@@ -29,6 +29,7 @@ echo "   - Add these secrets:"
 echo "     * VERCEL_TOKEN: [your-vercel-token]"
 echo "     * VERCEL_ORG_ID: [your-org-id]"
 echo "     * VERCEL_PROJECT_ID: [your-project-id]"
+echo "     * GOOGLE_API_KEY: [your-gemini-api-key]"
 echo ""
 
 echo "Current Vercel Project Info:"
