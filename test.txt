@@ -5,3 +5,4 @@ Updated workflow for better CI/CD reliability
 Triggering deployment with secrets configured
 Fixed Vercel CLI installation in workflow
 Fixed Vercel CLI installation - using npx
+Updated package-lock.json with vercel dependency
