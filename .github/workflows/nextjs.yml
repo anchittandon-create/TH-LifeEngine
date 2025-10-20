@@ -19,17 +19,35 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm cache clean --force
+          npm ci --prefer-offline --no-audit
 
       - name: Build project
         run: npm run build
-        env:
-          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
 
-      - name: Install Vercel CLI
-        run: npm install -g vercel
+      - name: Check secrets
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "❌ VERCEL_TOKEN secret not set. Please add it to GitHub repository secrets."
+            exit 1
+          fi
+          if [ -z "$VERCEL_ORG_ID" ]; then
+            echo "❌ VERCEL_ORG_ID secret not set. Please add it to GitHub repository secrets."
+            exit 1
+          fi
+          if [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "❌ VERCEL_PROJECT_ID secret not set. Please add it to GitHub repository secrets."
+            exit 1
+          fi
+          echo "✅ All Vercel secrets are configured"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: Deploy to Vercel
         run: vercel --prod --yes
@@ -37,3 +55,4 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        if: env.VERCEL_TOKEN != ''

@@ -1,3 +1,5 @@
 test
 test
 trigger deploy
+Updated workflow for better CI/CD reliability
+Triggering deployment with secrets configured
