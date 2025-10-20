@@ -32,6 +32,7 @@
     "typescript": "5.5.4",
     "tailwindcss": "^3.4.0",
     "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32"
+    "postcss": "^8.4.32",
+    "vercel": "^35.0.0"
   }
 }
