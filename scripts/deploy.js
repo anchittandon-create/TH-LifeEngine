@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 
 function runCommand(command, description) {
   try {
@@ -13,33 +15,56 @@ function runCommand(command, description) {
   }
 }
 
-function gitAddCommitPush() {
+function checkGitStatus() {
   try {
-    // Check if there are any changes
     const status = execSync('git status --porcelain', { encoding: 'utf8' });
-    if (!status.trim()) {
-      console.log('📋 No changes to commit');
-      return;
-    }
+    return status.trim();
+  } catch (error) {
+    console.error('❌ Failed to check git status:', error.message);
+    return '';
+  }
+}
 
-    console.log('🚀 Starting automatic git deployment...');
+function getCurrentBranch() {
+  try {
+    return execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
+  } catch (error) {
+    console.log('⚠️  Could not determine current branch, assuming main');
+    return 'main';
+  }
+}
 
+function gitAddCommitPush() {
+  const changes = checkGitStatus();
+  if (!changes) {
+    console.log('📋 No changes to commit - skipping deployment');
+    return false;
+  }
+
+  console.log('🚀 Starting automatic git deployment...');
+  console.log(`📝 Changes detected:\n${changes}`);
+
+  try {
     // Add all changes
     runCommand('git add .', 'Adding files to git');
 
-    // Get current date/time for commit message
+    // Get current date/time and branch for commit message
     const now = new Date();
     const timestamp = now.toISOString().slice(0, 19).replace('T', ' ');
-    const commitMessage = `Auto-deploy: ${timestamp}`;
+    const branch = getCurrentBranch();
+    const commitMessage = `Auto-deploy [${branch}]: ${timestamp}`;
 
     // Commit changes
     runCommand(`git commit -m "${commitMessage}"`, 'Committing changes');
 
     // Push to remote
-    runCommand('git push origin main', 'Pushing to remote repository');
+    runCommand(`git push origin ${branch}`, `Pushing to remote ${branch} branch`);
 
     console.log('🎉 Deployment completed successfully!');
     console.log('📦 Vercel auto-deployment should trigger now...');
+    console.log(`🔗 Commit: ${commitMessage}`);
+
+    return true;
 
   } catch (error) {
     console.error('❌ Git deployment failed:', error.message);
@@ -47,5 +72,52 @@ function gitAddCommitPush() {
   }
 }
 
-// Run the deployment
-gitAddCommitPush();
+// Auto-deploy after build
+function postBuildDeploy() {
+  console.log('🏗️  Build completed, checking for deployment...');
+  const deployed = gitAddCommitPush();
+  if (deployed) {
+    console.log('✅ Build and deploy cycle completed!');
+  }
+}
+
+// Watch mode deployment (for development)
+function watchAndDeploy() {
+  console.log('👀 Starting watch mode with auto-deployment...');
+  console.log('💡 Changes will be automatically committed and pushed');
+
+  // Initial deploy check
+  gitAddCommitPush();
+
+  // Set up file watcher for continuous deployment
+  const watchDir = path.join(__dirname, '..');
+  console.log(`📁 Watching directory: ${watchDir}`);
+
+  // Simple polling-based watcher (more reliable than fs.watch for large projects)
+  let lastStatus = checkGitStatus();
+  setInterval(() => {
+    const currentStatus = checkGitStatus();
+    if (currentStatus !== lastStatus && currentStatus.trim()) {
+      console.log('🔄 Changes detected, deploying...');
+      gitAddCommitPush();
+      lastStatus = currentStatus;
+    }
+  }, 5000); // Check every 5 seconds
+
+  console.log('⏰ Auto-deployment watcher active (checks every 5 seconds)');
+}
+
+// Main execution
+const command = process.argv[2];
+
+switch (command) {
+  case 'watch':
+    watchAndDeploy();
+    break;
+  case 'post-build':
+    postBuildDeploy();
+    break;
+  default:
+    gitAddCommitPush();
+    break;
+}

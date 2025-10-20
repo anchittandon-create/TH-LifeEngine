@@ -8,8 +8,10 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "deploy": "node scripts/deploy.js",
-    "build:deploy": "npm run build && npm run deploy",
-    "dev:deploy": "next dev & sleep 2 && npm run deploy"
+    "build:deploy": "npm run build && npm run deploy post-build",
+    "dev:deploy": "next dev & node scripts/deploy.js watch",
+    "dev:auto": "npm run dev:deploy",
+    "postbuild": "npm run deploy post-build"
   },
   "dependencies": {
     "next": "14.2.5",
