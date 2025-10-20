@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createId } from "@/lib/utils/ids";
-import type { Profile } from "@/lib/domain/profile";
+import type { Profile } from "@/lib/ai/schemas";
 
 const globalState = globalThis as unknown as {
   __LIFEENGINE_PROFILES__?: Map<string, Profile>;
@@ -17,26 +17,26 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const payload = (await request.json()) as Partial<Profile>;
-  const id = payload.id ?? createId();
-  const profile: Profile = {
-    id,
-    name: payload.name ?? "Unnamed",
-    gender: (payload.gender as Profile["gender"]) ?? "Other",
-    age: Number(payload.age ?? 0),
-    height_cm: payload.height_cm,
-    weight_kg: payload.weight_kg,
-    region: payload.region,
-    medical_flags: payload.medical_flags ?? [],
-    activity_level: payload.activity_level,
-    dietary: payload.dietary,
-    preferences: payload.preferences,
-    availability: payload.availability,
-    createdAt: payload.createdAt ?? new Date().toISOString(),
-  };
+  try {
+    const payload = (await request.json()) as Partial<Profile>;
+    const id = payload.id ?? createId();
+    const profile: Profile = {
+      id,
+      name: payload.name ?? "Unnamed",
+      gender: payload.gender ?? "other",
+      age: payload.age ?? 25,
+      height: payload.height ?? 170,
+      weight: payload.weight ?? 70,
+      activityLevel: payload.activityLevel ?? "moderate",
+      goals: payload.goals ?? [],
+      flags: payload.flags ?? [],
+    };
 
-  PROFILE_STORE.set(id, profile);
-  return NextResponse.json({ profile });
+    PROFILE_STORE.set(id, profile);
+    return NextResponse.json({ profile });
+  } catch (error) {
+    return NextResponse.json({ error: "Invalid profile data" }, { status: 400 });
+  }
 }
 
 export async function DELETE(request: Request) {

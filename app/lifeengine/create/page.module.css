@@ -1,0 +1,73 @@
+.page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.page h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 32px;
+  color: var(--text-primary);
+}
+
+.page section {
+  margin-bottom: 32px;
+}
+
+.page section h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.form {
+  display: grid;
+  gap: 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btn {
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn.ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.btn.ghost:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.btn:not(.ghost) {
+  background: var(--primary-color);
+  color: white;
+}
+
+.btn:not(.ghost):hover:not(:disabled) {
+  background: var(--primary-hover);
+}

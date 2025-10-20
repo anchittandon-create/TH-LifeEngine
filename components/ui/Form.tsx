@@ -16,7 +16,7 @@ export default function Form({ onSubmit, children, className = '' }: FormProps) 
     setIsSubmitting(true);
     try {
       const formData = new FormData(e.currentTarget);
-      const data = Object.fromEntries(formData.entries());
+      const data = Object.fromEntries((formData as any).entries());
       await onSubmit(data);
     } finally {
       setIsSubmitting(false);

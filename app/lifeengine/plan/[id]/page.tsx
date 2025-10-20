@@ -1,25 +1,28 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Segmented from "@/components/ui/Segmented";
-import styles from "./PlanDetail.module.css";
-import type { Plan, Week } from "@/lib/domain/plan";
-import { getPlans } from "@/lib/utils/store";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import styles from "./page.module.css";
 
-const segments = [
-  { value: "overview", label: "Overview" },
-  { value: "weekly", label: "Weekly" },
-  { value: "daily", label: "Daily" },
-  { value: "citations", label: "Citations" },
-];
-
-type PlanResponse = {
-  planId: string;
-  plan: Plan;
-  warnings: string[];
-  analytics: Plan["analytics"];
+type Plan = {
+  id: string;
   profileId: string;
+  intakeId: string;
+  days: {
+    date: string;
+    activities: {
+      type: string;
+      name: string;
+      duration: number;
+      description: string;
+    }[];
+    meals: {
+      type: string;
+      name: string;
+      calories: number;
+      description: string;
+    }[];
+  }[];
 };
 
 type Props = {
@@ -27,252 +30,91 @@ type Props = {
 };
 
 export default function PlanDetailPage({ params }: Props) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [data, setData] = useState<PlanResponse | null>(null);
+  const [plan, setPlan] = useState<Plan | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const view = searchParams.get("view") ?? "overview";
 
   useEffect(() => {
-    const loadPlan = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(`/api/lifeengine/getPlan?id=${params.id}`);
-        if (!response.ok) {
-          if (response.status === 404) {
-            const local = getPlans().find((entry) => entry.id === params.id);
-            if (local) {
-              setData({
-                planId: local.id,
-                plan: local.plan,
-                warnings: local.warnings,
-                analytics: local.analytics,
-                profileId: local.profileId,
-              });
-              return;
-            }
-          }
-          throw new Error(`Status ${response.status}`);
-        }
-        const result = await response.json();
-        setData(result as PlanResponse);
-      } catch (err: any) {
-        setError(err.message ?? "Unable to load plan");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadPlan();
   }, [params.id]);
 
-  const setView = (value: string) => {
-    const paramsCopy = new URLSearchParams(searchParams.toString());
-    paramsCopy.set("view", value);
-    router.replace(`?${paramsCopy.toString()}`, { scroll: false });
+  const loadPlan = async () => {
+    try {
+      const response = await fetch(`/api/lifeengine/getPlan?id=${params.id}`);
+      if (!response.ok) throw new Error("Failed to load plan");
+      const data = await response.json();
+      setPlan(data.plan);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const flattenedDays = useMemo(() => {
-    if (!data) return [];
-    const days: { week: Week; dayIndex: number; weekIndex: number }[] = [];
-    data.plan.weeks.forEach((week) => {
-      week.days.forEach((day) => {
-        days.push({ week, dayIndex: day.dayNumber, weekIndex: week.weekNumber });
-      });
-    });
-    return days;
-  }, [data]);
-
-  if (loading) {
-    return <p className={styles.loading}>Loading plan…</p>;
-  }
-
-  if (error) {
-    return <p style={{ color: "#b91c1c" }}>{error}</p>;
-  }
-
-  if (!data) {
-    return <p className={styles.loading}>Plan not available.</p>;
-  }
-
-  const { plan, warnings, analytics } = data;
+  if (loading) return <div className={styles.page}>Loading plan...</div>;
+  if (error) return <div className={styles.page}>Error: {error}</div>;
+  if (!plan) return <div className={styles.page}>Plan not found</div>;
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
+      <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>{plan.meta?.title || 'Untitled Plan'}</h1>
-          <div className={styles.badges}>
-            {(plan.meta?.goals ?? []).map((goal) => (
-              <span key={goal} className={styles.badge}>
-                {goal}
+          <h1>Your Personalized Plan</h1>
+          <p className={styles.subtitle}>Plan #{plan.id.slice(-8)}</p>
+        </div>
+        <Link href="/lifeengine/dashboard" className={styles.backBtn}>
+          ← Back to Dashboard
+        </Link>
+      </div>
+
+      <div className={styles.days}>
+        {plan.days.map((day, index) => (
+          <div key={day.date} className={styles.day}>
+            <div className={styles.dayHeader}>
+              <h2>Day {index + 1}</h2>
+              <span className={styles.date}>
+                {new Date(day.date).toLocaleDateString()}
               </span>
-            ))}
-          </div>
-        </div>
-        <Segmented value={view} onChange={setView} options={segments} />
-      </header>
+            </div>
 
-      <section className={styles.overviewCard}>
-        <div className={styles.metaGrid}>
-          <div className={styles.metaItem}>
-            Duration: {plan.meta?.duration_days || 'N/A'} days
-          </div>
-          <div className={styles.metaItem}>
-            Weeks: {plan.meta?.weeks || 'N/A'}
-          </div>
-          <div className={styles.metaItem}>
-            Daily Budget: {plan.meta?.time_budget_min_per_day || 'N/A'} minutes
-          </div>
-          <div className={styles.metaItem}>
-            Hydration ensured &bull; Analytics overall {analytics.overall}
-          </div>
-        </div>
-        {warnings.length > 0 && (
-          <div className={styles.warningBlock}>
-            <strong>Warnings</strong>
-            <ul>
-              {warnings.map((warning) => (
-                <li key={warning}>{warning}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </section>
-
-      {view === "overview" && (
-        <section className={styles.sectionCard}>
-          <h2>Coach Messages</h2>
-          <ul className={styles.list}>
-            {(plan.coach_messages ?? []).map((message) => (
-              <li key={message}>{message}</li>
-            ))}
-          </ul>
-          <h3>Adherence Tips</h3>
-          <ul className={styles.list}>
-            {(plan.adherence_tips ?? []).map((tip) => (
-              <li key={tip}>{tip}</li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {view === "weekly" && (
-        <section className={styles.sectionCard}>
-          <h2>Weekly Progression</h2>
-          <div className={styles.dayGrid}>
-            {plan.weeks.map((week) => (
-              <article key={week.weekNumber} className={styles.week}>
-                <div className={styles.weekHeader}>
-                  <span>Week {week.weekNumber}</span>
-                  <span>{week.focus}</span>
-                </div>
-                <p>{week.progression_note}</p>
-                <ul className={styles.list}>
-                  {week.days.map((day) => (
-                    <li key={day.dayNumber}>
-                      Day {day.dayNumber} · {day.theme ?? "Theme pending"}
-                    </li>
+            {day.activities.length > 0 && (
+              <div className={styles.section}>
+                <h3>Activities</h3>
+                <div className={styles.items}>
+                  {day.activities.map((activity, i) => (
+                    <div key={i} className={styles.item}>
+                      <div className={styles.itemHeader}>
+                        <span className={styles.type}>{activity.type}</span>
+                        <span className={styles.duration}>{activity.duration} min</span>
+                      </div>
+                      <h4>{activity.name}</h4>
+                      <p>{activity.description}</p>
+                    </div>
                   ))}
-                </ul>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {view === "daily" && (
-        <section className={styles.sectionCard}>
-          <h2>Daily Detail</h2>
-          <div className={styles.dayGrid}>
-            {flattenedDays.map(({ week, dayIndex }) => {
-              const day = week.days.find((item) => item.dayNumber === dayIndex);
-              if (!day) return null;
-              return (
-                <div key={`${week.weekNumber}-${day.dayNumber}`} className={styles.dayCard}>
-                  <div className={styles.dayTitle}>
-                    Week {week.weekNumber} · Day {day.dayNumber} {day.theme ? `· ${day.theme}` : ""}
-                  </div>
-                  {day.yoga && day.yoga.length > 0 && (
-                    <div>
-                      <strong>Yoga</strong>
-                      <ul className={styles.list}>
-                        {day.yoga.map((flow) => (
-                          <li key={flow.flow_id}>
-                            {flow.name} — {flow.duration_min} min ({flow.intensity})
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {day.breathwork && day.breathwork.length > 0 && (
-                    <div>
-                      <strong>Breathwork</strong>
-                      <ul className={styles.list}>
-                        {day.breathwork.map((item, index) => (
-                          <li key={`${item.name}-${index}`}>
-                            {item.name} — {item.duration_min} min
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {day.nutrition && (
-                    <div>
-                      <strong>Nutrition</strong>
-                      <ul className={styles.list}>
-                        <li>Kcal target {day.nutrition.kcal_target}</li>
-                        {(day.nutrition.meals ?? []).map((meal, index) => (
-                          <li key={`${meal.meal}-${index}`}>
-                            {meal.meal}: {meal.name}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {day.habits && day.habits.length > 0 && (
-                    <div>
-                      <strong>Habits</strong>
-                      <ul className={styles.list}>
-                        {day.habits.map((habit) => (
-                          <li key={habit}>{habit}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {day.mindfulness && day.mindfulness.length > 0 && (
-                    <div>
-                      <strong>Mindfulness</strong>
-                      <ul className={styles.list}>
-                        {day.mindfulness.map((item) => (
-                          <li key={item}>{item}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
                 </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {view === "citations" && (
-        <section className={styles.sectionCard}>
-          <h2>Citations</h2>
-          <div className={styles.citations}>
-            {(plan.citations ?? []).length === 0 && <p>No citations provided.</p>}
-            {(plan.citations ?? []).map((citation) => (
-              <div key={citation} className={styles.citation}>
-                {citation}
               </div>
-            ))}
+            )}
+
+            {day.meals.length > 0 && (
+              <div className={styles.section}>
+                <h3>Meals</h3>
+                <div className={styles.items}>
+                  {day.meals.map((meal, i) => (
+                    <div key={i} className={styles.item}>
+                      <div className={styles.itemHeader}>
+                        <span className={styles.type}>{meal.type}</span>
+                        <span className={styles.calories}>{meal.calories} cal</span>
+                      </div>
+                      <h4>{meal.name}</h4>
+                      <p>{meal.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        </section>
-      )}
+        ))}
+      </div>
     </div>
   );
 }

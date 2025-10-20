@@ -1,0 +1,28 @@
+.container {
+  display: grid;
+  gap: 16px;
+}
+
+.card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.title {
+  font-size: 22px;
+  margin: 0 0 8px 0;
+  color: #111827;
+}
+
+.description {
+  color: #6b7280;
+  margin: 0 0 16px 0;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}

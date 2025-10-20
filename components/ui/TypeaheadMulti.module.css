@@ -1,0 +1,68 @@
+.typeaheadMulti {
+  position: relative;
+}
+
+.typeaheadChips {
+  margin-bottom: 8px;
+}
+
+.typeaheadInputWrapper {
+  position: relative;
+}
+
+.typeaheadInput {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.typeaheadInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.typeaheadSuggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.typeaheadSuggestion {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.typeaheadSuggestion:hover {
+  background: #f3f4f6;
+}
+
+.typeaheadSuggestion--selected {
+  background: #eff6ff;
+}
+
+.typeaheadSuggestionLabel {
+  font-size: 14px;
+  color: #374151;
+}
+
+.typeaheadSuggestionCategory {
+  font-size: 12px;
+  color: #6b7280;
+  font-style: italic;
+}

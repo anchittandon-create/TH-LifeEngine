@@ -3,6 +3,8 @@ import type { Plan } from './schemas';
 export function createFallbackPlan(sex: 'M' | 'F'): Plan {
   return {
     id: 'fallback-plan',
+    profileId: 'fallback-profile',
+    intakeId: 'fallback-intake',
     days: Array.from({ length: 7 }, (_, i) => ({
       date: new Date(Date.now() + i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       activities: [

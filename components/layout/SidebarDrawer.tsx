@@ -1,101 +1,49 @@
 "use client";
-
 import { useEffect, useRef } from "react";
-import NavLink from "./NavLink";
-import { NAV_ITEMS } from "./Sidebar";
+import Sidebar from "./Sidebar";
 import styles from "./SidebarDrawer.module.css";
 
-type DrawerProps = {
-  open: boolean;
-  onClose: () => void;
-};
-
-export default function SidebarDrawer({ open, onClose }: DrawerProps) {
-  const panelRef = useRef<HTMLDivElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
+export default function SidebarDrawer({ open, onClose }: { open: boolean; onClose: () => void; }) {
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!open) {
-      return;
-    }
+    if (!open) return;
+    const el = ref.current;
+    if (!el) return;
 
-    const panel = panelRef.current;
-    if (!panel) {
-      return;
-    }
+    const T = el.querySelectorAll<HTMLElement>('a,button,[tabindex]:not([tabindex="-1"])');
+    const first = T[0], last = T[T.length - 1];
 
-    previousFocusRef.current = document.activeElement as HTMLElement | null;
-
-    const focusable = () =>
-      panel.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
-
-    const handleKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
+    const h = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
         onClose();
       }
-      if (event.key === "Tab") {
-        const nodes = Array.from(focusable());
-        if (!nodes.length) {
-          return;
-        }
-        const first = nodes[0];
-        const last = nodes[nodes.length - 1];
-        if (event.shiftKey) {
-          if (document.activeElement === first) {
-            event.preventDefault();
-            last.focus();
-          }
-        } else if (document.activeElement === last) {
-          event.preventDefault();
-          first.focus();
+      if (e.key === "Tab" && T.length) {
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          (last || el).focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          (first || el).focus();
         }
       }
     };
 
-    document.addEventListener("keydown", handleKey);
-    const nodes = focusable();
-    (nodes[0] ?? panel).focus();
-
-    return () => {
-      document.removeEventListener("keydown", handleKey);
-      if (previousFocusRef.current) {
-        previousFocusRef.current.focus();
-      }
-    };
+    document.addEventListener("keydown", h);
+    (first || el).focus();
+    return () => document.removeEventListener("keydown", h);
   }, [open, onClose]);
 
-  if (!open) {
-    return null;
-  }
+  if (!open) return null;
 
   return (
-    <>
-      <div className={styles.overlay} role="presentation" onClick={onClose} />
-      <div
-        ref={panelRef}
-        className={styles.panel}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Navigation"
-        tabIndex={-1}
-      >
-        <nav>
-          {NAV_ITEMS.map((item) => (
-            <NavLink
-              key={item.href}
-              href={item.href}
-              label={item.label}
-              onClick={onClose}
-            />
-          ))}
-        </nav>
-        <button type="button" className={styles.close} onClick={onClose}>
-          Close
-        </button>
+    <div className={`${styles.wrapper} show-md`} aria-modal="true" role="dialog">
+      <div className={styles.overlay} onClick={onClose} />
+      <div ref={ref} id="mobile-sidebar" tabIndex={-1} className={styles.panel}>
+        <Sidebar />
+        <button className={styles.close} onClick={onClose}>Close</button>
       </div>
-    </>
+    </div>
   );
 }

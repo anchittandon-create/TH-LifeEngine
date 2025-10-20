@@ -7,11 +7,11 @@ import styles from "./AppShell.module.css";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
-  const toggleRef = useRef<HTMLButtonElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
 
-  const closeDrawer = () => {
+  const close = () => {
     setOpen(false);
-    toggleRef.current?.focus();
+    btnRef.current?.focus();
   };
 
   return (
@@ -20,26 +20,24 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <div className={styles.headerInner}>
           <div className={styles.brand}>
             <button
-              ref={toggleRef}
-              type="button"
-              aria-controls="mobile-sidebar"
-              aria-expanded={open ? "true" : "false"}
-              aria-label="Open navigation"
+              ref={btnRef}
               className={styles.drawerToggle}
+              aria-controls="mobile-sidebar"
+              aria-expanded={open}
               onClick={() => setOpen(true)}
             >
               ☰
             </button>
-            <span>TH+ LifeEngine</span>
+            <strong>TH+ LifeEngine</strong>
           </div>
-          <div className={styles.description}>Verbal Edition</div>
+          <div className={styles.description}>Health Booster</div>
         </div>
       </header>
       <div className={styles.layout}>
         <Sidebar />
         <main className={styles.main}>{children}</main>
       </div>
-      <SidebarDrawer open={open} onClose={closeDrawer} />
+      <SidebarDrawer open={open} onClose={close} />
     </div>
   );
 }

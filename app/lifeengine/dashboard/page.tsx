@@ -1,162 +1,85 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import styles from "./Dashboard.module.css";
-import type { Profile } from "@/lib/domain/profile";
-import type { Plan } from "@/lib/domain/plan";
-import { getProfiles, getPlans, StoredPlan } from "@/lib/utils/store";
+import styles from "./page.module.css";
 
-type ServerPlan = {
+type PlanSummary = {
   id: string;
   profileId: string;
-  title: string;
-  createdAt: number;
+  intakeId: string;
+  createdAt: string;
   goals: string[];
-  warnings: number;
-  analytics: Plan["analytics"];
-};
-
-type PlanCard = {
-  id: string;
-  title: string;
-  profileId: string;
-  createdAt: number;
-  goals: string[];
-  warnings: number;
-  analytics: Plan["analytics"];
-  source: "server" | "local";
 };
 
 export default function DashboardPage() {
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [plans, setPlans] = useState<PlanCard[]>([]);
-  const [profileFilter, setProfileFilter] = useState<string>("all");
-  const [loading, setLoading] = useState(false);
+  const [plans, setPlans] = useState<PlanSummary[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setProfiles(getProfiles());
-    const localPlans = getPlans().map(toLocalCard);
-    setPlans(localPlans);
-    refreshServer(localPlans);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadPlans();
   }, []);
 
-  const refreshServer = async (existing: PlanCard[]) => {
-    setLoading(true);
-    setError(null);
+  const loadPlans = async () => {
     try {
-      const response = await fetch("/api/lifeengine/listPlans?profileId=all");
-      if (!response.ok) {
-        throw new Error(`Status ${response.status}`);
-      }
+      const response = await fetch("/api/lifeengine/listPlans");
+      if (!response.ok) throw new Error("Failed to load plans");
       const data = await response.json();
-      const serverPlans: PlanCard[] = (data.plans as ServerPlan[]).map((plan) => ({
-        ...plan,
-        source: "server" as const,
-      }));
-      const merged = mergePlans(existing, serverPlans);
-      setPlans(merged);
+      setPlans(data.plans || []);
     } catch (err: any) {
-      setError(err.message ?? "Failed to load plans");
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredPlans = useMemo(() => {
-    return plans
-      .filter((plan) =>
-        profileFilter === "all" ? true : plan.profileId === profileFilter
-      )
-      .sort((a, b) => b.createdAt - a.createdAt);
-  }, [plans, profileFilter]);
+  if (loading) return <div className={styles.page}>Loading...</div>;
+  if (error) return <div className={styles.page}>Error: {error}</div>;
 
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Dashboard</h1>
-        <div className={styles.toolbar}>
-          <select
-            value={profileFilter}
-            onChange={(event) => setProfileFilter(event.target.value)}
-          >
-            <option value="all">All profiles</option>
-            {profiles.map((profile) => (
-              <option key={profile.id} value={profile.id}>
-                {profile.name}
-              </option>
-            ))}
-          </select>
-          <button type="button" onClick={() => refreshServer(plans)}>
-            Refresh
-          </button>
-        </div>
+        <h1>My Plans</h1>
+        <Link href="/lifeengine/create" className={styles.createBtn}>
+          Create New Plan
+        </Link>
       </div>
-      {error && <p style={{ color: "#b91c1c" }}>{error}</p>}
-      {loading && <p style={{ color: "#475569" }}>Refreshing…</p>}
-      {filteredPlans.length > 0 ? (
+
+      {plans.length === 0 ? (
+        <div className={styles.empty}>
+          <p>No plans yet. Create your first personalized plan!</p>
+          <Link href="/lifeengine/create" className={styles.createBtn}>
+            Get Started
+          </Link>
+        </div>
+      ) : (
         <div className={styles.grid}>
-          {filteredPlans.map((plan) => (
-            <article key={plan.id} className={styles.card}>
-              <div>
-                <div className={styles.cardTitle}>{plan.title}</div>
-                <div className={styles.meta}>
-                  <span>
-                    {new Date(plan.createdAt).toLocaleString()}
-                  </span>
-                  <span>{plan.source === "server" ? "Cloud" : "Local"}</span>
-                  <span>Warnings {plan.warnings}</span>
-                </div>
+          {plans.map((plan) => (
+            <div key={plan.id} className={styles.card}>
+              <div className={styles.cardHeader}>
+                <h3>Plan #{plan.id.slice(-8)}</h3>
+                <span className={styles.date}>
+                  {new Date(plan.createdAt).toLocaleDateString()}
+                </span>
               </div>
-              <div className={styles.scoreBar}>
-                <div
-                  className={styles.scoreFill}
-                  style={{ width: `${Math.min(1, plan.analytics.overall) * 100}%` }}
-                />
-              </div>
-              <div className={styles.badges}>
-                {plan.goals.map((goal) => (
-                  <span key={goal} className={styles.badge}>
+              <div className={styles.goals}>
+                {plan.goals.slice(0, 3).map((goal, i) => (
+                  <span key={i} className={styles.goal}>
                     {goal}
                   </span>
                 ))}
+                {plan.goals.length > 3 && (
+                  <span className={styles.more}>+{plan.goals.length - 3} more</span>
+                )}
               </div>
-              <Link className={styles.link} href={`/lifeengine/plan/${plan.id}`}>
-                Open Plan
+              <Link href={`/lifeengine/plan/${plan.id}`} className={styles.viewBtn}>
+                View Plan
               </Link>
-            </article>
+            </div>
           ))}
-        </div>
-      ) : (
-        <div className={styles.empty}>
-          No plans yet. Generate one from the Create page.
         </div>
       )}
     </div>
   );
-}
-
-function toLocalCard(plan: StoredPlan): PlanCard {
-  return {
-    id: plan.id,
-    title: plan.plan.meta?.title || 'Untitled',
-    profileId: plan.profileId,
-    createdAt: plan.createdAt,
-    goals: plan.plan.meta?.goals ?? [],
-    warnings: plan.warnings.length,
-    analytics: plan.analytics,
-    source: "local",
-  };
-}
-
-function mergePlans(local: PlanCard[], server: PlanCard[]) {
-  const map = new Map<string, PlanCard>();
-  [...local, ...server].forEach((plan) => {
-    if (!map.has(plan.id) || plan.source === "local") {
-      map.set(plan.id, plan);
-    }
-  });
-  return Array.from(map.values());
 }

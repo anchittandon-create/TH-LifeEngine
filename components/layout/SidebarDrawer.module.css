@@ -1,3 +1,9 @@
+.wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+}
+
 .overlay {
   position: fixed;
   inset: 0;

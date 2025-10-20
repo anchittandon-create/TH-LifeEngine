@@ -1,12 +1,33 @@
-'use client';
+"use client";
 
-import { ReactNode } from 'react';
+import { forwardRef, ReactNode } from "react";
+import styles from "./Field.module.css";
 
 interface FieldProps {
+  label?: string;
+  error?: string;
+  helperText?: string;
   children: ReactNode;
   className?: string;
 }
 
-export function Field({ children, className = '' }: FieldProps) {
-  return <div className={`space-y-1 ${className}`}>{children}</div>;
-}
+export const Field = forwardRef<HTMLDivElement, FieldProps>(
+  ({ label, error, helperText, children, className = "" }, ref) => {
+    return (
+      <div ref={ref} className={`${styles.field} ${className}`}>
+        {label && (
+          <label className={styles.fieldLabel}>
+            {label}
+          </label>
+        )}
+        <div className={styles.fieldInputWrapper}>
+          {children}
+        </div>
+        {error && <div className={styles.fieldError}>{error}</div>}
+        {helperText && !error && <div className={styles.fieldHelper}>{helperText}</div>}
+      </div>
+    );
+  }
+);
+
+Field.displayName = "Field";

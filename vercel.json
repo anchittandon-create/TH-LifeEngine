@@ -1,4 +1,5 @@
 {
-  "framework": "nextjs",
-  "buildCommand": "next build"
+  "version": 2,
+  "builds": [{ "src": "next.config.mjs", "use": "@vercel/next" }],
+  "env": { "GOOGLE_API_KEY": "@google_api_key" }
 }
