@@ -3,3 +3,4 @@ test
 trigger deploy
 Updated workflow for better CI/CD reliability
 Triggering deployment with secrets configured
+Fixed Vercel CLI installation in workflow
