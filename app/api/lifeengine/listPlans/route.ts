@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import type { Plan } from "@/lib/ai/schemas";
 
+export const dynamic = 'force-dynamic';
+
 const globalState = globalThis as unknown as {
   __LIFEENGINE_PLANS__?: Map<string, Plan>;
 };

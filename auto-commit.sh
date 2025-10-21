@@ -21,6 +21,10 @@ fi
 # Add all changes
 git add -A
 
+# Set Git user config for commits
+git config user.name "github-actions[bot]"
+git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
 # Commit with the provided message
 git commit -m "$COMMIT_MESSAGE"
 

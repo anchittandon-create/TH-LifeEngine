@@ -49,6 +49,10 @@ function gitAddCommitPush() {
     // Add ALL changes (including ignored files)
     runCommand('git add -A', 'Adding ALL files to git (including ignored)');
 
+    // Set Git user config for commits
+    runCommand('git config user.name "github-actions[bot]"', 'Setting Git user name');
+    runCommand('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"', 'Setting Git user email');
+
     // Get current date/time and branch for commit message
     const now = new Date();
     const timestamp = now.toISOString().slice(0, 19).replace('T', ' ');
