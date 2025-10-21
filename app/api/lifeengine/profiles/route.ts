@@ -3,16 +3,30 @@ import { supabase } from "@/lib/supabase";
 import { createId } from "@/lib/utils/ids";
 import type { Profile } from "@/lib/ai/schemas";
 
+const globalState = globalThis as unknown as {
+  __LIFEENGINE_PROFILES__?: Map<string, Profile>;
+};
+
+if (!globalState.__LIFEENGINE_PROFILES__) {
+  globalState.__LIFEENGINE_PROFILES__ = new Map<string, Profile>();
+}
+
+const PROFILE_STORE = globalState.__LIFEENGINE_PROFILES__;
+
 export async function GET() {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*');
+  if (supabase) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*');
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ profiles: data });
+  } else {
+    return NextResponse.json({ profiles: Array.from(PROFILE_STORE.values()) });
   }
-
-  return NextResponse.json({ profiles: data });
 }
 
 export async function POST(request: Request) {
@@ -31,16 +45,21 @@ export async function POST(request: Request) {
       subscriptionType: payload.subscriptionType ?? "quarterly",
     };
 
-    const { data, error } = await supabase
-      .from('profiles')
-      .insert([profile])
-      .select();
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert([profile])
+        .select();
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ profile: data[0] });
+    } else {
+      PROFILE_STORE.set(id, profile);
+      return NextResponse.json({ profile });
     }
-
-    return NextResponse.json({ profile: data[0] });
   } catch (error) {
     return NextResponse.json({ error: "Invalid profile data" }, { status: 400 });
   }
@@ -52,13 +71,17 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 });
   }
 
-  const { error } = await supabase
-    .from('profiles')
-    .delete()
-    .eq('id', id);
+  if (supabase) {
+    const { error } = await supabase
+      .from('profiles')
+      .delete()
+      .eq('id', id);
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+  } else {
+    PROFILE_STORE.delete(id);
   }
 
   return NextResponse.json({ ok: true });

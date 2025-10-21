@@ -1,18 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { getProfiles, saveProfile } from '@/lib/utils/store';
 import { createId } from '@/lib/utils/ids';
 import type { Profile } from '@/lib/domain/profile';
 
 export async function GET() {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*');
+  if (supabase) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*');
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
+  } else {
+    const profiles = getProfiles();
+    return NextResponse.json(profiles);
   }
-
-  return NextResponse.json(data);
 }
 
 export async function POST(request: NextRequest) {
@@ -48,14 +54,19 @@ export async function POST(request: NextRequest) {
     },
   };
 
-  const { data: insertedData, error } = await supabase
-    .from('profiles')
-    .insert([profile])
-    .select();
+  if (supabase) {
+    const { data: insertedData, error } = await supabase
+      .from('profiles')
+      .insert([profile])
+      .select();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(insertedData[0]);
+  } else {
+    saveProfile(profile);
+    return NextResponse.json(profile);
   }
-
-  return NextResponse.json(insertedData[0]);
 }

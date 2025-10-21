@@ -17,27 +17,33 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing profileId or message" }, { status: 400 });
     }
 
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', profileId)
-      .single();
+    let profile = null;
+    if (supabase) {
+      const { data, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', profileId)
+        .single();
 
-    if (profileError || !profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+      if (profileError || !data) {
+        // Profile not found, but continue without profile context
+        profile = null;
+      } else {
+        profile = data;
+      }
     }
 
     // Build context from profile and conversation history
     const contextPrompt = `You are TH_LifeEngine AI, a wellness assistant specializing in personalized health plans.
 
-PROFILE CONTEXT:
+${profile ? `PROFILE CONTEXT:
 - Name: ${profile.name}
 - Age: ${profile.age}
 - Gender: ${profile.gender}
 - Goals: ${profile.goals?.join(", ") || "General wellness"}
 - Experience Level: ${profile.experience || "Beginner"}
 - Health Concerns: ${profile.healthConcerns || "None specified"}
-- Preferred Time: ${profile.preferredTime || "Flexible"}
+- Preferred Time: ${profile.preferredTime || "Flexible"}` : 'No profile context available - provide general wellness advice.'}
 
 CONVERSATION HISTORY:
 ${conversationHistory.slice(-5).map(msg =>

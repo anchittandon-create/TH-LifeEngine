@@ -5,6 +5,16 @@ import type { Intake, Plan, Profile } from "@/lib/ai/schemas";
 import { createId } from "@/lib/utils/ids";
 import { supabase } from "@/lib/supabase";
 
+const globalState = globalThis as unknown as {
+  __LIFEENGINE_PLANS__?: Map<string, any>;
+};
+
+if (!globalState.__LIFEENGINE_PLANS__) {
+  globalState.__LIFEENGINE_PLANS__ = new Map<string, any>();
+}
+
+const PLAN_STORE = globalState.__LIFEENGINE_PLANS__;
+
 export async function POST(request: Request) {
   try {
     const { profileId, intake } = await request.json() as { profileId: string; intake: Intake };
@@ -13,14 +23,31 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing profileId or intake payload" }, { status: 400 });
     }
 
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', profileId)
-      .single();
+    let profile = null;
+    if (supabase) {
+      const { data, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', profileId)
+        .single();
 
-    if (profileError || !profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+      if (profileError || !data) {
+        return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+      }
+      profile = data;
+    } else {
+      // For demo purposes, create a mock profile
+      profile = {
+        id: profileId,
+        name: "Demo User",
+        age: 30,
+        gender: "other",
+        goals: ["weight_loss"],
+        healthConcerns: "",
+        experience: "beginner",
+        preferredTime: "flexible",
+        subscriptionType: "quarterly",
+      };
     }
 
     const generated = await generatePlan(profile, intake);
@@ -43,12 +70,16 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString(),
     };
 
-    const { error: insertError } = await supabase
-      .from('plans')
-      .insert([planData]);
+    if (supabase) {
+      const { error: insertError } = await supabase
+        .from('plans')
+        .insert([planData]);
 
-    if (insertError) {
-      return NextResponse.json({ error: insertError.message }, { status: 500 });
+      if (insertError) {
+        return NextResponse.json({ error: insertError.message }, { status: 500 });
+      }
+    } else {
+      PLAN_STORE.set(planId, planData);
     }
 
     return NextResponse.json({
