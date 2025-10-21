@@ -1,88 +1,98 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { GOOGLE_API_KEY } from "@/lib/utils/env";
-import { supabase } from "@/lib/supabase";
+import { z } from "zod";
 
-export async function POST(request: Request) {
+// Initialize Gemini AI conditionally
+let genAI: GoogleGenerativeAI | null = null;
+if (process.env.GOOGLE_AI_API_KEY) {
+  genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
+}
+
+const chatRequestSchema = z.object({
+  profileId: z.string().min(1, "Profile ID is required"),
+  message: z.string().min(1, "Message is required"),
+  conversationHistory: z.array(z.object({
+    id: z.string(),
+    role: z.enum(["user", "assistant"]),
+    content: z.string(),
+    timestamp: z.date().or(z.string()),
+  })).optional(),
+});
+
+export async function POST(request: NextRequest) {
   try {
-    const { profileId, message, conversationHistory = [] } = await request.json() as {
-      profileId: string;
-      message: string;
-      conversationHistory?: any[];
+    if (!genAI) {
+      return NextResponse.json(
+        { error: "AI service not configured" },
+        { status: 503 }
+      );
+    }
+
+    const body = await request.json();
+    const { profileId, message, conversationHistory } = chatRequestSchema.parse(body);
+
+    // Get profile data (in a real app, this would come from database)
+    // For now, we'll use a mock profile or fetch from our in-memory store
+    const profile = {
+      id: profileId,
+      name: "User",
+      goals: ["weight loss", "fitness"],
+      healthConcerns: "none",
+      experience: "beginner",
     };
 
-    if (!profileId || !message) {
-      return NextResponse.json({ error: "Missing profileId or message" }, { status: 400 });
-    }
+    // Build conversation context
+    const context = `
+You are TH_LifeEngine CustomGPT, a personalized wellness AI assistant.
 
-    if (!GOOGLE_API_KEY) {
-      return NextResponse.json({ error: "AI service not configured" }, { status: 500 });
-    }
-
-    const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
-
-    let profile = null;
-    if (supabase) {
-      const { data, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', profileId)
-        .single();
-
-      if (profileError || !data) {
-        // Profile not found, but continue without profile context
-        profile = null;
-      } else {
-        profile = data;
-      }
-    }
-
-    // Build context from profile and conversation history
-    const contextPrompt = `You are TH_LifeEngine AI, a wellness assistant specializing in personalized health plans.
-
-${profile ? `PROFILE CONTEXT:
+User Profile Context:
 - Name: ${profile.name}
-- Age: ${profile.age}
-- Gender: ${profile.gender}
-- Goals: ${profile.goals?.join(", ") || "General wellness"}
-- Experience Level: ${profile.experience || "Beginner"}
-- Health Concerns: ${profile.healthConcerns || "None specified"}
-- Preferred Time: ${profile.preferredTime || "Flexible"}` : 'No profile context available - provide general wellness advice.'}
+- Goals: ${profile.goals.join(", ")}
+- Health Concerns: ${profile.healthConcerns}
+- Experience Level: ${profile.experience}
 
-CONVERSATION HISTORY:
-${conversationHistory.slice(-5).map(msg =>
-  `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
-).join('\n')}
-
-INSTRUCTIONS:
+Guidelines:
 - Provide personalized, evidence-based wellness advice
-- Reference the user's profile information when relevant
 - Be encouraging and supportive
-- Keep responses concise but informative
-- If asked about medical conditions, recommend consulting healthcare professionals
-- Focus on yoga, diet, fitness, sleep, and holistic wellness
+- Focus on sustainable, long-term health improvements
+- Ask clarifying questions when needed
+- Reference their specific goals and profile
+- Keep responses conversational but informative
+- If discussing medical concerns, recommend consulting healthcare professionals
 
-User's question: ${message}
+${conversationHistory && conversationHistory.length > 0 ?
+  `Recent Conversation:\n${conversationHistory.slice(-5).map(msg =>
+    `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
+  ).join('\n')}\n\n` : ''
+}Current User Message: ${message}
 
-Respond as a knowledgeable wellness coach:`;
+Respond as a helpful wellness coach who knows their profile and goals.`;
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const result = await model.generateContent(contextPrompt);
-    const response = await result.response;
+    const result = await model.generateContent(context);
+    const response = result.response;
     const text = response.text();
 
     return NextResponse.json({
-      response: text.trim(),
+      response: text,
       profileId,
       timestamp: new Date().toISOString(),
     });
 
   } catch (error) {
     console.error("Chat API error:", error);
-    return NextResponse.json({
-      error: "Failed to process chat request",
-      response: "I'm sorry, I encountered an error. Please try again."
-    }, { status: 500 });
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid request data", details: error.errors },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
