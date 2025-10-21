@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getProfiles, saveProfile } from '@/lib/utils/store';
+import { supabase } from '@/lib/supabase';
 import { createId } from '@/lib/utils/ids';
 import type { Profile } from '@/lib/domain/profile';
 
 export async function GET() {
-  const profiles = getProfiles();
-  return NextResponse.json(profiles);
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*');
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json(data);
 }
 
 export async function POST(request: NextRequest) {
@@ -40,6 +47,15 @@ export async function POST(request: NextRequest) {
       secondary: data.secondaryPlans || [],
     },
   };
-  saveProfile(profile);
-  return NextResponse.json(profile);
+
+  const { data: insertedData, error } = await supabase
+    .from('profiles')
+    .insert([profile])
+    .select();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json(insertedData[0]);
 }

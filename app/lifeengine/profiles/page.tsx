@@ -2,15 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./Profiles.module.css";
-import type { Profile } from "@/lib/domain/profile";
-import {
-  deleteProfile as deleteProfileLocal,
-  exportProfiles,
-  getProfiles,
-  importProfiles,
-  saveProfile as saveProfileLocal,
-} from "@/lib/utils/store";
-import { createId } from "@/lib/utils/ids";
+import type { Profile } from "@/lib/ai/schemas";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -19,70 +11,45 @@ import { Label } from "@/components/ui/Label";
 import { Field } from "@/components/ui/Field";
 import { Actions } from "@/components/ui/Actions";
 
-const DEFAULT_PROFILE: Profile = {
-  id: "",
+const DEFAULT_PROFILE: Partial<Profile> = {
   name: "",
-  gender: "F",
-  age: 30,
-  height_cm: 165,
-  weight_kg: 65,
-  region: "IN",
-  medical_flags: [],
-  activity_level: "moderate",
-  dietary: {
-    type: "veg",
-    allergies: [],
-    avoid_items: [],
-    cuisine_pref: ["Indian fusion"],
-  },
-  preferences: { tone: "balanced", indoor_only: true },
-  availability: {
-    days_per_week: 5,
-    preferred_slots: [{ start: "06:30", end: "07:15" }],
-  },
-  plan_type: { primary: "weight_loss", secondary: [] },
+  age: 25,
+  gender: "other",
+  goals: [],
+  healthConcerns: "",
+  experience: "beginner",
+  preferredTime: "flexible",
+  subscriptionType: "quarterly",
 };
 
 function toFormState(profile: Profile) {
   return {
     ...profile,
-    medicalFlagsInput: (profile.medical_flags ?? []).join(", "),
-    allergiesInput: (profile.dietary?.allergies ?? []).join(", "),
-    avoidInput: (profile.dietary?.avoid_items ?? []).join(", "),
-    cuisineInput: (profile.dietary?.cuisine_pref ?? []).join(", "),
-    slotsInput: (profile.availability?.preferred_slots ?? [])
-      .map((slot) => `${slot.start}-${slot.end}`)
-      .join(", "),
+    goalsInput: (profile.goals ?? []).join(", "),
   };
-}
-
-function parseList(value: string) {
-  return value
-    .split(",")
-    .map((entry) => entry.trim())
-    .filter(Boolean);
-}
-
-function parseSlots(value: string) {
-  return value
-    .split(",")
-    .map((chunk) => chunk.trim())
-    .filter(Boolean)
-    .map((segment) => {
-      const [start, end] = segment.split("-").map((part) => part.trim());
-      return { start: start || "06:00", end: end || "07:00" };
-    });
 }
 
 export default function ProfilesPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState(toFormState(DEFAULT_PROFILE));
-  const importRef = useRef<HTMLInputElement>(null);
+  const [form, setForm] = useState(toFormState(DEFAULT_PROFILE as Profile));
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setProfiles(getProfiles());
+    fetchProfiles();
   }, []);
+
+  const fetchProfiles = async () => {
+    try {
+      const response = await fetch('/api/lifeengine/profiles');
+      const data = await response.json();
+      setProfiles(data.profiles || []);
+    } catch (error) {
+      console.error('Failed to fetch profiles:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const selectedProfile = useMemo(
     () => profiles.find((profile) => profile.id === editingId) ?? null,
@@ -93,102 +60,62 @@ export default function ProfilesPage() {
     if (selectedProfile) {
       setForm(toFormState(selectedProfile));
     } else {
-      setForm(toFormState({ ...DEFAULT_PROFILE, id: "" }));
+      setForm(toFormState({ ...DEFAULT_PROFILE, id: "" } as Profile));
     }
   }, [selectedProfile]);
 
-  const handleSave = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const id = editingId ?? createId();
     const payload: Profile = {
-      id,
-      name: form.name || "Unnamed",
+      id: editingId || `profile_${Date.now()}`,
+      name: form.name,
+      age: Number(form.age),
       gender: form.gender,
-      age: Number(form.age) || 0,
-      height_cm: Number(form.height_cm) || 0,
-      weight_kg: Number(form.weight_kg) || 0,
-      region: form.region,
-      medical_flags: parseList(form.medicalFlagsInput ?? ""),
-      activity_level: form.activity_level,
-      dietary: {
-        type: form.dietary?.type,
-        allergies: parseList(form.allergiesInput ?? ""),
-        avoid_items: parseList(form.avoidInput ?? ""),
-        cuisine_pref: parseList(form.cuisineInput ?? ""),
-      },
-      preferences: {
-        tone: form.preferences?.tone ?? "balanced",
-        indoor_only: form.preferences?.indoor_only ?? true,
-        notes: form.preferences?.notes ?? "",
-      },
-      availability: {
-        days_per_week: Number(form.availability?.days_per_week) || 5,
-        preferred_slots: parseSlots(form.slotsInput ?? ""),
-      },
-      plan_type: {
-        primary: form.plan_type?.primary ?? "weight_loss",
-        secondary: form.plan_type?.secondary ?? [],
-      },
+      goals: form.goalsInput ? form.goalsInput.split(',').map(g => g.trim()).filter(Boolean) : [],
+      healthConcerns: form.healthConcerns,
+      experience: form.experience,
+      preferredTime: form.preferredTime,
+      subscriptionType: form.subscriptionType,
     };
 
-    const next = saveProfileLocal(payload);
-    setProfiles(next);
-    setEditingId(payload.id);
-
-    fetch("/api/lifeengine/profiles", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    }).catch(() => {});
-  };
-
-  const handleDelete = (id: string) => {
-    if (!window.confirm("Remove this profile?")) return;
-    const next = deleteProfileLocal(id);
-    setProfiles(next);
-    if (editingId === id) {
-      setEditingId(null);
-    }
-    fetch("/api/lifeengine/profiles", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    }).catch(() => {});
-  };
-
-  const handleExport = () => {
-    const blob = new Blob([exportProfiles()], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `th_profiles_${Date.now()}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    const text = await file.text();
     try {
-      importProfiles(text);
-      const next = getProfiles();
-      setProfiles(next);
-      next.forEach((profile) => {
-        fetch("/api/lifeengine/profiles", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(profile),
-        }).catch(() => {});
+      const response = await fetch('/api/lifeengine/profiles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
+
+      if (response.ok) {
+        await fetchProfiles();
+        setEditingId(payload.id);
+      }
     } catch (error) {
-      console.error("Import failed", error);
-      window.alert("Invalid profile file");
-    } finally {
-      event.target.value = "";
+      console.error('Failed to save profile:', error);
     }
   };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Remove this profile?')) return;
+
+    try {
+      await fetch('/api/lifeengine/profiles', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      await fetchProfiles();
+      if (editingId === id) {
+        setEditingId(null);
+      }
+    } catch (error) {
+      console.error('Failed to delete profile:', error);
+    }
+  };
+
+  if (loading) {
+    return <div className={styles.wrapper}>Loading...</div>;
+  }
 
   return (
     <div className={styles.wrapper}>
@@ -196,9 +123,6 @@ export default function ProfilesPage() {
         <div className={styles.headingRow}>
           <h1 className={styles.title}>Profiles</h1>
           <Button variant="ghost" onClick={() => setEditingId(null)}>
-            <svg className={styles.icon} viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 4v16m8-8H4"/>
-            </svg>
             New Profile
           </Button>
         </div>
@@ -212,12 +136,8 @@ export default function ProfilesPage() {
                     <span className={styles.badge}>
                       {profile.gender} • {profile.age}y
                     </span>
-                    {profile.region && (
-                      <span className={styles.badge}>{profile.region}</span>
-                    )}
-                    {profile.activity_level && (
-                      <span className={styles.badge}>{profile.activity_level}</span>
-                    )}
+                    <span className={styles.badge}>{profile.experience}</span>
+                    <span className={styles.badge}>{profile.preferredTime}</span>
                   </div>
                 </div>
                 <div className={styles.actions}>
@@ -238,12 +158,17 @@ export default function ProfilesPage() {
                 </div>
               </div>
               <div className={styles.badges}>
-                {(profile.medical_flags ?? []).map((flag) => (
-                  <span key={flag} className={styles.badge}>
-                    {flag}
+                {profile.goals.map((goal) => (
+                  <span key={goal} className={styles.badge}>
+                    {goal}
                   </span>
                 ))}
               </div>
+              {profile.healthConcerns && (
+                <div className={styles.healthConcerns}>
+                  Health Concerns: {profile.healthConcerns}
+                </div>
+              )}
             </article>
           ))}
           {profiles.length === 0 && (
@@ -253,35 +178,8 @@ export default function ProfilesPage() {
             </div>
           )}
         </div>
-        <div className={styles.toolbar}>
-          <Button variant="ghost" size="sm" onClick={handleExport}>
-            <svg className={styles.icon} viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-            Export
-          </Button>
-          <label className={styles.fileInputLabel}>
-            <Button variant="ghost" size="sm">
-              <svg className={styles.icon} viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 4v16m8-8H4"/>
-              </svg>
-              Import
-            </Button>
-            <input
-              ref={importRef}
-              type="file"
-              accept="application/json"
-              className={styles.fileInput}
-              onChange={handleImport}
-            />
-          </label>
-        </div>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.title}>
-          {editingId ? "Edit Profile" : "Create Profile"}
-        </h2>
       <section className={styles.section}>
         <h2 className={styles.title}>
           {editingId ? "Edit Profile" : "Create Profile"}
@@ -297,7 +195,23 @@ export default function ProfilesPage() {
             />
           </Field>
 
-          <Field label="Gender">
+          <Field label="Age" required>
+            <Input
+              type="number"
+              min={1}
+              max={120}
+              value={form.age}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  age: Number(event.target.value),
+                }))
+              }
+              required
+            />
+          </Field>
+
+          <Field label="Gender" required>
             <Select
               value={form.gender}
               onChange={(event) =>
@@ -306,137 +220,89 @@ export default function ProfilesPage() {
                   gender: event.target.value as Profile["gender"],
                 }))
               }
+              required
             >
-              <option value="F">Female</option>
-              <option value="M">Male</option>
-              <option value="Other">Other</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
             </Select>
           </Field>
 
-          <Field label="Age">
+          <Field label="Fitness Goals" helper="Comma-separated list (e.g., Weight Loss, Flexibility, Stress Relief)">
             <Input
-              type="number"
-              min={12}
-              max={90}
-              value={form.age}
+              value={form.goalsInput}
               onChange={(event) =>
                 setForm((current) => ({
                   ...current,
-                  age: Number(event.target.value),
+                  goalsInput: event.target.value,
                 }))
               }
+              placeholder="Weight Loss, Flexibility, Stress Relief"
             />
           </Field>
 
-          <Field label="Height (cm)">
-            <Input
-              type="number"
-              value={form.height_cm}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  height_cm: Number(event.target.value),
-                }))
-              }
-            />
-          </Field>
-
-          <Field label="Weight (kg)">
-            <Input
-              type="number"
-              value={form.weight_kg}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  weight_kg: Number(event.target.value),
-                }))
-              }
-            />
-          </Field>
-
-          <Field label="Region">
-            <Select
-              value={form.region}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  region: event.target.value as Profile["region"],
-                }))
-              }
-            >
-              <option value="IN">India</option>
-              <option value="US">United States</option>
-              <option value="EU">Europe</option>
-              <option value="Global">Global</option>
-            </Select>
-          </Field>
-
-          <Field label="Medical Conditions" helper="Comma-separated list (e.g., PCOD, hypertension)">
-            <Input
-              value={form.medicalFlagsInput}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  medicalFlagsInput: event.target.value,
-                }))
-              }
-              placeholder="PCOD, hypertension, diabetes"
-            />
-          </Field>
-
-          <Field label="Dietary Allergies" helper="Comma-separated list (e.g., lactose, peanut)">
-            <Input
-              value={form.allergiesInput}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  allergiesInput: event.target.value,
-                }))
-              }
-              placeholder="lactose, peanut, gluten"
-            />
-          </Field>
-
-          <Field label="Foods to Avoid" helper="Comma-separated list (e.g., fried snacks)">
-            <Input
-              value={form.avoidInput}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  avoidInput: event.target.value,
-                }))
-              }
-              placeholder="fried snacks, processed foods"
-            />
-          </Field>
-
-          <Field label="Preferred Time Slots" helper="Format: start-end (e.g., 06:30-07:15, 20:30-21:00)">
-            <Input
-              value={form.slotsInput}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  slotsInput: event.target.value,
-                }))
-              }
-              placeholder="06:30-07:15, 20:30-21:00"
-            />
-          </Field>
-
-          <Field label="Additional Notes">
+          <Field label="Health Concerns">
             <Textarea
-              value={form.preferences?.notes ?? ""}
+              value={form.healthConcerns}
               onChange={(event) =>
                 setForm((current) => ({
                   ...current,
-                  preferences: {
-                    ...current.preferences,
-                    notes: event.target.value,
-                  },
+                  healthConcerns: event.target.value,
                 }))
               }
-              placeholder="Any additional preferences or notes..."
+              placeholder="Any health concerns or conditions..."
             />
+          </Field>
+
+          <Field label="Experience Level" required>
+            <Select
+              value={form.experience}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  experience: event.target.value as Profile["experience"],
+                }))
+              }
+              required
+            >
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </Select>
+          </Field>
+
+          <Field label="Preferred Session Time" required>
+            <Select
+              value={form.preferredTime}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  preferredTime: event.target.value as Profile["preferredTime"],
+                }))
+              }
+              required
+            >
+              <option value="morning">Morning</option>
+              <option value="evening">Evening</option>
+              <option value="flexible">Flexible</option>
+            </Select>
+          </Field>
+
+          <Field label="Subscription Type" required>
+            <Select
+              value={form.subscriptionType}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  subscriptionType: event.target.value as Profile["subscriptionType"],
+                }))
+              }
+              required
+            >
+              <option value="quarterly">Quarterly</option>
+              <option value="annual">Annual</option>
+              <option value="custom">Custom</option>
+            </Select>
           </Field>
 
           <Actions>
@@ -445,7 +311,6 @@ export default function ProfilesPage() {
             </Button>
           </Actions>
         </form>
-      </section>
       </section>
     </div>
   );

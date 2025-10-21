@@ -10,11 +10,10 @@ Given a user profile and intake preferences, generate a comprehensive weekly pla
 Profile data:
 - Age: {age}
 - Gender: {gender}
-- Height: {height}cm
-- Weight: {weight}kg
-- Activity Level: {activityLevel}
 - Goals: {goals}
-- Medical Flags: {flags}
+- Experience Level: {experience}
+- Health Concerns: {healthConcerns}
+- Preferred Time: {preferredTime}
 
 Plan Preferences:
 - Primary Type: {primaryPlanType}

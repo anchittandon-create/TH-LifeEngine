@@ -5,11 +5,11 @@ export const ProfileSchema = z.object({
   name: z.string(),
   age: z.number().min(1).max(120),
   gender: z.enum(['male', 'female', 'other']),
-  height: z.number().min(50).max(250), // cm
-  weight: z.number().min(20).max(300), // kg
-  activityLevel: z.enum(['sedentary', 'light', 'moderate', 'active', 'very_active']),
   goals: z.array(z.string()),
-  flags: z.array(z.string()),
+  healthConcerns: z.string(),
+  experience: z.enum(['beginner', 'intermediate', 'advanced']),
+  preferredTime: z.enum(['morning', 'evening', 'flexible']),
+  subscriptionType: z.enum(['quarterly', 'annual', 'custom']),
 });
 
 export const IntakeSchema = z.object({

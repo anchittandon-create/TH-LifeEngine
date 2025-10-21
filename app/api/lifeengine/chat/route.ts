@@ -1,18 +1,9 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GOOGLE_API_KEY } from "@/lib/utils/env";
+import { supabase } from "@/lib/supabase";
 
 const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
-
-const globalState = globalThis as unknown as {
-  __LIFEENGINE_PROFILES__?: Map<string, any>;
-};
-
-if (!globalState.__LIFEENGINE_PROFILES__) {
-  globalState.__LIFEENGINE_PROFILES__ = new Map<string, any>();
-}
-
-const PROFILE_STORE = globalState.__LIFEENGINE_PROFILES__;
 
 export async function POST(request: Request) {
   try {
@@ -26,8 +17,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing profileId or message" }, { status: 400 });
     }
 
-    const profile = PROFILE_STORE.get(profileId);
-    if (!profile) {
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', profileId)
+      .single();
+
+    if (profileError || !profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 

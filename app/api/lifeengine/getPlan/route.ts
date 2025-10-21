@@ -1,15 +1,5 @@
 import { NextResponse } from "next/server";
-import type { Plan } from "@/lib/ai/schemas";
-
-const globalState = globalThis as unknown as {
-  __LIFEENGINE_PLANS__?: Map<string, Plan>;
-};
-
-if (!globalState.__LIFEENGINE_PLANS__) {
-  globalState.__LIFEENGINE_PLANS__ = new Map<string, Plan>();
-}
-
-const PLAN_STORE = globalState.__LIFEENGINE_PLANS__;
+import { supabase } from "@/lib/supabase";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -19,13 +9,18 @@ export async function GET(request: Request) {
   }
 
   try {
-    const plan = PLAN_STORE.get(id);
-    if (!plan) {
+    const { data: plan, error } = await supabase
+      .from('plans')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !plan) {
       return NextResponse.json({ error: "Plan not found" }, { status: 404 });
     }
 
     return NextResponse.json({
-      plan,
+      plan: plan.planJson,
     });
   } catch (error) {
     console.error("Error fetching plan:", error);

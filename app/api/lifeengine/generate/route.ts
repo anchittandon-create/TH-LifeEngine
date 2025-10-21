@@ -3,22 +3,7 @@ import { generatePlan } from "@/lib/ai/planner";
 import { verifyPlan } from "@/lib/ai/verifier";
 import type { Intake, Plan, Profile } from "@/lib/ai/schemas";
 import { createId } from "@/lib/utils/ids";
-
-const globalState = globalThis as unknown as {
-  __LIFEENGINE_PLANS__?: Map<string, Plan>;
-  __LIFEENGINE_PROFILES__?: Map<string, Profile>;
-};
-
-if (!globalState.__LIFEENGINE_PLANS__) {
-  globalState.__LIFEENGINE_PLANS__ = new Map<string, Plan>();
-}
-
-if (!globalState.__LIFEENGINE_PROFILES__) {
-  globalState.__LIFEENGINE_PROFILES__ = new Map<string, Profile>();
-}
-
-const PLAN_STORE = globalState.__LIFEENGINE_PLANS__;
-const PROFILE_STORE = globalState.__LIFEENGINE_PROFILES__;
+import { supabase } from "@/lib/supabase";
 
 export async function POST(request: Request) {
   try {
@@ -28,8 +13,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing profileId or intake payload" }, { status: 400 });
     }
 
-    const profile = PROFILE_STORE.get(profileId);
-    if (!profile) {
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', profileId)
+      .single();
+
+    if (profileError || !profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
@@ -44,7 +34,22 @@ export async function POST(request: Request) {
     }
 
     const planId = createId();
-    PLAN_STORE.set(planId, generated);
+    const planData = {
+      id: planId,
+      profileId,
+      intakeId: createId(),
+      planJson: generated,
+      planType: intake.primaryPlanType,
+      createdAt: new Date().toISOString(),
+    };
+
+    const { error: insertError } = await supabase
+      .from('plans')
+      .insert([planData]);
+
+    if (insertError) {
+      return NextResponse.json({ error: insertError.message }, { status: 500 });
+    }
 
     return NextResponse.json({
       planId,
