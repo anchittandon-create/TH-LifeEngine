@@ -8,11 +8,11 @@
     flex-direction: column;
     width: 16rem;
     min-height: 100vh;
-    background: #ffffff;
-    border-right: 1px solid rgba(15, 23, 42, 0.08);
+    background: var(--panel);
+    border-right: 1px solid var(--border);
     position: sticky;
     top: 0;
-    padding: 1.5rem 1rem;
+    padding: var(--space-6) var(--space-4);
   }
 }
 
@@ -20,11 +20,11 @@
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #94a3b8;
-  margin-bottom: 1rem;
+  color: var(--muted);
+  margin-bottom: var(--space-4);
 }
 
 .nav {
   display: grid;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }

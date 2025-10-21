@@ -1,22 +1,22 @@
 .wrapper {
   min-height: 100vh;
-  background: #f3f4f7;
+  background: var(--bg);
 }
 
 .header {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--panel);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  border-bottom: 1px solid var(--border);
 }
 
 .headerInner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1rem;
+  padding: var(--space-3) var(--space-4);
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -24,14 +24,14 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .description {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--muted);
 }
 
 .layout {
@@ -43,29 +43,32 @@
 
 .main {
   flex: 1;
-  padding: 1.5rem 1rem 3rem;
+  padding: var(--space-6) var(--space-4) var(--space-8);
 }
 
 .drawerToggle {
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  background: #ffffff;
-  border-radius: 0.75rem;
-  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
   font-size: 1.25rem;
   line-height: 1;
   cursor: pointer;
+  color: var(--text);
+  transition: all var(--dur-med) ease-out;
 }
 
 .drawerToggle:hover {
-  background: #e2e8f0;
+  background: var(--brand-quiet);
+  border-color: var(--brand);
 }
 
 @media (min-width: 768px) {
   .headerInner {
-    padding: 1rem 1.5rem;
+    padding: var(--space-4) var(--space-6);
   }
   .main {
-    padding: 2rem 2rem 4rem;
+    padding: var(--space-8) var(--space-8) var(--space-8);
   }
   .drawerToggle {
     display: none;
