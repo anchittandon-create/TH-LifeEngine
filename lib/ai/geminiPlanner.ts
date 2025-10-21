@@ -3,9 +3,12 @@ import { GOOGLE_API_KEY } from '../utils/env';
 import { PLANNER_PROMPT } from './prompts';
 import type { Intake, Plan, Profile } from './schemas';
 
-const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
-
 export async function generatePlan(profile: Profile, intake: Intake): Promise<Plan> {
+  if (!GOOGLE_API_KEY) {
+    throw new Error('GOOGLE_API_KEY is not configured');
+  }
+
+  const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
   const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
   const prompt = PLANNER_PROMPT

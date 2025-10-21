@@ -107,3 +107,6 @@ Thumbs.db
 
 # Vercel
 .vercel
+
+# Turbo
+.turbo

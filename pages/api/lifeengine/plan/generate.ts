@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { generatePlan } from "@/lib/ai/geminiPlanner";
-import { verifyPlan } from "@/lib/ai/geminiVerifier";
+import { verifyPlan } from "@/lib/ai/verifier";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).end();

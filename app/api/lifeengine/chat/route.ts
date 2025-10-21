@@ -3,8 +3,6 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GOOGLE_API_KEY } from "@/lib/utils/env";
 import { supabase } from "@/lib/supabase";
 
-const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
-
 export async function POST(request: Request) {
   try {
     const { profileId, message, conversationHistory = [] } = await request.json() as {
@@ -16,6 +14,12 @@ export async function POST(request: Request) {
     if (!profileId || !message) {
       return NextResponse.json({ error: "Missing profileId or message" }, { status: 400 });
     }
+
+    if (!GOOGLE_API_KEY) {
+      return NextResponse.json({ error: "AI service not configured" }, { status: 500 });
+    }
+
+    const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
 
     let profile = null;
     if (supabase) {
