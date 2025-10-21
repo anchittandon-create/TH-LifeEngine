@@ -16,21 +16,23 @@
     "dev:auto": "npm run dev:deploy"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@vercel/blob": "^0.23.4",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.3",
     "next": "14.2.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "@google/generative-ai": "^0.21.0",
     "swr": "^2.2.5",
-    "zod": "^3.23.8",
-    "@vercel/blob": "^0.23.4"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^20.14.10",
     "@types/react": "^18.3.2",
     "@types/react-dom": "^18.3.0",
-    "typescript": "5.5.4",
-    "tailwindcss": "^3.4.0",
     "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32"
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.0",
+    "typescript": "5.5.4"
   }
 }

@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import styles from "./page.module.css";
 
 type Plan = {
@@ -35,6 +37,8 @@ export default function PlanDetailPage({ params }: Props) {
   const [plan, setPlan] = useState<Plan | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
+  const planRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadPlan();
@@ -50,6 +54,49 @@ export default function PlanDetailPage({ params }: Props) {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const downloadPDF = async () => {
+    if (!plan || !planRef.current) return;
+
+    setDownloading(true);
+    try {
+      const canvas = await html2canvas(planRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 295; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      let position = 0;
+
+      // Add first page
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Add additional pages if needed
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`TH_LifeEngine_Plan_${plan.id.slice(-8)}.pdf`);
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      alert('Failed to generate PDF. Please try again.');
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -124,12 +171,21 @@ export default function PlanDetailPage({ params }: Props) {
           <h1 className={styles.title}>Your Personalized Health Plan</h1>
           <p className={styles.subtitle}>Plan #{plan.id.slice(-8)}</p>
         </div>
-        <Link href="/lifeengine/dashboard">
-          <Button variant="ghost">← Back to Dashboard</Button>
-        </Link>
+        <div className={styles.headerActions}>
+          <Button
+            variant="ghost"
+            onClick={downloadPDF}
+            disabled={downloading}
+          >
+            {downloading ? "Generating PDF..." : "📄 Download PDF"}
+          </Button>
+          <Link href="/lifeengine/dashboard">
+            <Button variant="ghost">← Back to Dashboard</Button>
+          </Link>
+        </div>
       </header>
 
-      <div className={styles.days}>
+      <div ref={planRef} className={styles.days}>
         {plan.days.map((day, index) => (
           <div key={day.date} className={styles.day}>
             <div className={styles.dayHeader}>

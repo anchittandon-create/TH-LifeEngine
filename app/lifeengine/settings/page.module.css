@@ -50,6 +50,20 @@
   border-top: 1px solid var(--border);
 }
 
+.dangerZone {
+  padding: var(--space-4);
+  border: 1px solid var(--error);
+  border-radius: var(--radius-md);
+  background: rgba(220, 38, 38, 0.05);
+}
+
+.warning {
+  color: var(--error);
+  font-size: 14px;
+  margin-bottom: var(--space-4);
+  font-weight: 500;
+}
+
 @media (max-width: 768px) {
   .page {
     padding: var(--space-4);

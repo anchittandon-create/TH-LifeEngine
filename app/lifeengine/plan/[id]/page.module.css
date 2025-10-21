@@ -14,6 +14,12 @@
   gap: var(--space-4);
 }
 
+.headerActions {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
 .title {
   font-size: 24px;
   font-weight: 700;
@@ -226,4 +232,20 @@
     align-items: flex-start;
     gap: var(--space-2);
   }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-8);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border);
+  gap: var(--space-4);
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
 }
