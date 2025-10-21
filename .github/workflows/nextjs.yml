@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
           node-version: '20'
           cache: 'npm'
@@ -28,31 +28,3 @@ jobs:
 
       - name: Build project
         run: npm run build
-
-      - name: Check secrets
-        run: |
-          if [ -z "$VERCEL_TOKEN" ]; then
-            echo "❌ VERCEL_TOKEN secret not set. Please add it to GitHub repository secrets."
-            exit 1
-          fi
-          if [ -z "$VERCEL_ORG_ID" ]; then
-            echo "❌ VERCEL_ORG_ID secret not set. Please add it to GitHub repository secrets."
-            exit 1
-          fi
-          if [ -z "$VERCEL_PROJECT_ID" ]; then
-            echo "❌ VERCEL_PROJECT_ID secret not set. Please add it to GitHub repository secrets."
-            exit 1
-          fi
-          echo "✅ All Vercel secrets are configured"
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
-      - name: Deploy to Vercel
-        run: npx vercel --prod --yes
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        if: env.VERCEL_TOKEN != ''

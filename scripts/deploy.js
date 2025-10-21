@@ -17,7 +17,8 @@ function runCommand(command, description) {
 
 function checkGitStatus() {
   try {
-    const status = execSync('git status --porcelain', { encoding: 'utf8' });
+    // Check for any changes including untracked and ignored files
+    const status = execSync('git status --porcelain --ignored', { encoding: 'utf8' });
     return status.trim();
   } catch (error) {
     console.error('❌ Failed to check git status:', error.message);
@@ -45,8 +46,8 @@ function gitAddCommitPush() {
   console.log(`📝 Changes detected:\n${changes}`);
 
   try {
-    // Add all changes
-    runCommand('git add .', 'Adding files to git');
+    // Add ALL changes (including ignored files)
+    runCommand('git add -A', 'Adding ALL files to git (including ignored)');
 
     // Get current date/time and branch for commit message
     const now = new Date();
