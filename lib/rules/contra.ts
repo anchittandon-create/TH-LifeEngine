@@ -1,74 +1,23 @@
-import { Profile } from '../ai/schemas';
-
-export interface ContraResult {
-  safe: boolean;
-  reasons: string[];
-}
-
-export const CONTRA = {
-  hypertension: {
-    yoga_avoid: ['inversions', 'intense_flows'],
-    breath_caution: ['breath_retention'],
-  },
-  diabetes: {
-    yoga_avoid: ['fast_paced'],
-    breath_caution: [],
-  },
-  // Add more as needed
+export const CONTRA:any = {
+  pcod:{ yoga_avoid:["prolonged_inversions"], breath_caution:[], diet_notes:["prefer_low_gi","anti_inflammatory"] },
+  pregnancy:{ yoga_avoid:["deep_twists","hot_yoga"], breath_caution:["long_breath_retention"], diet_notes:["avoid_unpasteurized"] },
+  back_pain:{ yoga_avoid:["deep_forward_flexion"], breath_caution:[], diet_notes:[] },
+  hypertension:{ yoga_avoid:["max_exertion_flows"], breath_caution:["kapalbhati"], diet_notes:["low_sodium"] }
 };
 
-export function checkContras(profile: Profile, planType: string): ContraResult {
-  const reasons: string[] = [];
-
-  // Age-based restrictions
-  if (profile.age < 18 && planType.includes('intense')) {
-    reasons.push('Intense plans not recommended for individuals under 18');
-  }
-
-  if (profile.age > 65 && planType.includes('high_impact')) {
-    reasons.push('High-impact activities may pose risks for individuals over 65');
-  }
-
-  // Weight-based restrictions
-  if (profile.weight < 45 && planType.includes('strength')) {
-    reasons.push('Strength training requires adequate body weight for safety');
-  }
-
-  // Activity level checks
-  if (profile.activityLevel === 'sedentary' && planType.includes('advanced')) {
-    reasons.push('Advanced plans require higher baseline activity level');
-  }
-
-  // Goal-specific contras
-  if (profile.goals.includes('weight_loss') && profile.weight < 50) {
-    reasons.push('Extreme weight loss goals may not be safe at current weight');
-  }
-
-  // Flag-based restrictions
-  if (profile.flags.includes('pregnant') && planType.includes('high_impact')) {
-    reasons.push('High-impact activities not recommended during pregnancy');
-  }
-
-  if (profile.flags.includes('injury') && planType.includes('running')) {
-    reasons.push('Running may aggravate existing injuries');
-  }
-
-  if (profile.flags.includes('heart_condition') && planType.includes('intense')) {
-    reasons.push('Intense activities require medical clearance for heart conditions');
-  }
-
-  // Check against CONTRA table for medical flags
-  profile.flags.forEach(flag => {
-    if (flag in CONTRA) {
-      const contra = (CONTRA as any)[flag];
-      if (planType.includes('yoga') && contra.yoga_avoid.some((avoid: string) => planType.includes(avoid))) {
-        reasons.push(`${flag} contraindicates certain yoga poses`);
+export function checkContras(profile: any, activityType: string) {
+  const flags = profile.medical_flags || [];
+  const issues: string[] = [];
+  for (const flag of flags) {
+    const contra = CONTRA[flag];
+    if (contra) {
+      if (activityType === 'yoga' && contra.yoga_avoid.includes(activityType)) {
+        issues.push(`${flag}: avoid ${activityType}`);
+      }
+      if (activityType === 'breath' && contra.breath_caution.includes(activityType)) {
+        issues.push(`${flag}: caution with ${activityType}`);
       }
     }
-  });
-
-  return {
-    safe: reasons.length === 0,
-    reasons,
-  };
+  }
+  return { safe: issues.length === 0, reasons: issues };
 }

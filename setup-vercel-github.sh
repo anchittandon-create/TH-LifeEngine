@@ -1,39 +1,45 @@
 #!/bin/bash
 
-echo "Setting up Vercel GitHub Actions Integration"
-echo "============================================"
-echo ""
+echo "Setting up Vercel and GitHub integration..."
 
-# Get Vercel token
-echo "1. Get your Vercel Token:"
-echo "   - Go to https://vercel.com/account/tokens"
-echo "   - Create a new token"
-echo "   - Copy the token"
-echo ""
+# Create GitHub Actions workflow
 
-# Get Org ID
-echo "2. Get your Vercel Org ID:"
-echo "   - Run: vercel whoami"
-echo "   - Copy the 'id' field from the output"
-echo ""
+mkdir -p .github/workflows
 
-# Get Project ID
-echo "3. Get your Vercel Project ID:"
-echo "   - Run: cat .vercel/project.json"
-echo "   - Copy the 'projectId' field"
-echo ""
+cat > .github/workflows/deploy.yml << EOF
 
-echo "4. Add these secrets to GitHub:"
-echo "   - Go to your GitHub repo: https://github.com/AT-2803/TH_LifeEngine/settings/secrets/actions"
-echo "   - Add these secrets:"
-echo "     * VERCEL_TOKEN: [your-vercel-token]"
-echo "     * VERCEL_ORG_ID: [your-org-id]"
-echo "     * VERCEL_PROJECT_ID: [your-project-id]"
-echo "     * GOOGLE_API_KEY: [your-gemini-api-key]"
-echo ""
+name: Deploy to Vercel
 
-echo "Current Vercel Project Info:"
-cat .vercel/project.json
+on:
 
-echo ""
-echo "Once secrets are added, every push to main branch will auto-deploy to Vercel!"
+  push:
+
+    branches:
+
+      - main
+
+jobs:
+
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - uses: amondnet/vercel-action@v20
+
+        with:
+
+          vercel-token: \${{ secrets.VERCEL_TOKEN }}
+
+          vercel-org-id: \${{ secrets.VERCEL_ORG_ID }}
+
+          vercel-project-id: \${{ secrets.VERCEL_PROJECT_ID }}
+
+          working-directory: ./
+
+EOF
+
+echo "GitHub Actions workflow created!"

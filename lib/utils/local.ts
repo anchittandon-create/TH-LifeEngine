@@ -1,0 +1,2 @@
+export function getLocal<T=any>(k:string,d:T):T{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch{return d;} }
+export function setLocal(k:string,v:any){ localStorage.setItem(k, JSON.stringify(v)); }

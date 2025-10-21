@@ -167,18 +167,20 @@ export default function CreatePlan() {
 
           <Field label="Goals">
             <TypeaheadMulti
-              value={profile.goals}
+              label="Goals"
+              values={profile.goals}
               onChange={(goals) => setProfile({ ...profile, goals })}
-              suggestions={goalSuggestions}
+              suggestField="goals"
               placeholder="Select your goals..."
             />
           </Field>
 
           <Field label="Medical Conditions (optional)">
             <TypeaheadMulti
-              value={profile.flags}
+              label="Medical Conditions"
+              values={profile.flags}
               onChange={(flags) => setProfile({ ...profile, flags })}
-              suggestions={flagSuggestions}
+              suggestField="flags"
               placeholder="Any medical conditions..."
             />
           </Field>

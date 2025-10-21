@@ -1,4 +1,4 @@
-eame: Deploy to Vercel
+name: Deploy to Vercel
 
 on:
   push:
@@ -28,3 +28,6 @@ jobs:
 
       - name: Build project
         run: npm run build
+
+      - name: Auto-deploy changes
+        run: npm run deploy

@@ -18,7 +18,7 @@ const DEFAULT_PROFILE: Profile = {
   gender: "F",
   age: 30,
   height_cm: 165,
-  weight_kg: 60,
+  weight_kg: 65,
   region: "IN",
   medical_flags: [],
   activity_level: "moderate",
@@ -26,13 +26,14 @@ const DEFAULT_PROFILE: Profile = {
     type: "veg",
     allergies: [],
     avoid_items: [],
-    cuisine_pref: "Indian fusion",
+    cuisine_pref: ["Indian fusion"],
   },
   preferences: { tone: "balanced", indoor_only: true },
   availability: {
     days_per_week: 5,
     preferred_slots: [{ start: "06:30", end: "07:15" }],
   },
+  plan_type: { primary: "weight_loss", secondary: [] },
 };
 
 function toFormState(profile: Profile) {
@@ -41,6 +42,7 @@ function toFormState(profile: Profile) {
     medicalFlagsInput: (profile.medical_flags ?? []).join(", "),
     allergiesInput: (profile.dietary?.allergies ?? []).join(", "),
     avoidInput: (profile.dietary?.avoid_items ?? []).join(", "),
+    cuisineInput: (profile.dietary?.cuisine_pref ?? []).join(", "),
     slotsInput: (profile.availability?.preferred_slots ?? [])
       .map((slot) => `${slot.start}-${slot.end}`)
       .join(", "),
@@ -106,7 +108,7 @@ export default function ProfilesPage() {
         type: form.dietary?.type,
         allergies: parseList(form.allergiesInput ?? ""),
         avoid_items: parseList(form.avoidInput ?? ""),
-        cuisine_pref: form.dietary?.cuisine_pref ?? "",
+        cuisine_pref: parseList(form.cuisineInput ?? ""),
       },
       preferences: {
         tone: form.preferences?.tone ?? "balanced",
@@ -117,7 +119,10 @@ export default function ProfilesPage() {
         days_per_week: Number(form.availability?.days_per_week) || 5,
         preferred_slots: parseSlots(form.slotsInput ?? ""),
       },
-      createdAt: new Date().toISOString(),
+      plan_type: {
+        primary: form.plan_type?.primary ?? "weight_loss",
+        secondary: form.plan_type?.secondary ?? [],
+      },
     };
 
     const next = saveProfileLocal(payload);

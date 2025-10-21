@@ -1,6 +1,5 @@
 {
-  "installCommand": "npm ci",
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "framework": "nextjs"
+  "version": 2,
+  "builds": [{ "src": "next.config.mjs", "use": "@vercel/next" }],
+  "env": { "GOOGLE_API_KEY": "@google_api_key" }
 }

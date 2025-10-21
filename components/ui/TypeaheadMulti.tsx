@@ -1,166 +1,22 @@
 "use client";
-
-import { useState, useRef, useEffect, useCallback } from "react";
-import { Chips } from "./Chips";
-import styles from "./TypeaheadMulti.module.css";
-
-interface Suggestion {
-  id: string;
-  label: string;
-  category?: string;
-}
-
-interface TypeaheadMultiProps {
-  value: string[];
-  onChange: (value: string[]) => void;
-  suggestions: Suggestion[];
-  placeholder?: string;
-  maxSuggestions?: number;
-  onSearch?: (query: string) => Promise<Suggestion[]>;
-  className?: string;
-}
-
-export function TypeaheadMulti({
-  value,
-  onChange,
-  suggestions,
-  placeholder = "Type to search...",
-  maxSuggestions = 10,
-  onSearch,
-  className = "",
-}: TypeaheadMultiProps) {
-  const [query, setQuery] = useState("");
-  const [filteredSuggestions, setFilteredSuggestions] = useState<Suggestion[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const suggestionsRef = useRef<HTMLDivElement>(null);
-
-  const filterSuggestions = useCallback(async (searchQuery: string) => {
-    if (onSearch) {
-      const results = await onSearch(searchQuery);
-      setFilteredSuggestions(results.slice(0, maxSuggestions));
-    } else {
-      const filtered = suggestions
-        .filter(
-          (suggestion) =>
-            suggestion.label.toLowerCase().includes(searchQuery.toLowerCase()) &&
-            !value.includes(suggestion.id)
-        )
-        .slice(0, maxSuggestions);
-      setFilteredSuggestions(filtered);
-    }
-  }, [suggestions, value, maxSuggestions, onSearch]);
-
-  useEffect(() => {
-    if (query.length > 0) {
-      filterSuggestions(query);
-      setShowSuggestions(true);
-    } else {
-      setFilteredSuggestions([]);
-      setShowSuggestions(false);
-    }
-    setSelectedIndex(-1);
-  }, [query, filterSuggestions]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setSelectedIndex((prev) =>
-        prev < filteredSuggestions.length - 1 ? prev + 1 : prev
-      );
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (selectedIndex >= 0 && filteredSuggestions[selectedIndex]) {
-        addItem(filteredSuggestions[selectedIndex].id);
-      }
-    } else if (e.key === "Escape") {
-      setShowSuggestions(false);
-      setSelectedIndex(-1);
-    }
-  };
-
-  const addItem = (itemId: string) => {
-    if (!value.includes(itemId)) {
-      onChange([...value, itemId]);
-    }
-    setQuery("");
-    setShowSuggestions(false);
-    inputRef.current?.focus();
-  };
-
-  const removeItem = (itemId: string) => {
-    onChange(value.filter((id) => id !== itemId));
-  };
-
-  const handleSuggestionClick = (suggestion: Suggestion) => {
-    addItem(suggestion.id);
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        suggestionsRef.current &&
-        !suggestionsRef.current.contains(event.target as Node) &&
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
-      ) {
-        setShowSuggestions(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  return (
-    <div className={`${styles.typeaheadMulti} ${className}`}>
-      <Chips
-        items={value}
-        onRemove={removeItem}
-        className={styles.typeaheadChips}
-      />
-      <div className={styles.typeaheadInputWrapper}>
-        <input
-          ref={inputRef}
-          type="text"
-          value={query}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          onFocus={() => query && setShowSuggestions(true)}
-          placeholder={placeholder}
-          className={styles.typeaheadInput}
-        />
-        {showSuggestions && filteredSuggestions.length > 0 && (
-          <div ref={suggestionsRef} className={styles.typeaheadSuggestions}>
-            {filteredSuggestions.map((suggestion, index) => (
-              <div
-                key={suggestion.id}
-                className={`${styles.typeaheadSuggestion} ${
-                  index === selectedIndex ? styles.typeaheadSuggestionSelected : ""
-                }`}
-                onClick={() => handleSuggestionClick(suggestion)}
-              >
-                <span className={styles.typeaheadSuggestionLabel}>
-                  {suggestion.label}
-                </span>
-                {suggestion.category && (
-                  <span className={styles.typeaheadSuggestionCategory}>
-                    {suggestion.category}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+import { useEffect, useRef, useState } from "react"; import { debounce } from "@/lib/utils/debounce"; import Chips from "./Chips"; import { Field } from "./Field";
+export function TypeaheadMulti({label,values,onChange,placeholder,suggestField,required}:{label:string;values:string[];onChange:(v:string[])=>void;placeholder?:string;suggestField:"planType"|"goals"|"flags"|"dietAllergies"|"cuisines"|"equipment";required?:boolean;}){
+  const [q,setQ]=useState(""); const [open,setOpen]=useState(false); const [matches,setMatches]=useState<string[]>([]); const [related,setRelated]=useState<string[]>([]); const [cta,setCta]=useState<any>(null); const [i,setI]=useState(0);
+  const fetchS = debounce(async (term:string)=>{ const r=await fetch(`/api/suggest?field=${suggestField}&q=${encodeURIComponent(term)}`); const j=await r.json(); setMatches(j.matches||[]); setRelated(j.related||[]); setCta(j.cta||null); setOpen(true); setI(0); },200);
+  useEffect(()=>{ if(q.length){ fetchS(q); } else { setOpen(false);} },[q]);
+  function add(v:string){ if(!v) return; if(!values.includes(v)) onChange([...values,v]); setQ(""); setOpen(false); }
+  function remove(v:string){ onChange(values.filter(x=>x!==v)); }
+  function key(e:React.KeyboardEvent<HTMLInputElement>){ if(e.key==="ArrowDown"){ e.preventDefault(); setI(i=>Math.min(i+1,(matches.length-1))); } else if(e.key==="ArrowUp"){ e.preventDefault(); setI(i=>Math.max(i-1,0)); } else if(e.key==="Enter"){ e.preventDefault(); add(matches[i]); } else if(e.key==="Escape"){ setOpen(false);} else if(e.key==="Backspace" && !q && values.length){ remove(values[values.length-1]); } }
+  return (<div className="autosuggest">
+    <Field label={label} required={required}><Chips values={values} onRemove={remove}/><input className="input" placeholder={placeholder||"Type to search…"} value={q} onChange={e=>setQ(e.target.value)} onKeyDown={key} onFocus={()=>q&&setOpen(true)}/></Field>
+    {open&&(<div className="as-panel">
+      {matches.map((m,idx)=>(<div key={m} className="as-item" data-active={idx===i?"true":"false"} onMouseDown={()=>add(m)}>{m}</div>))}
+      {related.length>0&&(<div className="as-section">Related searches</div>)}
+      {related.map(r=>(<div key={r} className="as-item" onMouseDown={()=>add(r)}>{r}</div>))}
+      <div className="as-section">
+        {cta && <button className="btn ghost" onMouseDown={(e)=>{e.preventDefault(); if(cta.payload?.plan_type){ if(cta.payload.plan_type.primary) add(cta.payload.plan_type.primary); (cta.payload.plan_type.secondary||[]).forEach(add); } (cta.payload.goals||[]).forEach(add); }}>Use this example</button>}
+        {!cta && <span className="helper">No match? Press Enter to add free text.</span>}
       </div>
-    </div>
-  );
+    </div>)}
+  </div>);
 }
