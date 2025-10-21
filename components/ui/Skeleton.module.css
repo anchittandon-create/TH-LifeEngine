@@ -1,0 +1,30 @@
+.skeleton {
+  background: linear-gradient(90deg, var(--border) 25%, transparent 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton.text {
+  height: 16px;
+  border-radius: var(--radius-xs);
+}
+
+.skeleton.rectangular {
+  border-radius: var(--radius-sm);
+}
+
+.skeleton.circular {
+  border-radius: 50%;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}

@@ -1,17 +1,25 @@
 'use client';
 
 import { forwardRef } from 'react';
+import styles from './Textarea.module.css';
 
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   className?: string;
+  error?: boolean;
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className = '', ...props }, ref) => {
+  ({ className = '', error, ...props }, ref) => {
+    const classes = [
+      styles.textarea,
+      error && styles['is-error'],
+      className
+    ].filter(Boolean).join(' ');
+
     return (
       <textarea
         ref={ref}
-        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical ${className}`}
+        className={classes}
         {...props}
       />
     );

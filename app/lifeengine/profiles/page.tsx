@@ -11,6 +11,13 @@ import {
   saveProfile as saveProfileLocal,
 } from "@/lib/utils/store";
 import { createId } from "@/lib/utils/ids";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import { Textarea } from "@/components/ui/Textarea";
+import { Label } from "@/components/ui/Label";
+import { Field } from "@/components/ui/Field";
+import { Actions } from "@/components/ui/Actions";
 
 const DEFAULT_PROFILE: Profile = {
   id: "",
@@ -188,23 +195,22 @@ export default function ProfilesPage() {
       <section className={styles.section}>
         <div className={styles.headingRow}>
           <h1 className={styles.title}>Profiles</h1>
-          <button
-            type="button"
-            className={styles.buttonGhost}
-            onClick={() => setEditingId(null)}
-          >
+          <Button variant="ghost" onClick={() => setEditingId(null)}>
+            <svg className={styles.icon} viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 4v16m8-8H4"/>
+            </svg>
             New Profile
-          </button>
+          </Button>
         </div>
         <div className={styles.list}>
           {profiles.map((profile) => (
-            <article key={profile.id} className={styles.card}>
+            <article key={profile.id} className={`card ${styles.card}`}>
               <div className={styles.cardHeader}>
                 <div>
                   <div className={styles.cardTitle}>{profile.name}</div>
                   <div className={styles.badges}>
                     <span className={styles.badge}>
-                      {profile.gender} • {profile.age}
+                      {profile.gender} • {profile.age}y
                     </span>
                     {profile.region && (
                       <span className={styles.badge}>{profile.region}</span>
@@ -215,20 +221,20 @@ export default function ProfilesPage() {
                   </div>
                 </div>
                 <div className={styles.actions}>
-                  <button
-                    type="button"
-                    className={styles.buttonGhost}
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setEditingId(profile.id)}
                   >
                     Edit
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.buttonGhost}
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
                     onClick={() => handleDelete(profile.id)}
                   >
                     Delete
-                  </button>
+                  </Button>
                 </div>
               </div>
               <div className={styles.badges}>
@@ -241,18 +247,26 @@ export default function ProfilesPage() {
             </article>
           ))}
           {profiles.length === 0 && (
-            <article className={styles.card}>
-              <div className={styles.cardTitle}>No profiles yet</div>
-              <p className={styles.badge}>Add your first profile to begin planning.</p>
-            </article>
+            <div className={`card ${styles.emptyState}`}>
+              <div className={styles.emptyStateTitle}>No profiles yet</div>
+              <p>Create your first profile to start building personalized health plans.</p>
+            </div>
           )}
         </div>
         <div className={styles.toolbar}>
-          <button type="button" className={styles.buttonGhost} onClick={handleExport}>
-            Export JSON
-          </button>
-          <label className={styles.buttonGhost}>
-            Import JSON
+          <Button variant="ghost" size="sm" onClick={handleExport}>
+            <svg className={styles.icon} viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Export
+          </Button>
+          <label className={styles.fileInputLabel}>
+            <Button variant="ghost" size="sm">
+              <svg className={styles.icon} viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 4v16m8-8H4"/>
+              </svg>
+              Import
+            </Button>
             <input
               ref={importRef}
               type="file"
@@ -268,23 +282,23 @@ export default function ProfilesPage() {
         <h2 className={styles.title}>
           {editingId ? "Edit Profile" : "Create Profile"}
         </h2>
+      <section className={styles.section}>
+        <h2 className={styles.title}>
+          {editingId ? "Edit Profile" : "Create Profile"}
+        </h2>
         <form onSubmit={handleSave} className={styles.form}>
-          <label className={styles.field}>
-            <span className={styles.label}>Name</span>
-            <input
-              className="input"
+          <Field label="Name" required>
+            <Input
               value={form.name}
               onChange={(event) =>
                 setForm((current) => ({ ...current, name: event.target.value }))
               }
               required
             />
-          </label>
+          </Field>
 
-          <label className={styles.field}>
-            <span className={styles.label}>Gender</span>
-            <select
-              className="select"
+          <Field label="Gender">
+            <Select
               value={form.gender}
               onChange={(event) =>
                 setForm((current) => ({
@@ -293,16 +307,14 @@ export default function ProfilesPage() {
                 }))
               }
             >
-              <option>F</option>
-              <option>M</option>
-              <option>Other</option>
-            </select>
-          </label>
+              <option value="F">Female</option>
+              <option value="M">Male</option>
+              <option value="Other">Other</option>
+            </Select>
+          </Field>
 
-          <label className={styles.field}>
-            <span className={styles.label}>Age</span>
-            <input
-              className="input"
+          <Field label="Age">
+            <Input
               type="number"
               min={12}
               max={90}
@@ -314,12 +326,10 @@ export default function ProfilesPage() {
                 }))
               }
             />
-          </label>
+          </Field>
 
-          <label className={styles.field}>
-            <span className={styles.label}>Height (cm)</span>
-            <input
-              className="input"
+          <Field label="Height (cm)">
+            <Input
               type="number"
               value={form.height_cm}
               onChange={(event) =>
@@ -329,12 +339,10 @@ export default function ProfilesPage() {
                 }))
               }
             />
-          </label>
+          </Field>
 
-          <label className={styles.field}>
-            <span className={styles.label}>Weight (kg)</span>
-            <input
-              className="input"
+          <Field label="Weight (kg)">
+            <Input
               type="number"
               value={form.weight_kg}
               onChange={(event) =>
@@ -344,12 +352,10 @@ export default function ProfilesPage() {
                 }))
               }
             />
-          </label>
+          </Field>
 
-          <label className={styles.field}>
-            <span className={styles.label}>Region</span>
-            <select
-              className="select"
+          <Field label="Region">
+            <Select
               value={form.region}
               onChange={(event) =>
                 setForm((current) => ({
@@ -358,17 +364,15 @@ export default function ProfilesPage() {
                 }))
               }
             >
-              <option>IN</option>
-              <option>US</option>
-              <option>EU</option>
-              <option>Global</option>
-            </select>
-          </label>
+              <option value="IN">India</option>
+              <option value="US">United States</option>
+              <option value="EU">Europe</option>
+              <option value="Global">Global</option>
+            </Select>
+          </Field>
 
-          <label className={styles.field}>
-            <span className={styles.label}>Medical flags</span>
-            <input
-              className="input"
+          <Field label="Medical Conditions" helper="Comma-separated list (e.g., PCOD, hypertension)">
+            <Input
               value={form.medicalFlagsInput}
               onChange={(event) =>
                 setForm((current) => ({
@@ -376,14 +380,12 @@ export default function ProfilesPage() {
                   medicalFlagsInput: event.target.value,
                 }))
               }
-              placeholder="pcod, hypertension"
+              placeholder="PCOD, hypertension, diabetes"
             />
-          </label>
+          </Field>
 
-          <label className={styles.field}>
-            <span className={styles.label}>Dietary allergies</span>
-            <input
-              className="input"
+          <Field label="Dietary Allergies" helper="Comma-separated list (e.g., lactose, peanut)">
+            <Input
               value={form.allergiesInput}
               onChange={(event) =>
                 setForm((current) => ({
@@ -391,14 +393,12 @@ export default function ProfilesPage() {
                   allergiesInput: event.target.value,
                 }))
               }
-              placeholder="lactose, peanut"
+              placeholder="lactose, peanut, gluten"
             />
-          </label>
+          </Field>
 
-          <label className={styles.field}>
-            <span className={styles.label}>Foods to avoid</span>
-            <input
-              className="input"
+          <Field label="Foods to Avoid" helper="Comma-separated list (e.g., fried snacks)">
+            <Input
               value={form.avoidInput}
               onChange={(event) =>
                 setForm((current) => ({
@@ -406,14 +406,12 @@ export default function ProfilesPage() {
                   avoidInput: event.target.value,
                 }))
               }
-              placeholder="fried snacks"
+              placeholder="fried snacks, processed foods"
             />
-          </label>
+          </Field>
 
-          <label className={styles.field}>
-            <span className={styles.label}>Preferred slots</span>
-            <input
-              className="input"
+          <Field label="Preferred Time Slots" helper="Format: start-end (e.g., 06:30-07:15, 20:30-21:00)">
+            <Input
               value={form.slotsInput}
               onChange={(event) =>
                 setForm((current) => ({
@@ -423,12 +421,10 @@ export default function ProfilesPage() {
               }
               placeholder="06:30-07:15, 20:30-21:00"
             />
-          </label>
+          </Field>
 
-          <label className={styles.field}>
-            <span className={styles.label}>Notes</span>
-            <textarea
-              className="textarea"
+          <Field label="Additional Notes">
+            <Textarea
               value={form.preferences?.notes ?? ""}
               onChange={(event) =>
                 setForm((current) => ({
@@ -439,13 +435,17 @@ export default function ProfilesPage() {
                   },
                 }))
               }
+              placeholder="Any additional preferences or notes..."
             />
-          </label>
+          </Field>
 
-          <button type="submit" className={styles.buttonGhost}>
-            {editingId ? "Update" : "Save"}
-          </button>
+          <Actions>
+            <Button type="submit">
+              {editingId ? "Update Profile" : "Create Profile"}
+            </Button>
+          </Actions>
         </form>
+      </section>
       </section>
     </div>
   );

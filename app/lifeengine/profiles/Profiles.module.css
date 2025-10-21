@@ -1,6 +1,6 @@
 .wrapper {
   display: grid;
-  gap: 2rem;
+  gap: var(--space-6);
 }
 
 @media (min-width: 960px) {
@@ -11,99 +11,117 @@
 }
 
 .section {
-  background: #ffffff;
-  border-radius: 1.25rem;
-  padding: 1.75rem;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.04);
+  background: var(--panel);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 2px var(--shadow);
 }
 
 .headingRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.25rem;
+  margin-bottom: var(--space-4);
 }
 
 .title {
-  font-size: 1.5rem;
+  font-size: 24px;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text);
+  margin: 0;
 }
 
 .list {
   display: grid;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .card {
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 1rem;
-  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
   display: grid;
-  gap: 0.5rem;
+  gap: var(--space-3);
+  transition: all var(--dur-med) ease-out;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+  transform: translateY(-1px);
 }
 
 .cardHeader {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: var(--space-3);
 }
 
 .cardTitle {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text);
+  font-size: 18px;
 }
 
 .badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
-  font-size: 0.75rem;
+  gap: var(--space-2);
+  font-size: 12px;
 }
 
 .badge {
-  background: rgba(37, 99, 235, 0.1);
-  color: #1d4ed8;
-  padding: 0.2rem 0.55rem;
-  border-radius: 999px;
+  background: var(--brand-quiet);
+  color: var(--brand);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  font-weight: 500;
 }
 
 .actions {
   display: flex;
-  gap: 0.75rem;
-}
-
-.buttonGhost {
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  border-radius: 0.75rem;
-  padding: 0.45rem 0.85rem;
-  background: #f8fafc;
-  cursor: pointer;
-  font-size: 0.85rem;
-}
-
-.buttonGhost:hover {
-  background: #e2e8f0;
-}
-
-.textareaSmall {
-  min-height: 80px;
+  gap: var(--space-3);
+  flex-shrink: 0;
 }
 
 .toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-}
-
-.toolbar button,
-.toolbar label {
-  font-size: 0.85rem;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
 }
 
 .fileInput {
   display: none;
+}
+
+.fileInputLabel {
+  cursor: pointer;
+}
+
+.form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--space-8);
+  color: var(--muted);
+}
+
+.emptyStateTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: var(--space-2);
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  margin-right: var(--space-2);
 }

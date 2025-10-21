@@ -1,0 +1,41 @@
+.sidebar {
+  width: 260px;
+  min-height: 100vh;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  padding-top: var(--space-3);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  text-decoration: none;
+  transition: all var(--dur-med) ease-out;
+  font-weight: 500;
+}
+
+.navLink:hover {
+  background: var(--brand-quiet);
+  color: var(--brand);
+}
+
+.navLink[aria-current="page"] {
+  background: var(--brand);
+  color: var(--brand-ink);
+}
+
+.navLink svg {
+  width: 20px;
+  height: 20px;
+}

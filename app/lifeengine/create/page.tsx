@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Field } from "@/components/ui/Field";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import { Button } from "@/components/ui/Button";
+import { Actions } from "@/components/ui/Actions";
 import { TypeaheadMulti } from "@/components/ui/TypeaheadMulti";
 import { GOALS, MEDICAL_FLAGS, ACTIVITY_LEVELS, GENDERS, PLAN_TYPES } from "@/lib/catalog/examples";
 import styles from "./page.module.css";
@@ -81,14 +85,19 @@ export default function CreatePlan() {
 
   return (
     <div className={styles.page}>
-      <h1>Create Your Personalized Plan</h1>
+      <header className={styles.header}>
+        <h1 className={styles.title}>Create Your Personalized Plan</h1>
+        <p className={styles.subtitle}>
+          Tell us about yourself and we'll create a custom health plan tailored to your needs
+        </p>
+      </header>
 
       <form onSubmit={handleSubmit} className={styles.form}>
-        <section>
-          <h2>Profile Information</h2>
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Profile Information</h2>
 
-          <Field label="Name">
-            <input
+          <Field label="Name" required>
+            <Input
               type="text"
               value={profile.name}
               onChange={(e) => setProfile({ ...profile, name: e.target.value })}
@@ -98,8 +107,8 @@ export default function CreatePlan() {
           </Field>
 
           <div className={styles.grid}>
-            <Field label="Age">
-              <input
+            <Field label="Age" required>
+              <Input
                 type="number"
                 value={profile.age}
                 onChange={(e) => setProfile({ ...profile, age: e.target.value })}
@@ -110,8 +119,8 @@ export default function CreatePlan() {
               />
             </Field>
 
-            <Field label="Gender">
-              <select
+            <Field label="Gender" required>
+              <Select
                 value={profile.gender}
                 onChange={(e) => setProfile({ ...profile, gender: e.target.value as any })}
                 required
@@ -121,13 +130,13 @@ export default function CreatePlan() {
                     {gender.charAt(0).toUpperCase() + gender.slice(1)}
                   </option>
                 ))}
-              </select>
+              </Select>
             </Field>
           </div>
 
           <div className={styles.grid}>
-            <Field label="Height (cm)">
-              <input
+            <Field label="Height (cm)" required>
+              <Input
                 type="number"
                 value={profile.height}
                 onChange={(e) => setProfile({ ...profile, height: e.target.value })}
@@ -138,8 +147,8 @@ export default function CreatePlan() {
               />
             </Field>
 
-            <Field label="Weight (kg)">
-              <input
+            <Field label="Weight (kg)" required>
+              <Input
                 type="number"
                 value={profile.weight}
                 onChange={(e) => setProfile({ ...profile, weight: e.target.value })}
@@ -151,8 +160,8 @@ export default function CreatePlan() {
             </Field>
           </div>
 
-          <Field label="Activity Level">
-            <select
+          <Field label="Activity Level" required>
+            <Select
               value={profile.activityLevel}
               onChange={(e) => setProfile({ ...profile, activityLevel: e.target.value as any })}
               required
@@ -162,7 +171,7 @@ export default function CreatePlan() {
                   {level.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                 </option>
               ))}
-            </select>
+            </Select>
           </Field>
 
           <Field label="Goals">
@@ -175,7 +184,7 @@ export default function CreatePlan() {
             />
           </Field>
 
-          <Field label="Medical Conditions (optional)">
+          <Field label="Medical Conditions" helper="Optional - any conditions that may affect your plan">
             <TypeaheadMulti
               label="Medical Conditions"
               values={profile.flags}
@@ -186,11 +195,11 @@ export default function CreatePlan() {
           </Field>
         </section>
 
-        <section>
-          <h2>Plan Preferences</h2>
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Plan Preferences</h2>
 
-          <Field label="Primary Plan Type">
-            <select
+          <Field label="Primary Plan Type" required>
+            <Select
               value={intake.primaryPlanType}
               onChange={(e) => setIntake({ ...intake, primaryPlanType: e.target.value })}
               required
@@ -201,11 +210,11 @@ export default function CreatePlan() {
                   {type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                 </option>
               ))}
-            </select>
+            </Select>
           </Field>
 
-          <Field label="Secondary Plan Type (optional)">
-            <select
+          <Field label="Secondary Plan Type" helper="Optional - choose a secondary focus for your plan">
+            <Select
               value={intake.secondaryPlanType}
               onChange={(e) => setIntake({ ...intake, secondaryPlanType: e.target.value })}
             >
@@ -215,12 +224,12 @@ export default function CreatePlan() {
                   {type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                 </option>
               ))}
-            </select>
+            </Select>
           </Field>
 
           <div className={styles.grid}>
-            <Field label="Start Date">
-              <input
+            <Field label="Start Date" required>
+              <Input
                 type="date"
                 value={intake.startDate}
                 onChange={(e) => setIntake({ ...intake, startDate: e.target.value })}
@@ -229,8 +238,8 @@ export default function CreatePlan() {
               />
             </Field>
 
-            <Field label="End Date">
-              <input
+            <Field label="End Date" required>
+              <Input
                 type="date"
                 value={intake.endDate}
                 onChange={(e) => setIntake({ ...intake, endDate: e.target.value })}
@@ -241,14 +250,14 @@ export default function CreatePlan() {
           </div>
         </section>
 
-        <div className={styles.actions}>
-          <button type="button" className={`${styles.btn} ${styles.ghost}`} onClick={() => router.back()}>
+        <Actions>
+          <Button type="button" variant="ghost" onClick={() => router.back()}>
             Cancel
-          </button>
-          <button type="submit" className={styles.btn} disabled={loading}>
+          </Button>
+          <Button type="submit" disabled={loading}>
             {loading ? "Creating..." : "Create Plan"}
-          </button>
-        </div>
+          </Button>
+        </Actions>
       </form>
     </div>
   );

@@ -1,0 +1,27 @@
+.select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  transition: border-color var(--dur-med) ease-out;
+  cursor: pointer;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px var(--accent-quiet);
+}
+
+.select.is-error {
+  border-color: var(--error);
+}
+
+.select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -1,14 +1,23 @@
 'use client';
 
 import { FormEvent, ReactNode, useState } from 'react';
+import styles from './Form.module.css';
 
 interface FormProps {
   onSubmit: (data: Record<string, any>) => void | Promise<void>;
   children: ReactNode;
   className?: string;
+  submitLabel?: string;
+  submittingLabel?: string;
 }
 
-export default function Form({ onSubmit, children, className = '' }: FormProps) {
+export default function Form({
+  onSubmit,
+  children,
+  className = '',
+  submitLabel = 'Submit',
+  submittingLabel = 'Submitting...'
+}: FormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -16,33 +25,25 @@ export default function Form({ onSubmit, children, className = '' }: FormProps) 
     setIsSubmitting(true);
     try {
       const formData = new FormData(e.currentTarget);
-      const data = Object.fromEntries((formData as any).entries());
+      const data = Object.fromEntries(formData as any);
       await onSubmit(data);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const classes = [styles.form, className].filter(Boolean).join(' ');
+
   return (
-    <form onSubmit={handleSubmit} className={`space-y-4 ${className}`}>
+    <form onSubmit={handleSubmit} className={classes}>
       {children}
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full px-4 py-2 bg-[var(--accent)] text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+        className={styles.submit}
       >
-        {isSubmitting ? 'Submitting...' : 'Submit'}
+        {isSubmitting ? submittingLabel : submitLabel}
       </button>
     </form>
   );
 }
-
-export { default as Form } from './Form';
-export { Field } from './Field';
-export { Label } from './Label';
-export { Input } from './Input';
-export { Select } from './Select';
-export { Textarea } from './Textarea';
-export { HelpText } from './HelpText';
-export { Actions } from './Actions';
-export { Button } from './Button';

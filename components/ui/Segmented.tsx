@@ -1,5 +1,7 @@
 'use client';
 
+import styles from './Segmented.module.css';
+
 type Option = {
   value: string;
   label: string;
@@ -22,7 +24,7 @@ export default function Segmented({
     <div
       role="tablist"
       aria-label={ariaLabel ?? "Segmented navigation"}
-      className="flex rounded-md bg-[var(--border)] p-1"
+      className={styles.segmented}
     >
       {options.map((option) => {
         const active = option.value === value;
@@ -31,12 +33,8 @@ export default function Segmented({
             key={option.value}
             type="button"
             role="tab"
-            aria-selected={active ? 'true' : 'false'}
-            className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-              active
-                ? 'bg-[var(--card)] text-[var(--fg)] shadow-sm'
-                : 'text-[var(--muted)] hover:text-[var(--fg)]'
-            }`}
+            aria-selected={active}
+            className={`${styles.option} ${active ? styles.active : ''}`}
             onClick={() => onChange(option.value)}
           >
             {option.label}

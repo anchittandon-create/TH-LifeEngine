@@ -1,0 +1,104 @@
+.container {
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.container.top-right {
+  top: var(--space-4);
+  right: var(--space-4);
+}
+
+.container.top-left {
+  top: var(--space-4);
+  left: var(--space-4);
+}
+
+.container.bottom-right {
+  bottom: var(--space-4);
+  right: var(--space-4);
+}
+
+.container.bottom-left {
+  bottom: var(--space-4);
+  left: var(--space-4);
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  box-shadow: 0 8px 24px rgba(0,0,0,.15);
+  pointer-events: auto;
+  animation: slideIn var(--dur-med) ease-out;
+  min-width: 300px;
+  max-width: 500px;
+}
+
+.toast.success {
+  border-color: var(--success);
+  background: var(--success);
+  color: white;
+}
+
+.toast.error {
+  border-color: var(--error);
+  background: var(--error);
+  color: white;
+}
+
+.toast.warning {
+  border-color: var(--warn);
+  background: var(--warn);
+  color: white;
+}
+
+.toast.info {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+}
+
+.message {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.close {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background var(--dur-med) ease-out;
+  opacity: 0.8;
+}
+
+.close:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

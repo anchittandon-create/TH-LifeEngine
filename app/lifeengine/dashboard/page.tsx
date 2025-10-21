@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+import { Skeleton } from "@/components/ui/Skeleton";
 import styles from "./page.module.css";
 
 type PlanSummary = {
@@ -34,31 +36,74 @@ export default function DashboardPage() {
     }
   };
 
-  if (loading) return <div className={styles.page}>Loading...</div>;
-  if (error) return <div className={styles.page}>Error: {error}</div>;
+  if (loading) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.header}>
+          <Skeleton className={styles.titleSkeleton} />
+          <Skeleton className={styles.buttonSkeleton} />
+        </div>
+        <div className={styles.grid}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className={styles.card}>
+              <Skeleton className={styles.cardHeaderSkeleton} />
+              <div className={styles.goals}>
+                <Skeleton className={styles.goalSkeleton} />
+                <Skeleton className={styles.goalSkeleton} />
+                <Skeleton className={styles.goalSkeleton} />
+              </div>
+              <Skeleton className={styles.buttonSkeleton} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.error}>
+          <h2 className={styles.errorTitle}>Something went wrong</h2>
+          <p className={styles.errorMessage}>{error}</p>
+          <Button onClick={loadPlans}>Try Again</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
-      <div className={styles.header}>
-        <h1>My Plans</h1>
-        <Link href="/lifeengine/create" className={styles.createBtn}>
-          Create New Plan
+      <header className={styles.header}>
+        <div>
+          <h1 className={styles.title}>My Health Plans</h1>
+          <p className={styles.subtitle}>
+            View and manage your personalized health plans
+          </p>
+        </div>
+        <Link href="/lifeengine/create">
+          <Button>Create New Plan</Button>
         </Link>
-      </div>
+      </header>
 
       {plans.length === 0 ? (
         <div className={styles.empty}>
-          <p>No plans yet. Create your first personalized plan!</p>
-          <Link href="/lifeengine/create" className={styles.createBtn}>
-            Get Started
-          </Link>
+          <div className={styles.emptyContent}>
+            <h2 className={styles.emptyTitle}>No plans yet</h2>
+            <p className={styles.emptyText}>
+              Create your first personalized health plan to get started on your wellness journey.
+            </p>
+            <Link href="/lifeengine/create">
+              <Button>Get Started</Button>
+            </Link>
+          </div>
         </div>
       ) : (
         <div className={styles.grid}>
           {plans.map((plan) => (
             <div key={plan.id} className={styles.card}>
               <div className={styles.cardHeader}>
-                <h3>Plan #{plan.id.slice(-8)}</h3>
+                <h3 className={styles.cardTitle}>Plan #{plan.id.slice(-8)}</h3>
                 <span className={styles.date}>
                   {new Date(plan.createdAt).toLocaleDateString()}
                 </span>
@@ -73,8 +118,10 @@ export default function DashboardPage() {
                   <span className={styles.more}>+{plan.goals.length - 3} more</span>
                 )}
               </div>
-              <Link href={`/lifeengine/plan/${plan.id}`} className={styles.viewBtn}>
-                View Plan
+              <Link href={`/lifeengine/plan/${plan.id}`}>
+                <Button variant="ghost" className={styles.viewButton}>
+                  View Plan
+                </Button>
               </Link>
             </div>
           ))}

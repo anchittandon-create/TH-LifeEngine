@@ -1,18 +1,26 @@
 'use client';
 
 import { forwardRef, ReactNode } from 'react';
+import styles from './Select.module.css';
 
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   children: ReactNode;
   className?: string;
+  error?: boolean;
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ children, className = '', ...props }, ref) => {
+  ({ children, className = '', error, ...props }, ref) => {
+    const classes = [
+      styles.select,
+      error && styles['is-error'],
+      className
+    ].filter(Boolean).join(' ');
+
     return (
       <select
         ref={ref}
-        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`}
+        className={classes}
         {...props}
       >
         {children}

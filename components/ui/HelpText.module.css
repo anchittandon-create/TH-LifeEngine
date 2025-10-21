@@ -1,0 +1,10 @@
+.helpText {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: var(--space-1);
+  line-height: 1.4;
+}
+
+.helpText.error {
+  color: var(--error);
+}

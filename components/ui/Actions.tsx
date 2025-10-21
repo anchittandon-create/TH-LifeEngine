@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
+import styles from './Actions.module.css';
 
 interface ActionsProps {
   children: ReactNode;
@@ -8,5 +9,6 @@ interface ActionsProps {
 }
 
 export function Actions({ children, className = '' }: ActionsProps) {
-  return <div className={`flex justify-end space-x-2 ${className}`}>{children}</div>;
+  const classes = [styles.actions, className].filter(Boolean).join(' ');
+  return <div className={classes}>{children}</div>;
 }
