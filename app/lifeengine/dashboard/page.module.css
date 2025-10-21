@@ -13,15 +13,15 @@
 }
 
 .title {
-  font-size: var(--text-3xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
   margin-bottom: var(--space-2);
 }
 
 .subtitle {
-  font-size: var(--text-lg);
-  color: var(--color-text-secondary);
+  font-size: 16px;
+  color: var(--muted);
 }
 
 .empty {
@@ -29,8 +29,8 @@
   align-items: center;
   justify-content: center;
   min-height: 400px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: var(--panel);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
 }
 
@@ -40,14 +40,14 @@
 }
 
 .emptyTitle {
-  font-size: var(--text-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
   margin-bottom: var(--space-3);
 }
 
 .emptyText {
-  color: var(--color-text-secondary);
+  color: var(--muted);
   margin-bottom: var(--space-6);
 }
 
@@ -61,14 +61,14 @@
 }
 
 .errorTitle {
-  font-size: var(--text-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
   margin-bottom: var(--space-3);
 }
 
 .errorMessage {
-  color: var(--color-text-secondary);
+  color: var(--muted);
   margin-bottom: var(--space-6);
 }
 
@@ -79,16 +79,16 @@
 }
 
 .card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: var(--panel);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: var(--space-6);
-  transition: all var(--motion-duration-fast) var(--motion-easing);
+  transition: all var(--dur-med) ease-out;
 }
 
 .card:hover {
-  border-color: var(--color-border-hover);
-  box-shadow: var(--shadow-lg);
+  border-color: var(--brand);
+  box-shadow: 0 8px 24px rgba(0,0,0,.10);
   transform: translateY(-2px);
 }
 
@@ -100,14 +100,14 @@
 }
 
 .cardTitle {
-  font-size: var(--text-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
 }
 
 .date {
-  color: var(--color-text-secondary);
-  font-size: var(--text-sm);
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .goals {
@@ -118,17 +118,17 @@
 }
 
 .goal {
-  background: var(--color-background-accent);
-  color: var(--color-text-primary);
+  background: var(--brand-quiet);
+  color: var(--brand);
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-pill);
-  font-size: var(--text-sm);
-  font-weight: var(--font-weight-medium);
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .more {
-  color: var(--color-text-secondary);
-  font-size: var(--text-sm);
+  color: var(--muted);
+  font-size: 14px;
   align-self: center;
   margin-left: var(--space-1);
 }
