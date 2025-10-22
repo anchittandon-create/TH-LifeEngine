@@ -1,88 +1,72 @@
-import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
-import { createId } from "@/lib/utils/ids";
-import type { Profile } from "@/lib/ai/schemas";
+import { NextRequest, NextResponse } from "next/server";
+import { Logger } from "@/lib/logging/logger";
+import { v4 as uuidv4 } from 'uuid';
 
-const globalState = globalThis as unknown as {
-  __LIFEENGINE_PROFILES__?: Map<string, Profile>;
-};
-
-if (!globalState.__LIFEENGINE_PROFILES__) {
-  globalState.__LIFEENGINE_PROFILES__ = new Map<string, Profile>();
-}
-
-const PROFILE_STORE = globalState.__LIFEENGINE_PROFILES__;
+const logger = new Logger('system');
+const TH_PROFILES = new Map<string, any>();
 
 export async function GET() {
-  if (supabase) {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*');
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ profiles: data });
-  } else {
-    return NextResponse.json({ profiles: Array.from(PROFILE_STORE.values()) });
-  }
-}
-
-export async function POST(request: Request) {
   try {
-    const payload = (await request.json()) as Partial<Profile>;
-    const id = payload.id ?? createId();
-    const profile: Profile = {
-      id,
-      name: payload.name ?? "Unnamed",
-      age: payload.age ?? 25,
-      gender: payload.gender ?? "other",
-      goals: payload.goals ?? [],
-      healthConcerns: payload.healthConcerns ?? "",
-      experience: payload.experience ?? "beginner",
-      preferredTime: payload.preferredTime ?? "flexible",
-      subscriptionType: payload.subscriptionType ?? "quarterly",
-    };
-
-    if (supabase) {
-      const { data, error } = await supabase
-        .from('profiles')
-        .insert([profile])
-        .select();
-
-      if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-      }
-
-      return NextResponse.json({ profile: data[0] });
-    } else {
-      PROFILE_STORE.set(id, profile);
-      return NextResponse.json({ profile });
-    }
-  } catch (error) {
-    return NextResponse.json({ error: "Invalid profile data" }, { status: 400 });
+    logger.info('Fetching all profiles');
+    
+    const profiles = Array.from(TH_PROFILES.values());
+    
+    logger.info('Profiles fetched successfully', { count: profiles.length });
+    
+    return NextResponse.json(profiles);
+  } catch (error: any) {
+    logger.error('Failed to fetch profiles', { error: error.message });
+    return NextResponse.json({ error: "Failed to fetch profiles" }, { status: 500 });
   }
 }
 
-export async function DELETE(request: Request) {
-  const { id } = (await request.json()) as { id?: string };
-  if (!id) {
-    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    
+    const profileId = body.id || uuidv4();
+    const profile = {
+      ...body,
+      id: profileId,
+      createdAt: body.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    TH_PROFILES.set(profileId, profile);
+    
+    logger.info('Profile created/updated', { 
+      profileId, 
+      name: profile.name,
+      action: body.id ? 'updated' : 'created'
+    });
+    
+    return NextResponse.json(profile);
+  } catch (error: any) {
+    logger.error('Failed to create/update profile', { error: error.message });
+    return NextResponse.json({ error: "Failed to save profile" }, { status: 500 });
   }
+}
 
-  if (supabase) {
-    const { error } = await supabase
-      .from('profiles')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json({ error: "Profile ID required" }, { status: 400 });
     }
-  } else {
-    PROFILE_STORE.delete(id);
+    
+    const deleted = TH_PROFILES.delete(id);
+    
+    if (deleted) {
+      logger.info('Profile deleted', { profileId: id });
+      return NextResponse.json({ message: "Profile deleted" });
+    } else {
+      logger.warn('Profile not found for deletion', { profileId: id });
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+  } catch (error: any) {
+    logger.error('Failed to delete profile', { error: error.message });
+    return NextResponse.json({ error: "Failed to delete profile" }, { status: 500 });
   }
-
-  return NextResponse.json({ ok: true });
 }

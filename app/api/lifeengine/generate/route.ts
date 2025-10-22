@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { v4 as uuidv4 } from 'uuid';
+import { Logger } from '@/lib/logging/logger';
+
+const logger = new Logger('system');
 
 const inputSchema = z.object({
   profileId: z.string(),
@@ -46,11 +49,20 @@ const inputSchema = z.object({
 const TH_PLANS = new Map<string, any>();
 
 export async function POST(req: NextRequest) {
+  const startTime = Date.now();
+  
   try {
     const body = await req.json();
     const input = inputSchema.parse(body);
 
+    logger.info('Plan generation started', { 
+      profileId: input.profileId,
+      planType: input.plan_type.primary,
+      duration: input.duration
+    });
+
     if (!process.env.GOOGLE_API_KEY) {
+      logger.error('GOOGLE_API_KEY not configured');
       return NextResponse.json({ error: 'GOOGLE_API_KEY not configured' }, { status: 500 });
     }
 
@@ -84,16 +96,24 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    logger.debug('Sending request to Gemini', { 
+      model: 'gemini-1.5-flash',
+      promptLength: userPrompt.length
+    });
+
     const result = await model.generateContent(`${systemPrompt}\n\n${userPrompt}`);
     const response = await result.response;
     let planJson;
     try {
       planJson = JSON.parse(response.text());
+      logger.debug('Plan JSON parsed successfully');
     } catch {
+      logger.warn('First parse failed, retrying...');
       // Retry
       const retryResult = await model.generateContent(`${systemPrompt}\n\n${userPrompt}\nReturn JSON only.`);
       const retryResponse = await retryResult.response;
       planJson = JSON.parse(retryResponse.text());
+      logger.debug('Plan JSON parsed on retry');
     }
 
     // Verifier
@@ -111,9 +131,22 @@ export async function POST(req: NextRequest) {
 
     TH_PLANS.set(planId, planData);
 
+    const duration = Date.now() - startTime;
+    logger.info('Plan generated successfully', {
+      planId,
+      profileId: input.profileId,
+      duration: `${duration}ms`,
+      warningsCount: verifiedPlan.warnings.length
+    });
+
     return NextResponse.json(planData);
-  } catch (error) {
-    console.error('Plan generation error:', error);
+  } catch (error: any) {
+    const duration = Date.now() - startTime;
+    logger.error('Plan generation failed', { 
+      error: error.message,
+      duration: `${duration}ms`,
+      stack: error.stack
+    });
     return NextResponse.json({ error: 'Failed to generate plan' }, { status: 500 });
   }
 }
@@ -127,8 +160,8 @@ function calculateBMR(profile: any) {
 
 function calculateTDEE(profile: any) {
   const bmr = calculateBMR(profile);
-  const factors = { sedentary: 1.2, light: 1.375, moderate: 1.55, intense: 1.725 };
-  return bmr * factors[profile.activity_level];
+  const factors: Record<string, number> = { sedentary: 1.2, light: 1.375, moderate: 1.55, intense: 1.725 };
+  return bmr * (factors[profile.activity_level] || factors.moderate);
 }
 
 function calculateKcalTarget(profile: any) {
@@ -157,7 +190,7 @@ function getMeals() {
 
 function verifyPlan(planJson: any, input: any) {
   // Implement verifier logic as per prompt
-  const warnings = [];
+  const warnings: string[] = [];
   const analytics = { safety_score: 0.95, diet_match: 0.92, progression_score: 0.9, adherence_score: 0.88, overall: 0.91 };
   return { plan: planJson, warnings, analytics };
 }
