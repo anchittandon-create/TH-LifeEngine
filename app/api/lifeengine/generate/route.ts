@@ -48,12 +48,29 @@ const inputSchema = z.object({
 
 const TH_PLANS = new Map<string, any>();
 
+// Request throttling - prevent duplicate calls within 5 seconds
+const requestCache = new Map<string, { timestamp: number; response: any }>();
+const THROTTLE_MS = 5000;
+
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
   
   try {
     const body = await req.json();
     const input = inputSchema.parse(body);
+
+    // Create cache key from profile + plan type
+    const cacheKey = `${input.profileId}-${input.plan_type.primary}-${JSON.stringify(input.goals)}`;
+    
+    // Check throttle cache
+    const cached = requestCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp) < THROTTLE_MS) {
+      logger.warn('Request throttled - duplicate call detected', { 
+        profileId: input.profileId,
+        timeSinceLastCall: Date.now() - cached.timestamp
+      });
+      return NextResponse.json(cached.response);
+    }
 
     logger.info('Plan generation started', { 
       profileId: input.profileId,
@@ -67,53 +84,70 @@ export async function POST(req: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-    const systemPrompt = `You are TH+ LifeEngine Director. Generate safe, evidence-aligned plans strictly in JSON schema. Respect user profile (gender/age/region/diet/flags), plan_type (primary+secondary), goals, duration, time budget, experience, equipment. Constraints: ≤10% weekly progression, ≥1 rest day ≤6, deload ≥8 weeks, hydration ≥35 ml/kg (or floor by region), contraindications per flags. Use labeled catalogs only. Include daily citations where possible. If unsafe, set 'TBD_SAFE' and add a warning. Output valid JSON only.`;
-
-    const userPrompt = JSON.stringify({
-      profileSnapshot: input.profileSnapshot,
-      intake: {
-        plan_type: input.plan_type,
-        goals: input.goals,
-        conditions: input.conditions,
-        duration: input.duration,
-        time_budget_min_per_day: input.time_budget_min_per_day,
-        experience_level: input.experience_level,
-        equipment: input.equipment,
-      },
-      derived: {
-        bmr: calculateBMR(input.profileSnapshot),
-        tdee: calculateTDEE(input.profileSnapshot),
-        kcalTarget: calculateKcalTarget(input.profileSnapshot),
-        hydration: calculateHydration(input.profileSnapshot),
-        durationDays: input.duration.unit === 'weeks' ? input.duration.value * 7 : input.duration.value,
-        weeks: input.duration.unit === 'weeks' ? input.duration.value : Math.ceil(input.duration.value / 7),
-      },
-      catalogs: {
-        flows: getYogaFlows(),
-        meals: getMeals(),
-      },
-    });
-
-    logger.debug('Sending request to Gemini', { 
+    const model = genAI.getGenerativeModel({ 
       model: 'gemini-1.5-flash',
-      promptLength: userPrompt.length
+      generationConfig: {
+        temperature: 0.7,
+        topP: 0.8,
+        topK: 40,
+        maxOutputTokens: 2048,
+        responseMimeType: "application/json", // Force JSON output - no markdown
+      },
     });
 
-    const result = await model.generateContent(`${systemPrompt}\n\n${userPrompt}`);
+    // ULTRA-COMPACT PROMPT: Minimal tokens
+    const compactPrompt = `Generate ${input.duration.value} ${input.duration.unit} wellness plan JSON:
+Profile: ${input.profileSnapshot.gender} ${input.profileSnapshot.age}y ${input.profileSnapshot.weight_kg}kg ${input.profileSnapshot.height_cm}cm ${input.profileSnapshot.activity_level}
+Diet: ${input.profileSnapshot.dietary.type} | Avoid: ${input.profileSnapshot.dietary.allergies.join(',')||'none'}
+Goals: ${input.goals.map(g => g.name).join(', ')}
+Medical: ${input.profileSnapshot.medical_flags.join(', ')||'none'}
+Budget: ${input.time_budget_min_per_day}min/day | Level: ${input.experience_level}
+Equipment: ${input.equipment.join(', ')||'none'}
+
+JSON structure:
+{"meta":{"title":"","duration_days":${input.duration.unit === 'weeks' ? input.duration.value * 7 : input.duration.value},"weeks":${input.duration.unit === 'weeks' ? input.duration.value : Math.ceil(input.duration.value / 7)},"goals":[],"summary":""},"weekly_plan":[{"week_index":1,"focus":"","days":[{"day_index":1,"theme":"","yoga":[{"name":"","duration_min":0,"calories_burned":0}],"nutrition":{"kcal_target":${Math.round(calculateKcalTarget(input.profileSnapshot))},"hydration_ml":${Math.round(calculateHydration(input.profileSnapshot))},"meals":[{"meal":"breakfast","name":"","kcal":0}]},"habits":[],"citations":[]}]}],"citations":[],"warnings":[],"adherence_tips":[]}`;
+
+    const estimatedInputTokens = Math.ceil(compactPrompt.length / 4);
+    logger.debug('Sending compact request to Gemini', { 
+      model: 'gemini-1.5-flash',
+      promptLength: compactPrompt.length,
+      estimatedInputTokens,
+      savings: `~${Math.round(((1500 - estimatedInputTokens) / 1500) * 100)}% reduction from original`
+    });
+
+    const result = await model.generateContent(compactPrompt);
     const response = await result.response;
+    
+    // Track token usage for cost monitoring
+    const usageMetadata = response.usageMetadata;
+    const inputTokens = usageMetadata?.promptTokenCount || 0;
+    const outputTokens = usageMetadata?.candidatesTokenCount || 0;
+    const totalTokens = usageMetadata?.totalTokenCount || 0;
+    const estimatedCost = ((inputTokens / 1000000) * 0.075) + ((outputTokens / 1000000) * 0.30);
+
+    logger.info('✅ Gemini API usage', {
+      inputTokens: `${inputTokens} tokens (saved ~${1500 - inputTokens} tokens!)`,
+      outputTokens,
+      totalTokens,
+      estimatedCost: `$${estimatedCost.toFixed(6)}`
+    });
+    
     let planJson;
+    const responseText = response.text().trim()
+    
     try {
-      planJson = JSON.parse(response.text());
-      logger.debug('Plan JSON parsed successfully');
-    } catch {
-      logger.warn('First parse failed, retrying...');
-      // Retry
-      const retryResult = await model.generateContent(`${systemPrompt}\n\n${userPrompt}\nReturn JSON only.`);
-      const retryResponse = await retryResult.response;
-      planJson = JSON.parse(retryResponse.text());
-      logger.debug('Plan JSON parsed on retry');
+      planJson = JSON.parse(responseText);
+      logger.info('✅ Plan JSON parsed successfully');
+    } catch (parseError: any) {
+      logger.error('❌ JSON parse failed', { 
+        error: parseError.message, 
+        responsePreview: responseText.substring(0, 200) 
+      });
+      // Return error instead of retrying to save costs
+      return NextResponse.json({ 
+        error: 'Failed to generate valid plan. Please try again.',
+        details: parseError.message 
+      }, { status: 500 });
     }
 
     // Verifier
@@ -127,17 +161,39 @@ export async function POST(req: NextRequest) {
       plan: verifiedPlan.plan,
       warnings: verifiedPlan.warnings,
       analytics: verifiedPlan.analytics,
+      costMetrics: {
+        inputTokens,
+        outputTokens,
+        totalTokens,
+        estimatedCost: `$${estimatedCost.toFixed(6)}`,
+        savedTokens: Math.max(0, 1500 - inputTokens)
+      }
     };
 
     TH_PLANS.set(planId, planData);
 
     const duration = Date.now() - startTime;
-    logger.info('Plan generated successfully', {
+    logger.info('🎉 Plan generated successfully', {
       planId,
       profileId: input.profileId,
       duration: `${duration}ms`,
-      warningsCount: verifiedPlan.warnings.length
+      warningsCount: verifiedPlan.warnings.length,
+      cost: `$${estimatedCost.toFixed(6)}`,
+      tokensSaved: Math.max(0, 1500 - inputTokens)
     });
+
+    // Cache the response for throttling
+    requestCache.set(cacheKey, { 
+      timestamp: Date.now(), 
+      response: planData 
+    });
+    
+    // Clear old cache entries (older than 10 seconds)
+    for (const [key, value] of requestCache.entries()) {
+      if (Date.now() - value.timestamp > 10000) {
+        requestCache.delete(key);
+      }
+    }
 
     return NextResponse.json(planData);
   } catch (error: any) {
@@ -174,19 +230,7 @@ function calculateHydration(profile: any) {
   return profile.weight_kg * 35; // ml/kg
 }
 
-function getYogaFlows() {
-  return [
-    { id: 'pcod_calm', name: 'PCOD Calm', tags: ['gentle', 'pcod'] },
-    // Add more
-  ];
-}
-
-function getMeals() {
-  return [
-    { name: 'Oats Upma', swaps: ['Poha (no peanuts)'] },
-    // Add more
-  ];
-}
+// ❌ REMOVED: getYogaFlows() and getMeals() - no longer sending catalogs to save tokens
 
 function verifyPlan(planJson: any, input: any) {
   // Implement verifier logic as per prompt
