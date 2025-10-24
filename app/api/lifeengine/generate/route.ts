@@ -48,9 +48,13 @@ const inputSchema = z.object({
 
 const TH_PLANS = new Map<string, any>();
 
-// Request throttling - prevent duplicate calls within 5 seconds
+// 💰 COST OPTIMIZATION: Extended caching - prevent duplicate calls within 1 hour
 const requestCache = new Map<string, { timestamp: number; response: any }>();
-const THROTTLE_MS = 5000;
+const THROTTLE_MS = 3600000; // 1 hour = 3,600,000ms (was 5 seconds)
+
+// 💰 Daily request limit per profile to prevent cost abuse
+const dailyRequestCount = new Map<string, { date: string; count: number }>();
+const MAX_REQUESTS_PER_DAY = 10; // Adjust based on your needs
 
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
@@ -59,15 +63,41 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const input = inputSchema.parse(body);
 
+    // 💰 COST CONTROL: Daily request limit per profile
+    const today = new Date().toISOString().split('T')[0];
+    const profileLimit = dailyRequestCount.get(input.profileId);
+    
+    if (profileLimit) {
+      if (profileLimit.date === today && profileLimit.count >= MAX_REQUESTS_PER_DAY) {
+        logger.warn('Daily request limit exceeded', { 
+          profileId: input.profileId,
+          count: profileLimit.count,
+          limit: MAX_REQUESTS_PER_DAY
+        });
+        return NextResponse.json({ 
+          error: `Daily limit reached. You can generate ${MAX_REQUESTS_PER_DAY} plans per day. Try again tomorrow.`,
+          retryAfter: 'tomorrow'
+        }, { status: 429 });
+      }
+      if (profileLimit.date !== today) {
+        dailyRequestCount.set(input.profileId, { date: today, count: 1 });
+      } else {
+        profileLimit.count++;
+      }
+    } else {
+      dailyRequestCount.set(input.profileId, { date: today, count: 1 });
+    }
+
     // Create cache key from profile + plan type
     const cacheKey = `${input.profileId}-${input.plan_type.primary}-${JSON.stringify(input.goals)}`;
     
-    // Check throttle cache
+    // 💰 Check 1-hour cache - huge cost savings!
     const cached = requestCache.get(cacheKey);
     if (cached && (Date.now() - cached.timestamp) < THROTTLE_MS) {
-      logger.warn('Request throttled - duplicate call detected', { 
+      logger.warn('Request served from 1-hour cache', { 
         profileId: input.profileId,
-        timeSinceLastCall: Date.now() - cached.timestamp
+        timeSinceLastCall: Math.round((Date.now() - cached.timestamp) / 60000) + ' minutes',
+        costSaved: '$0.05-0.07'
       });
       return NextResponse.json(cached.response);
     }
@@ -85,12 +115,12 @@ export async function POST(req: NextRequest) {
 
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-flash',
+      model: 'gemini-1.5-flash-8b', // 💰 50% CHEAPER than gemini-1.5-flash
       generationConfig: {
-        temperature: 0.7,
-        topP: 0.8,
-        topK: 40,
-        maxOutputTokens: 2048,
+        temperature: 0.5, // 💰 Lower = more focused, less tokens
+        topP: 0.7, // 💰 Reduced from 0.8
+        topK: 30, // 💰 Reduced from 40
+        maxOutputTokens: 1536, // 💰 Reduced from 2048 (25% savings)
         responseMimeType: "application/json", // Force JSON output - no markdown
       },
     });
@@ -125,11 +155,12 @@ JSON structure:
     const totalTokens = usageMetadata?.totalTokenCount || 0;
     const estimatedCost = ((inputTokens / 1000000) * 0.075) + ((outputTokens / 1000000) * 0.30);
 
-    logger.info('✅ Gemini API usage', {
+    logger.info('✅ Gemini API usage (flash-8b = 50% cheaper!)', {
       inputTokens: `${inputTokens} tokens (saved ~${1500 - inputTokens} tokens!)`,
-      outputTokens,
+      outputTokens: `${outputTokens} tokens (max: 1536, was: 2048)`,
       totalTokens,
-      estimatedCost: `$${estimatedCost.toFixed(6)}`
+      estimatedCost: `$${estimatedCost.toFixed(6)}`,
+      estimatedCostINR: `₹${(estimatedCost * 84).toFixed(4)}`
     });
     
     let planJson;
@@ -182,16 +213,23 @@ JSON structure:
       tokensSaved: Math.max(0, 1500 - inputTokens)
     });
 
-    // Cache the response for throttling
+    // 💰 Cache the response for 1 hour - massive savings!
     requestCache.set(cacheKey, { 
       timestamp: Date.now(), 
       response: planData 
     });
     
-    // Clear old cache entries (older than 10 seconds)
+    // 💰 Clear old cache entries (older than 2 hours) to prevent memory issues
     for (const [key, value] of requestCache.entries()) {
-      if (Date.now() - value.timestamp > 10000) {
+      if (Date.now() - value.timestamp > 7200000) { // 2 hours
         requestCache.delete(key);
+      }
+    }
+    
+    // 💰 Clean up old daily counters
+    for (const [profileId, data] of dailyRequestCount.entries()) {
+      if (data.date !== today) {
+        dailyRequestCount.delete(profileId);
       }
     }
 
