@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generatePlan } from '@/lib/ai/planner';
 import { verifyPlan } from '@/lib/ai/verifier';
-import { savePlan } from '@/lib/utils/store';
+import { savePlanRecord } from '@/lib/utils/store';
 import { createId } from '@/lib/utils/ids';
 import type { Intake } from '@/lib/domain/intake';
 
@@ -12,6 +12,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
   }
   const planWithId = { ...plan, id: createId(), createdAt: new Date().toISOString() };
-  savePlan(planWithId);
+  savePlanRecord(planWithId);
   return NextResponse.json(planWithId);
 }
