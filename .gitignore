@@ -61,6 +61,32 @@ web_modules/
 .env.production.local
 .env.local
 
+# Additional security patterns
+*.key
+*.pem
+*.p12
+*.pfx
+secrets.json
+config.local.json
+.secrets/
+keys/
+credentials/
+
+# API keys and tokens
+*api-key*
+*token*
+*secret*
+*password*
+auth.json
+firebase-key.json
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+database.json
+lifeengine.state.json
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
