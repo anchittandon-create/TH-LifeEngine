@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Logger } from "@/lib/logging/logger";
 import { v4 as uuidv4 } from 'uuid';
+import { db } from "@/lib/utils/db";
 
 const logger = new Logger('system');
-const TH_PROFILES = new Map<string, any>();
 
 export async function GET() {
   try {
-    logger.info('Fetching all profiles');
+    logger.info('Fetching all profiles from persistent storage');
     
-    const profiles = Array.from(TH_PROFILES.values());
+    const profiles = await db.getProfiles();
     
     logger.info('Profiles fetched successfully', { count: profiles.length });
     
@@ -32,13 +32,14 @@ export async function POST(req: NextRequest) {
       updatedAt: new Date().toISOString()
     };
     
-    TH_PROFILES.set(profileId, profile);
-    
-    logger.info('Profile created/updated', { 
-      profileId, 
-      name: profile.name,
-      action: body.id ? 'updated' : 'created'
-    });
+    // Use persistent database storage
+    if (body.id) {
+      await db.updateProfile(profile);
+      logger.info('Profile updated in persistent storage', { profileId, name: profile.name });
+    } else {
+      await db.saveProfile(profile);
+      logger.info('Profile created in persistent storage', { profileId, name: profile.name });
+    }
     
     return NextResponse.json(profile);
   } catch (error: any) {
@@ -56,15 +57,9 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Profile ID required" }, { status: 400 });
     }
     
-    const deleted = TH_PROFILES.delete(id);
-    
-    if (deleted) {
-      logger.info('Profile deleted', { profileId: id });
-      return NextResponse.json({ message: "Profile deleted" });
-    } else {
-      logger.warn('Profile not found for deletion', { profileId: id });
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
-    }
+    await db.deleteProfile(id);
+    logger.info('Profile deleted from persistent storage', { profileId: id });
+    return NextResponse.json({ message: "Profile deleted" });
   } catch (error: any) {
     logger.error('Failed to delete profile', { error: error.message });
     return NextResponse.json({ error: "Failed to delete profile" }, { status: 500 });
