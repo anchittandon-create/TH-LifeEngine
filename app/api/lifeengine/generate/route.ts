@@ -434,12 +434,13 @@ async function buildInput(body: any): Promise<{
 
 function buildPrompt(input: z.infer<typeof inputSchema>, context: GenerationContext) {
   const kcalTarget = Math.round(calculateKcalTarget(input.profileSnapshot));
+  const weeks = Math.max(1, Math.ceil((context.durationDays || 7) / 7));
   return `Create a wellness plan JSON for ${input.profileSnapshot.age}y ${input.profileSnapshot.gender} ${input.profileSnapshot.weight_kg}kg.
 Goals: ${input.goals.slice(0, 3).map((g) => g.name).join(", ")}
 Time: ${input.time_budget_min_per_day}min/day
 
 JSON format:
-{"meta":{"title":"Plan","duration_days":28,"weeks":4},"weekly_plan":[{"week_index":1,"days":[{"day_index":1,"yoga":[{"name":"Flow","duration_min":15}],"nutrition":{"kcal_target":${kcalTarget},"meals":[{"meal":"breakfast","name":"Oats","kcal":300}]},"habits":[{"name":"Meditation","duration_min":5}]}]}],"warnings":[]}`;
+{"meta":{"title":"Plan","duration_days":${context.durationDays || 7},"weeks":${weeks}},"weekly_plan":[{"week_index":1,"days":[{"day_index":1,"yoga":[{"name":"Flow","duration_min":15}],"nutrition":{"kcal_target":${kcalTarget},"meals":[{"meal":"breakfast","name":"Oats","kcal":300}]},"habits":[{"name":"Meditation","duration_min":5}]}]}],"warnings":[]}`;
 }
 
 function calculateBMR(profile: any) {
@@ -509,12 +510,17 @@ function deriveGoalObjects(profile: any, intake?: IntakePayload | null) {
 }
 
 function deriveDuration(intake?: IntakePayload | null) {
+  const isProd = process.env.VERCEL === "1" || process.env.NODE_ENV === "production" || !!process.env.VERCEL;
   const start = safeDate(intake?.startDate);
   if (intake?.endDate) {
     const end = safeDate(intake.endDate);
     const diffMs = end.getTime() - start.getTime();
     if (diffMs > 0) {
-      const days = Math.max(1, Math.round(diffMs / DAY_MS));
+      let days = Math.max(1, Math.round(diffMs / DAY_MS));
+      if (isProd) {
+        // In production, limit initial generation to 7 days to avoid timeouts
+        days = Math.min(days, 7);
+      }
       const weeks = Math.max(1, Math.ceil(days / 7));
       return {
         startDate: start.toISOString().split("T")[0],
@@ -524,10 +530,12 @@ function deriveDuration(intake?: IntakePayload | null) {
     }
   }
 
+  // Default duration
+  const defaultDays = (isProd ? 7 : 28);
   return {
     startDate: start.toISOString().split("T")[0],
-    days: 28,
-    weeks: 4,
+    days: defaultDays,
+    weeks: Math.max(1, Math.ceil(defaultDays / 7)),
   };
 }
 
