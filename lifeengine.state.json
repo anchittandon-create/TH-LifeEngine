@@ -101,6 +101,88 @@
         "createdAt": "2025-11-01T03:14:39.401Z",
         "updatedAt": "2025-11-01T03:14:39.401Z"
       }
+    },
+    {
+      "name": "Debug Test",
+      "age": 30,
+      "gender": "male",
+      "goals": [
+        "fitness"
+      ],
+      "experience": "beginner",
+      "id": "e271ba20-caa9-4845-aa68-a86436b1799c",
+      "healthConcerns": "",
+      "preferredTime": "flexible",
+      "subscriptionType": "quarterly",
+      "demographics": {
+        "age": 30,
+        "sex": "M",
+        "height": 170,
+        "weight": 70
+      },
+      "lifestyle": {
+        "primaryGoal": "fitness",
+        "secondaryGoals": [],
+        "timeZone": "UTC",
+        "activityLevel": "light"
+      },
+      "preferences": {
+        "level": "beginner",
+        "focusAreas": [
+          "fitness"
+        ],
+        "coachingNotes": "",
+        "tone": "balanced",
+        "indoorOnly": false
+      },
+      "schedule": {
+        "preferredSlots": [
+          {
+            "start": "18:00",
+            "end": "19:00"
+          }
+        ],
+        "daysPerWeek": 5,
+        "timeBudgetMin": 30
+      },
+      "health": {
+        "notes": "",
+        "flags": [],
+        "allergies": [],
+        "chronicConditions": [],
+        "injuries": [],
+        "medications": []
+      },
+      "nutrition": {
+        "dietType": "veg",
+        "cuisinePreference": "indian",
+        "dislikes": [],
+        "supplements": []
+      },
+      "equipment": [],
+      "contact": {
+        "email": "",
+        "phone": "",
+        "location": "Global"
+      },
+      "coachingNotes": "",
+      "createdAt": "2025-11-01T03:46:24.292Z",
+      "updatedAt": "2025-11-01T03:46:24.292Z",
+      "ui": {
+        "id": "e271ba20-caa9-4845-aa68-a86436b1799c",
+        "name": "Debug Test",
+        "age": 30,
+        "gender": "male",
+        "goals": [
+          "fitness"
+        ],
+        "healthConcerns": "",
+        "experience": "beginner",
+        "preferredTime": "flexible",
+        "subscriptionType": "quarterly",
+        "createdAt": "2025-11-01T03:46:24.292Z",
+        "updatedAt": "2025-11-01T03:46:24.292Z"
+      }
     }
   ],
   "plans": []
