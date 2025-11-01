@@ -184,7 +184,7 @@ export async function POST(req: NextRequest) {
         temperature: 0.3,
         topP: 0.6,
         topK: 25,
-        maxOutputTokens: 1024,
+        maxOutputTokens: 16384,
       },
     });
 
@@ -195,6 +195,7 @@ export async function POST(req: NextRequest) {
       model: "models/gemini-2.5-flash",
       promptLength: compactPrompt.length,
       estimatedInputTokens,
+      prompt: compactPrompt.substring(0, 200) + "...",
     });
 
     const result = await model.generateContent(compactPrompt);
@@ -214,7 +215,21 @@ export async function POST(req: NextRequest) {
     });
 
     let planJson: any;
-    const responseText = response.text().trim();
+    let responseText = response.text().trim();
+    
+    // Remove markdown code block formatting if present
+    if (responseText.startsWith('```json')) {
+      responseText = responseText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (responseText.startsWith('```')) {
+      responseText = responseText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+    
+    logger.debug("Raw AI response", {
+      responseLength: responseText.length,
+      responsePreview: responseText.substring(0, 300),
+      finishReason: response.candidates?.[0]?.finishReason,
+      safetyRatings: response.candidates?.[0]?.safetyRatings,
+    });
 
     try {
       planJson = JSON.parse(responseText);
@@ -417,17 +432,12 @@ async function buildInput(body: any): Promise<{
 
 function buildPrompt(input: z.infer<typeof inputSchema>, context: GenerationContext) {
   const kcalTarget = Math.round(calculateKcalTarget(input.profileSnapshot));
-  return `${input.duration.value}${input.duration.unit} plan JSON:
-${input.profileSnapshot.gender}${input.profileSnapshot.age}y ${input.profileSnapshot.weight_kg}kg ${input.profileSnapshot.activity_level}
-Diet:${input.profileSnapshot.dietary.type} Avoid:${input.profileSnapshot.dietary.allergies.join(",") || "none"}
-Goals:${input.goals.map((g) => g.name).join(",")}
-Medical:${input.profileSnapshot.medical_flags.join(",") || "none"}
-${input.time_budget_min_per_day}min/day ${input.experience_level}
-Equipment:${input.equipment.join(",") || "none"}
+  return `Create a wellness plan JSON for ${input.profileSnapshot.age}y ${input.profileSnapshot.gender} ${input.profileSnapshot.weight_kg}kg.
+Goals: ${input.goals.slice(0, 3).map((g) => g.name).join(", ")}
+Time: ${input.time_budget_min_per_day}min/day
 
-JSON:{"meta":{"title":"","duration_days":${context.durationDays || input.duration.value},"weeks":${
-    input.duration.unit === "weeks" ? input.duration.value : Math.ceil(input.duration.value / 7)
-  }},"weekly_plan":[{"week_index":1,"days":[{"day_index":1,"yoga":[{"name":"","duration_min":0}],"nutrition":{"kcal_target":${kcalTarget},"meals":[{"meal":"breakfast","name":"","kcal":0}]},"habits":[]}]}],"warnings":[]}`;
+JSON format:
+{"meta":{"title":"Plan","duration_days":28,"weeks":4},"weekly_plan":[{"week_index":1,"days":[{"day_index":1,"yoga":[{"name":"Flow","duration_min":15}],"nutrition":{"kcal_target":${kcalTarget},"meals":[{"meal":"breakfast","name":"Oats","kcal":300}]},"habits":[{"name":"Meditation","duration_min":5}]}]}],"warnings":[]}`;
 }
 
 function calculateBMR(profile: any) {
