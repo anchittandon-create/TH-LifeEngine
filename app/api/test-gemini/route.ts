@@ -14,7 +14,7 @@ export async function GET() {
     
     // Test with the most basic model first
     const model = genAI.getGenerativeModel({
-      model: "gemini-pro",
+      model: "models/gemini-2.5-flash",
       generationConfig: {
         temperature: 0.1,
         maxOutputTokens: 50,

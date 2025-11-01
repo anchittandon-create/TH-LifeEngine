@@ -179,7 +179,7 @@ export async function POST(req: NextRequest) {
 
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: "gemini-pro",
+      model: "models/gemini-2.5-flash",
       generationConfig: {
         temperature: 0.3,
         topP: 0.6,
@@ -192,7 +192,7 @@ export async function POST(req: NextRequest) {
 
     const estimatedInputTokens = Math.ceil(compactPrompt.length / 4);
     logger.debug("Sending compact request to Gemini", {
-      model: "gemini-pro",
+      model: "models/gemini-2.5-flash",
       promptLength: compactPrompt.length,
       estimatedInputTokens,
     });
@@ -206,7 +206,7 @@ export async function POST(req: NextRequest) {
     const totalTokens = usageMetadata?.totalTokenCount || 0;
     const estimatedCost = inputTokens / 1_000_000 * 0.075 + outputTokens / 1_000_000 * 0.3;
 
-    logger.info("✅ EXTREME COST MODE: Gemini API usage (pro)", {
+    logger.info("✅ EXTREME COST MODE: Gemini API usage (2.5-flash)", {
       inputTokens,
       outputTokens,
       totalTokens,
@@ -298,6 +298,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(planData);
   } catch (error: any) {
     const duration = Date.now() - startTime;
+    
+    // Handle specific API quota exceeded error
+    if (error.message && error.message.includes("429") && error.message.includes("quota")) {
+      logger.error("🚨 Google API quota exceeded", {
+        error: error.message,
+        duration: `${duration}ms`,
+        suggestion: "Use mock plan generation or increase API quota"
+      });
+      return NextResponse.json({
+        error: "AI service temporarily unavailable due to quota limits. Using backup plan generation.",
+        fallback: true,
+        mockPlanEndpoint: "/api/lifeengine/plan/generate"
+      }, { status: 503 });
+    }
+    
     logger.error("Plan generation failed", {
       error: error.message,
       duration: `${duration}ms`,
