@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       cacheHours: 24,
       maxRequestsPerProfile: 3,
       maxOutputTokens: 1024,
-      model: 'gemini-1.5-flash-8b',
+      model: 'models/gemini-2.5-flash',
       temperature: 0.3
     }
   });
