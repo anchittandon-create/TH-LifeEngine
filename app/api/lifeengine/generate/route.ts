@@ -178,13 +178,15 @@ export async function POST(req: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+    const isProd = process.env.VERCEL === "1" || process.env.NODE_ENV === "production" || !!process.env.VERCEL;
     const model = genAI.getGenerativeModel({
       model: "models/gemini-2.5-flash",
       generationConfig: {
         temperature: 0.3,
         topP: 0.6,
         topK: 25,
-        maxOutputTokens: 16384,
+        // Keep output bounded in production to avoid Vercel timeouts
+        maxOutputTokens: isProd ? 3072 : 16384,
       },
     });
 
