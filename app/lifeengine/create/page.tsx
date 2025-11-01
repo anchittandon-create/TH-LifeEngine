@@ -65,7 +65,7 @@ export default function CreatePlan() {
         },
       };
 
-      const response = await fetch("/api/lifeengine/plan/generate", {
+      const response = await fetch("/api/lifeengine/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
