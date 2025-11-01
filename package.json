@@ -14,6 +14,8 @@
     "build:deploy": "npm run build && npm run deploy post-build",
     "dev:deploy": "next dev & node scripts/deploy.js watch",
     "dev:auto": "npm run dev:deploy",
+    "commit": "bash scripts/auto-commit.sh",
+    "setup:auto": "bash scripts/setup-auto-commit.sh",
     "auto-commit": "bash scripts/auto-commit.sh",
     "watch:commit": "bash scripts/watch-and-commit.sh",
     "dev:watch": "npm run dev & npm run watch:commit"
