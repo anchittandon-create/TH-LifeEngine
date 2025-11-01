@@ -2,6 +2,7 @@ import { put, list, head, del } from "@vercel/blob";
 import { promises as fs } from 'fs';
 import path from 'path';
 import { hasVercelBlobStorage } from "./env";
+import type { Profile } from "@/lib/ai/schemas";
 
 const BLOB_KEY = "lifeengine.state.json";
 const LOCAL_STORAGE_PATH = path.join(process.cwd(), 'lifeengine.state.json');
@@ -44,9 +45,21 @@ export type StoredPlan = {
   days: StoredPlanDay[];
 };
 
+export type UiProfileSnapshot = Profile & {
+  createdAt: string;
+  updatedAt?: string;
+};
+
 export type ProfileRow = {
   id: string;
   name: string;
+  age?: number;
+  gender?: Profile["gender"];
+  goals?: string[];
+  healthConcerns?: string;
+  experience?: Profile["experience"];
+  preferredTime?: Profile["preferredTime"];
+  subscriptionType?: Profile["subscriptionType"];
   demographics?: {
     age?: number;
     sex?: Sex;
@@ -94,6 +107,8 @@ export type ProfileRow = {
   };
   coachingNotes?: string;
   createdAt?: string;
+  updatedAt?: string;
+  ui?: UiProfileSnapshot;
 };
 
 type PlanRow = {
@@ -112,6 +127,8 @@ type MemoryState = {
   profiles: ProfileRow[];
   plans: PlanRow[];
 };
+
+const defaultTimestamp = new Date().toISOString();
 
 const defaultProfile: ProfileRow = {
   id: "prof_anchit",
@@ -166,7 +183,21 @@ const defaultProfile: ProfileRow = {
     focusAreas: ["pelvic_floor", "core_strength"],
   },
   coachingNotes: "Cycle-sensitive programming required; integrate hydration reminders.",
-  createdAt: new Date().toISOString(),
+  createdAt: defaultTimestamp,
+  updatedAt: defaultTimestamp,
+  ui: {
+    id: "prof_anchit",
+    name: "Anchit",
+    age: 34,
+    gender: "male",
+    goals: ["PCOD-friendly lean gain", "stress_balance", "gut_health"],
+    healthConcerns: "Prefers low-impact flows during luteal phase.",
+    experience: "intermediate",
+    preferredTime: "evening",
+    subscriptionType: "quarterly",
+    createdAt: defaultTimestamp,
+    updatedAt: defaultTimestamp,
+  },
 };
 
 function ensureAnchorProfile(state: MemoryState): MemoryState {
@@ -196,6 +227,8 @@ function ensureAnchorProfile(state: MemoryState): MemoryState {
       focusAreas: existing?.preferences?.focusAreas ?? defaultProfile.preferences?.focusAreas,
     },
     coachingNotes: existing?.coachingNotes ?? defaultProfile.coachingNotes,
+    updatedAt: existing?.updatedAt ?? defaultProfile.updatedAt,
+    ui: existing?.ui ?? defaultProfile.ui,
   } satisfies ProfileRow;
   const others = state.profiles.filter((profile) => profile.id !== defaultProfile.id);
   state.profiles = [merged, ...others];
@@ -284,6 +317,14 @@ export const db = {
   },
   async saveProfile(profile: ProfileRow) {
     const payload = { ...profile, createdAt: profile.createdAt ?? new Date().toISOString() };
+    if (payload.ui) {
+      payload.ui = {
+        ...payload.ui,
+        createdAt: payload.createdAt ?? payload.ui.createdAt ?? new Date().toISOString(),
+        updatedAt: payload.ui.updatedAt ?? payload.updatedAt ?? payload.createdAt,
+      };
+    }
+    payload.updatedAt = profile.updatedAt ?? payload.updatedAt ?? payload.createdAt;
     const state = await readState();
     const filtered = state.profiles.filter((p) => p.id !== profile.id);
     state.profiles = [payload, ...filtered];
@@ -291,6 +332,14 @@ export const db = {
   },
   async updateProfile(profile: ProfileRow) {
     const payload = { ...profile, createdAt: profile.createdAt ?? new Date().toISOString() };
+    payload.updatedAt = profile.updatedAt ?? new Date().toISOString();
+    if (payload.ui) {
+      payload.ui = {
+        ...payload.ui,
+        createdAt: payload.createdAt ?? payload.ui.createdAt ?? new Date().toISOString(),
+        updatedAt: payload.updatedAt,
+      };
+    }
     const state = await readState();
     state.profiles = state.profiles.map((p) => (p.id === profile.id ? { ...p, ...payload } : p));
     await writeState(state);

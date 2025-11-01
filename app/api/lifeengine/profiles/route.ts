@@ -3,10 +3,11 @@ import { Logger } from "@/lib/logging/logger";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "@/lib/utils/db";
 import type { Profile } from "@/lib/ai/schemas";
+import type { ProfileRow, UiProfileSnapshot } from "@/lib/utils/db";
 
 const logger = new Logger("system");
 
-type EnhancedProfile = Profile & { createdAt: string };
+type EnhancedProfile = Profile & { createdAt: string; updatedAt?: string };
 
 const MORNING_SLOT = { start: "06:00", end: "09:00" };
 const EVENING_SLOT = { start: "18:00", end: "21:00" };
@@ -50,6 +51,19 @@ function normalizeGoals(input: unknown, fallback: string[] = []): string[] {
   return [...fallback];
 }
 
+function cleanGoalList(values: Array<string | null | undefined>): string[] {
+  const result: string[] = [];
+  for (const value of values) {
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (trimmed) {
+        result.push(trimmed);
+      }
+    }
+  }
+  return result;
+}
+
 function slotsFromPreferredTime(input: Profile["preferredTime"]) {
   switch (input) {
     case "morning":
@@ -61,15 +75,23 @@ function slotsFromPreferredTime(input: Profile["preferredTime"]) {
   }
 }
 
-function toEnhancedProfile(profile: any): EnhancedProfile {
+function toEnhancedProfile(profile: ProfileRow): EnhancedProfile {
+  if (profile.ui) {
+    return {
+      ...profile.ui,
+      createdAt: profile.ui.createdAt ?? profile.createdAt ?? new Date().toISOString(),
+      updatedAt: profile.ui.updatedAt ?? profile.updatedAt,
+    };
+  }
+
   const gender = normalizeGender(profile.gender ?? profile.demographics?.sex);
   const age = Number(profile.age ?? profile.demographics?.age ?? 30);
   const goals = normalizeGoals(
     profile.goals,
-    [
-      profile.lifestyle?.primaryGoal,
+    cleanGoalList([
+      profile.lifestyle?.primaryGoal ?? null,
       ...(profile.lifestyle?.secondaryGoals ?? []),
-    ].filter(Boolean)
+    ])
   );
   const experience = normalizeExperience(
     profile.experience ?? profile.preferences?.level
@@ -92,29 +114,85 @@ function toEnhancedProfile(profile: any): EnhancedProfile {
     preferredTime,
     subscriptionType: profile.subscriptionType ?? "quarterly",
     createdAt: profile.createdAt ?? new Date().toISOString(),
+    updatedAt: profile.updatedAt,
   };
 }
 
 function prepareProfilePayload(
   incoming: any,
-  existing: any | null
-) {
+  existing: ProfileRow | null
+): ProfileRow {
   const now = new Date().toISOString();
+  const existingUi = existing?.ui ?? null;
+  const profileId = incoming.id ?? existing?.id ?? `prof_${uuidv4().slice(0, 8)}`;
+  const name =
+    incoming.name ??
+    existingUi?.name ??
+    existing?.name ??
+    "New User";
   const gender = normalizeGender(
-    incoming.gender ?? existing?.demographics?.sex ?? "other"
+    incoming.gender ??
+      existingUi?.gender ??
+      existing?.demographics?.sex ??
+      existing?.gender ??
+      "other"
+  );
+  const age = Number(
+    incoming.age ??
+      existingUi?.age ??
+      existing?.demographics?.age ??
+      existing?.age ??
+      30
+  );
+  const goals = normalizeGoals(
+    incoming.goals,
+    existingUi?.goals ??
+      cleanGoalList([
+        existing?.lifestyle?.primaryGoal ?? null,
+        ...(existing?.lifestyle?.secondaryGoals ?? []),
+      ])
+  );
+  const experience = normalizeExperience(
+    incoming.experience ??
+      existingUi?.experience ??
+      existing?.preferences?.level ??
+      existing?.experience
   );
   const preferredTime = normalizePreferredTime(
-    incoming.preferredTime ?? existing?.preferredTime ?? "flexible"
+    incoming.preferredTime ??
+      existingUi?.preferredTime ??
+      existing?.preferredTime ??
+      "flexible"
   );
-  const goals = normalizeGoals(incoming.goals, existing?.preferences?.focusAreas);
+  const subscriptionType =
+    incoming.subscriptionType ??
+    existingUi?.subscriptionType ??
+    existing?.subscriptionType ??
+    "quarterly";
+  const healthConcerns =
+    typeof incoming.healthConcerns === "string" && incoming.healthConcerns.length > 0
+      ? incoming.healthConcerns
+      : existingUi?.healthConcerns ??
+        existing?.health?.notes ??
+        existing?.coachingNotes ??
+        existing?.healthConcerns ??
+        "";
+  const createdAt = existing?.createdAt ?? incoming.createdAt ?? now;
 
-  const payload = {
+  const payload: ProfileRow = {
     ...(existing ?? {}),
     ...incoming,
-    id: incoming.id ?? existing?.id ?? `prof_${uuidv4().slice(0, 8)}`,
-    name: incoming.name ?? existing?.name ?? "New User",
+    id: profileId,
+    name,
+    gender,
+    age,
+    goals,
+    healthConcerns,
+    experience,
+    preferredTime,
+    subscriptionType,
     demographics: {
-      age: Number(incoming.age ?? existing?.demographics?.age ?? 30),
+      age,
       sex: gender === "male" ? "M" : gender === "female" ? "F" : "Other",
       height: incoming.height ?? existing?.demographics?.height ?? 170,
       weight: incoming.weight ?? existing?.demographics?.weight ?? 70,
@@ -128,21 +206,19 @@ function prepareProfilePayload(
       activityLevel:
         incoming.activityLevel ??
         existing?.lifestyle?.activityLevel ??
-        (incoming.experience === "advanced"
+        (experience === "advanced"
           ? "intense"
-          : incoming.experience === "intermediate"
+          : experience === "intermediate"
           ? "moderate"
           : "light"),
     },
     preferences: {
       ...(existing?.preferences ?? {}),
-      level: normalizeExperience(
-        incoming.experience ?? existing?.preferences?.level
-      ),
+      level: experience,
       focusAreas: goals,
       coachingNotes:
-        incoming.healthConcerns ??
-        existing?.preferences?.coachingNotes ??
+        healthConcerns ||
+        existing?.preferences?.coachingNotes ||
         "",
       tone: existing?.preferences?.tone ?? "balanced",
       indoorOnly: existing?.preferences?.indoorOnly ?? false,
@@ -154,14 +230,11 @@ function prepareProfilePayload(
       timeBudgetMin:
         incoming.timeBudget ??
         existing?.schedule?.timeBudgetMin ??
-        (incoming.experience === "advanced" ? 60 : 45),
+        (experience === "advanced" ? 60 : experience === "intermediate" ? 45 : 30),
     },
     health: {
       ...(existing?.health ?? {}),
-      notes:
-        incoming.healthConcerns ??
-        existing?.health?.notes ??
-        "",
+      notes: healthConcerns,
       flags: existing?.health?.flags ?? [],
       allergies: existing?.health?.allergies ?? [],
       chronicConditions: existing?.health?.chronicConditions ?? [],
@@ -182,10 +255,22 @@ function prepareProfilePayload(
       phone: incoming.phone ?? existing?.contact?.phone ?? "",
       location: incoming.location ?? existing?.contact?.location ?? "Global",
     },
-    coachingNotes:
-      incoming.healthConcerns ?? existing?.coachingNotes ?? "",
-    createdAt: existing?.createdAt ?? incoming.createdAt ?? now,
+    coachingNotes: healthConcerns,
+    createdAt,
     updatedAt: now,
+    ui: {
+      id: profileId,
+      name,
+      age,
+      gender,
+      goals,
+      healthConcerns,
+      experience,
+      preferredTime,
+      subscriptionType,
+      createdAt,
+      updatedAt: now,
+    } satisfies UiProfileSnapshot,
   };
 
   return payload;
