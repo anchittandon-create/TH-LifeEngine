@@ -5,7 +5,7 @@
 
 set -e
 
-WATCH_DIR="/Users/Anchit.Tandon/Desktop/AI HUSTLE - APPS/TH_LifeEngine_Starter_Kit_Pro"
+WATCH_DIR="/Users/Anchit.Tandon/Desktop/AI HUSTLE - APPS/TH-LifeEngine"
 SCRIPT_DIR="$WATCH_DIR/scripts"
 
 echo "👀 Watching for changes in: $WATCH_DIR"
