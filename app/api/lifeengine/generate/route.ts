@@ -55,6 +55,8 @@ const inputSchema = z.object({
   equipment: z.array(z.string()),
 });
 
+type NormalizedInput = z.infer<typeof inputSchema>;
+
 const simpleRequestSchema = z
   .object({
     profileId: z.string(),
@@ -86,6 +88,15 @@ type GenerationContext = {
   durationDays: number;
 };
 
+type PlanComputationResult = {
+  mode: "gemini" | "fallback";
+  storedPlan: StoredPlan;
+  warnings: string[];
+  analytics: Record<string, any>;
+  costMetrics: Record<string, any>;
+  estimatedCostUsd: number;
+};
+
 // 💰 EXTREME COST OPTIMIZATION: 24-hour caching - prevent duplicate calls within full day
 const requestCache = new Map<string, { timestamp: number; response: any }>();
 const THROTTLE_MS = 86_400_000; // 24 hours
@@ -105,7 +116,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { input, context } = await buildInput(body);
 
-    // 💰 COST CONTROL: Ultra-strict daily request limit per profile
     const today = new Date().toISOString().split("T")[0];
     const profileLimit = dailyRequestCount.get(input.profileId);
 
@@ -134,7 +144,6 @@ export async function POST(req: NextRequest) {
       dailyRequestCount.set(input.profileId, { date: today, count: 1 });
     }
 
-    // 💰 GLOBAL BUDGET CIRCUIT BREAKER: Check total daily spend
     const globalSpend = globalDailySpend.get(today);
     if (globalSpend && globalSpend.totalCost >= MAX_DAILY_BUDGET_USD) {
       logger.error("🚨 DAILY BUDGET EXCEEDED - API BLOCKED", {
@@ -152,10 +161,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create cache key from profile + plan type
     const cacheKey = `${input.profileId}-${input.plan_type.primary}-${JSON.stringify(input.goals)}`;
-
-    // 💰 Check 24-hour cache - MASSIVE cost savings!
     const cached = requestCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < THROTTLE_MS) {
       logger.warn("Request served from 24-HOUR cache", {
@@ -172,162 +178,29 @@ export async function POST(req: NextRequest) {
       duration: input.duration,
     });
 
-    if (!process.env.GOOGLE_API_KEY) {
-      logger.error("GOOGLE_API_KEY not configured");
-      return NextResponse.json({ error: "GOOGLE_API_KEY not configured" }, { status: 500 });
-    }
-
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-    const isProd = process.env.VERCEL === "1" || process.env.NODE_ENV === "production" || !!process.env.VERCEL;
-    const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.5-flash",
-      generationConfig: {
-        temperature: 0.3,
-        topP: 0.6,
-        topK: 25,
-        // Keep output bounded in production to avoid Vercel timeouts
-        maxOutputTokens: isProd ? 3072 : 16384,
-      },
-    });
-
-    const compactPrompt = buildPrompt(input, context);
-
-    const estimatedInputTokens = Math.ceil(compactPrompt.length / 4);
-    logger.debug("Sending compact request to Gemini", {
-      model: "models/gemini-2.5-flash",
-      promptLength: compactPrompt.length,
-      estimatedInputTokens,
-      prompt: compactPrompt.substring(0, 200) + "...",
-    });
-
-    const result = await model.generateContent(compactPrompt);
-    const response = await result.response;
-
-    const usageMetadata = response.usageMetadata;
-    const inputTokens = usageMetadata?.promptTokenCount || 0;
-    const outputTokens = usageMetadata?.candidatesTokenCount || 0;
-    const totalTokens = usageMetadata?.totalTokenCount || 0;
-    const estimatedCost = inputTokens / 1_000_000 * 0.075 + outputTokens / 1_000_000 * 0.3;
-
-    logger.info("✅ EXTREME COST MODE: Gemini API usage (2.5-flash)", {
-      inputTokens,
-      outputTokens,
-      totalTokens,
-      estimatedCost: `$${estimatedCost.toFixed(6)}`,
-    });
-
-  let planJson: any;
-  let parseWarning: string | null = null;
-    let responseText = response.text().trim();
-    
-    // Remove markdown code block formatting if present
-    if (responseText.startsWith('```json')) {
-      responseText = responseText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    } else if (responseText.startsWith('```')) {
-      responseText = responseText.replace(/^```\s*/, '').replace(/\s*```$/, '');
-    }
-    
-    logger.debug("Raw AI response", {
-      responseLength: responseText.length,
-      responsePreview: responseText.substring(0, 300),
-      finishReason: response.candidates?.[0]?.finishReason,
-      safetyRatings: response.candidates?.[0]?.safetyRatings,
-    });
-
-    try {
-      planJson = JSON.parse(responseText);
-      logger.info("✅ Plan JSON parsed successfully");
-    } catch (parseError: any) {
-      // Fallback: proceed with an empty plan and let converter build a safe default schedule
-      parseWarning = `AI JSON parse failed: ${parseError.message}. Using safe fallback plan.`;
-      logger.error("❌ JSON parse failed - using fallback", {
-        error: parseError.message,
-        responsePreview: responseText.substring(0, 200),
-      });
-      planJson = {};
-    }
-
-  const verifiedPlan = verifyPlan(planJson, input);
-  if (parseWarning) verifiedPlan.warnings.push(parseWarning);
     const planId = uuidv4();
+    let result: PlanComputationResult;
 
-    const storedPlan = convertPlanToStoredPlan(verifiedPlan.plan, input, context, planId);
-    await db.savePlan({
+    if (!process.env.GOOGLE_API_KEY) {
+      logger.warn("GOOGLE_API_KEY not configured. Falling back to offline plan synthesis.");
+      result = buildFallbackPlan(planId, input, context, {
+        reason: "GOOGLE_API_KEY not configured",
+      });
+    } else {
+      result = await runGeminiPlan(planId, input, context, startTime);
+    }
+
+    return await persistPlanComputation({
       planId,
-      profileId: input.profileId,
-      createdAt: storedPlan.createdAt,
-      planJSON: storedPlan,
-      warnings: verifiedPlan.warnings,
-      analytics: verifiedPlan.analytics,
-      costMetrics: {
-        inputTokens,
-        outputTokens,
-        totalTokens,
-        estimatedCost: `$${estimatedCost.toFixed(6)}`,
-        savedTokens: Math.max(0, 1200 - inputTokens),
-        extremeMode: "Ultra-cost-optimized: 24h cache, 3 req/day, 1024 max tokens",
-      },
-      confidence: verifiedPlan.analytics?.overall ?? 0.9,
-      days: storedPlan.days.length,
+      cacheKey,
+      today,
+      input,
+      result,
+      startTime,
     });
-
-    const durationMs = Date.now() - startTime;
-
-    const currentGlobalSpend = globalDailySpend.get(today) || { date: today, totalCost: 0 };
-    currentGlobalSpend.totalCost += estimatedCost;
-    globalDailySpend.set(today, currentGlobalSpend);
-
-    logger.info("🎉 Plan generated - EXTREME COST MODE", {
-      planId,
-      profileId: input.profileId,
-      duration: `${durationMs}ms`,
-      warningsCount: verifiedPlan.warnings.length,
-      cost: `$${estimatedCost.toFixed(6)}`,
-      dailySpend: `$${currentGlobalSpend.totalCost.toFixed(4)}/${MAX_DAILY_BUDGET_USD}`,
-    });
-
-    const planData = {
-      planId,
-      profileId: input.profileId,
-      createdAt: storedPlan.createdAt,
-      plan: storedPlan,
-      warnings: verifiedPlan.warnings,
-      analytics: verifiedPlan.analytics,
-      costMetrics: {
-        inputTokens,
-        outputTokens,
-        totalTokens,
-        estimatedCost: `$${estimatedCost.toFixed(6)}`,
-        savedTokens: Math.max(0, 1200 - inputTokens),
-        extremeMode: "Ultra-cost-optimized: 24h cache, 3 req/day, 1024 max tokens",
-      },
-    };
-
-    requestCache.set(cacheKey, {
-      timestamp: Date.now(),
-      response: planData,
-    });
-
-    cleanupCaches(today);
-
-    return NextResponse.json(planData);
   } catch (error: any) {
     const duration = Date.now() - startTime;
-    
-    // Handle specific API quota exceeded error
-    if (error.message && error.message.includes("429") && error.message.includes("quota")) {
-      logger.error("🚨 Google API quota exceeded", {
-        error: error.message,
-        duration: `${duration}ms`,
-        suggestion: "Use mock plan generation or increase API quota"
-      });
-      return NextResponse.json({
-        error: "AI service temporarily unavailable due to quota limits. Using backup plan generation.",
-        fallback: true,
-        mockPlanEndpoint: "/api/lifeengine/plan/generate"
-      }, { status: 503 });
-    }
-    
+
     logger.error("Plan generation failed", {
       error: error.message,
       duration: `${duration}ms`,
@@ -355,6 +228,274 @@ function cleanupCaches(today: string) {
       globalDailySpend.delete(date);
     }
   }
+}
+
+async function runGeminiPlan(
+  planId: string,
+  input: NormalizedInput,
+  context: GenerationContext,
+  startTime: number,
+): Promise<PlanComputationResult> {
+  try {
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
+    const isProd =
+      process.env.VERCEL === "1" || process.env.NODE_ENV === "production" || !!process.env.VERCEL;
+    const model = genAI.getGenerativeModel({
+      model: "models/gemini-2.5-flash",
+      generationConfig: {
+        temperature: 0.3,
+        topP: 0.6,
+        topK: 25,
+        maxOutputTokens: isProd ? 3072 : 16384,
+      },
+    });
+
+    const compactPrompt = buildPrompt(input, context);
+    const estimatedInputTokens = Math.ceil(compactPrompt.length / 4);
+
+    logger.debug("Sending compact request to Gemini", {
+      model: "models/gemini-2.5-flash",
+      promptLength: compactPrompt.length,
+      estimatedInputTokens,
+      prompt: compactPrompt.substring(0, 200) + "...",
+    });
+
+    const generation = await model.generateContent(compactPrompt);
+    const response = await generation.response;
+
+    const usageMetadata = response.usageMetadata;
+    const inputTokens = usageMetadata?.promptTokenCount || 0;
+    const outputTokens = usageMetadata?.candidatesTokenCount || 0;
+    const totalTokens = usageMetadata?.totalTokenCount || 0;
+    const estimatedCost = (inputTokens / 1_000_000) * 0.075 + (outputTokens / 1_000_000) * 0.3;
+
+    logger.info("✅ EXTREME COST MODE: Gemini API usage (2.5-flash)", {
+      inputTokens,
+      outputTokens,
+      totalTokens,
+      estimatedCost: `$${estimatedCost.toFixed(6)}`,
+    });
+
+    let responseText = response.text().trim();
+    if (responseText.startsWith("```json")) {
+      responseText = responseText.replace(/^```json\\s*/, "").replace(/\\s*```$/, "");
+    } else if (responseText.startsWith("```")) {
+      responseText = responseText.replace(/^```\\s*/, "").replace(/\\s*```$/, "");
+    }
+
+    logger.debug("Raw AI response", {
+      responseLength: responseText.length,
+      responsePreview: responseText.substring(0, 300),
+      finishReason: response.candidates?.[0]?.finishReason,
+      safetyRatings: response.candidates?.[0]?.safetyRatings,
+    });
+
+    let planJson: any = {};
+    let parseWarning: string | null = null;
+    try {
+      planJson = JSON.parse(responseText);
+      logger.info("✅ Plan JSON parsed successfully");
+    } catch (parseError: any) {
+      parseWarning = `AI JSON parse failed: ${parseError.message}. Using safe fallback plan.`;
+      logger.error("❌ JSON parse failed - using fallback structure", {
+        error: parseError.message,
+        responsePreview: responseText.substring(0, 200),
+      });
+    }
+
+    const verifiedPlan = verifyPlan(planJson, input);
+    if (parseWarning) {
+      verifiedPlan.warnings.push(parseWarning);
+    }
+
+    const storedPlan = convertPlanToStoredPlan(verifiedPlan.plan, input, context, planId);
+
+    return {
+      mode: "gemini",
+      storedPlan,
+      warnings: verifiedPlan.warnings,
+      analytics: verifiedPlan.analytics,
+      estimatedCostUsd: estimatedCost,
+      costMetrics: {
+        mode: "gemini",
+        inputTokens,
+        outputTokens,
+        totalTokens,
+        estimatedCost: `$${estimatedCost.toFixed(6)}`,
+        savedTokens: Math.max(0, 1200 - inputTokens),
+        extremeMode: "Ultra-cost-optimized: 24h cache, 3 req/day, 1024 max tokens",
+        parseWarning: parseWarning ?? undefined,
+      },
+    };
+  } catch (error: any) {
+    const duration = Date.now() - startTime;
+    const message = error?.message ?? "Unknown generation error";
+    const quotaHit = /429/.test(message) && /quota/i.test(message);
+
+    if (quotaHit) {
+      logger.error("🚨 Google API quota exceeded", {
+        error: message,
+        duration: `${duration}ms`,
+        suggestion: "Use fallback plan generation or increase API quota",
+      });
+    } else {
+      logger.error("Gemini generation failed. Switching to fallback plan.", {
+        error: message,
+        duration: `${duration}ms`,
+      });
+    }
+
+    return buildFallbackPlan(planId, input, context, {
+      reason: quotaHit ? "Gemini quota exceeded" : message,
+      error,
+      durationMs: duration,
+    });
+  }
+}
+
+async function persistPlanComputation(params: {
+  planId: string;
+  cacheKey: string;
+  today: string;
+  input: NormalizedInput;
+  result: PlanComputationResult;
+  startTime: number;
+}) {
+  const { planId, cacheKey, today, input, result, startTime } = params;
+
+  await db.savePlan({
+    planId,
+    profileId: input.profileId,
+    createdAt: result.storedPlan.createdAt,
+    planJSON: result.storedPlan,
+    warnings: result.warnings,
+    analytics: result.analytics,
+    costMetrics: result.costMetrics,
+    confidence: result.analytics?.overall ?? 0.9,
+    days: result.storedPlan.days.length,
+  });
+
+  if (result.mode === "gemini" && result.estimatedCostUsd > 0) {
+    const currentGlobalSpend = globalDailySpend.get(today) || { date: today, totalCost: 0 };
+    currentGlobalSpend.totalCost += result.estimatedCostUsd;
+    globalDailySpend.set(today, currentGlobalSpend);
+  }
+
+  const planData = {
+    planId,
+    profileId: input.profileId,
+    createdAt: result.storedPlan.createdAt,
+    plan: result.storedPlan,
+    warnings: result.warnings,
+    analytics: result.analytics,
+    costMetrics: result.costMetrics,
+  };
+
+  requestCache.set(cacheKey, {
+    timestamp: Date.now(),
+    response: planData,
+  });
+
+  cleanupCaches(today);
+
+  const durationMs = Date.now() - startTime;
+
+  if (result.mode === "gemini") {
+    const spendSnapshot = globalDailySpend.get(today)?.totalCost ?? result.estimatedCostUsd;
+    logger.info("🎉 Plan generated - EXTREME COST MODE", {
+      planId,
+      profileId: input.profileId,
+      duration: `${durationMs}ms`,
+      warningsCount: result.warnings.length,
+      cost: `$${result.estimatedCostUsd.toFixed(6)}`,
+      dailySpend: `$${spendSnapshot.toFixed(4)}/${MAX_DAILY_BUDGET_USD}`,
+    });
+  } else {
+    logger.info("✅ Plan generated via offline fallback", {
+      planId,
+      profileId: input.profileId,
+      duration: `${durationMs}ms`,
+      warningsCount: result.warnings.length,
+      reason: result.costMetrics.reason ?? "fallback",
+    });
+  }
+
+  return NextResponse.json(planData);
+}
+
+function buildFallbackPlan(
+  planId: string,
+  input: NormalizedInput,
+  context: GenerationContext,
+  options: { reason: string; error?: unknown; durationMs?: number },
+): PlanComputationResult {
+  const storedPlan = buildFallbackStoredPlan(planId, input, context);
+  const warnings = [
+    `Generated via offline fallback: ${options.reason}`,
+    "Plan synthesised locally without external AI. Fine-tune as needed.",
+  ];
+  const analytics = defaultAnalytics();
+  const costMetrics = {
+    mode: "fallback",
+    inputTokens: 0,
+    outputTokens: 0,
+    totalTokens: 0,
+    estimatedCost: "$0.000000",
+    savedTokens: 0,
+    extremeMode: "offline-fallback",
+    reason: options.reason,
+  };
+
+  return {
+    mode: "fallback",
+    storedPlan,
+    warnings,
+    analytics,
+    costMetrics,
+    estimatedCostUsd: 0,
+  };
+}
+
+function buildFallbackStoredPlan(
+  planId: string,
+  input: NormalizedInput,
+  context: GenerationContext,
+): StoredPlan {
+  const start = safeDate(context.startDate);
+  const goalNames = context.goals.length
+    ? context.goals
+    : input.goals.map((goal) => goal.name);
+  const goals = goalNames.length ? goalNames : ["general_wellness"];
+  const timeBudget = Math.max(20, Math.min(input.time_budget_min_per_day || 45, 90));
+  const durationDays =
+    context.durationDays ||
+    (input.duration.unit === "weeks"
+      ? input.duration.value * 7
+      : Math.max(7, input.duration.value));
+
+  const kcalTarget = Math.max(1400, Math.round(calculateKcalTarget(input.profileSnapshot)));
+  const days = buildFallbackDays(start, goals, durationDays, timeBudget, kcalTarget);
+  const intakeId = context.intake?.id ?? `intake_${planId}`;
+  const createdAt = new Date().toISOString();
+
+  return {
+    id: planId,
+    profileId: input.profileId,
+    intakeId,
+    goals,
+    createdAt,
+    days,
+  };
+}
+
+function defaultAnalytics() {
+  return {
+    safety_score: 0.9,
+    diet_match: 0.86,
+    progression_score: 0.84,
+    adherence_score: 0.82,
+    overall: 0.85,
+  };
 }
 
 async function buildInput(body: any): Promise<{
@@ -773,7 +914,13 @@ function convertPlanToStoredPlan(
   }
 
   if (!days.length) {
-    const fallbackDays = buildFallbackDays(start, goals, context.durationDays || 7);
+    const fallbackDays = buildFallbackDays(
+      start,
+      goals,
+      context.durationDays || 7,
+      input.time_budget_min_per_day,
+      Math.max(1400, Math.round(calculateKcalTarget(input.profileSnapshot))),
+    );
     days.push(...fallbackDays);
   }
 
@@ -881,39 +1028,69 @@ function collectMeals(day: any): StoredPlanDay["meals"] {
   return meals;
 }
 
-function buildFallbackDays(start: Date, goals: string[], durationDays: number): StoredPlanDay[] {
-  const count = Math.min(Math.max(durationDays, 7), 28);
+function buildFallbackDays(
+  start: Date,
+  goals: string[],
+  durationDays: number,
+  timeBudgetMin: number,
+  kcalTarget: number,
+): StoredPlanDay[] {
+  const count = Math.min(Math.max(Math.round(durationDays), 7), 28);
   const targets = goals.length ? goals : ["wellness"];
+  const movementDuration = Math.max(20, Math.min(Math.round(timeBudgetMin || 45), 90));
   const fallback: StoredPlanDay[] = [];
 
   for (let i = 0; i < count; i++) {
-    const date = new Date(start.getTime() + i * DAY_MS);
-    const dateIso = date.toISOString().split("T")[0];
+    const dateIso = new Date(start.getTime() + i * DAY_MS).toISOString().split("T")[0];
     const goal = targets[i % targets.length];
+    const targetLabel = capitalize(goal);
+    const isRecovery = (i + 1) % 7 === 0;
+
+    const activities: StoredPlanDay["activities"] = [
+      {
+        type: "movement",
+        name: isRecovery ? "Recovery mobility" : `${targetLabel} focus`,
+        duration: isRecovery ? Math.min(30, movementDuration) : movementDuration,
+        description: isRecovery
+          ? "Gentle mobility, fascia release, and restorative stretching."
+          : `Coach-guided session progressing your ${targetLabel.toLowerCase()} goal.`,
+      },
+      {
+        type: "mindfulness",
+        name: "Breathing reset",
+        duration: 10,
+        description: "Five minutes of box breathing followed by gratitude journaling.",
+      },
+      {
+        type: "habit",
+        name: "Hydration",
+        duration: 0,
+        description: "Target eight glasses of water spaced across the day.",
+      },
+    ];
+
+    if (!isRecovery) {
+      activities.push({
+        type: "note",
+        name: "Progress cue",
+        duration: 0,
+        description: `Track effort (RPE) and note wins for ${targetLabel.toLowerCase()}.`,
+      });
+    }
+
+    const meals: StoredPlanDay["meals"] = [
+      {
+        type: "daily",
+        name: "Balanced plate",
+        calories: kcalTarget,
+        description: "Three balanced meals plus two mindful snacks built around whole foods.",
+      },
+    ];
+
     fallback.push({
       date: dateIso,
-      activities: [
-        {
-          type: "movement",
-          name: `${goal} session`,
-          duration: 30,
-          description: "Auto-generated session",
-        },
-        {
-          type: "habit",
-          name: "Hydration",
-          duration: 0,
-          description: "Drink 8 glasses of water.",
-        },
-      ],
-      meals: [
-        {
-          type: "daily",
-          name: "Balanced meals",
-          calories: 1800,
-          description: "Focus on whole foods and balanced macros.",
-        },
-      ],
+      activities,
+      meals,
     });
   }
 
@@ -927,4 +1104,11 @@ function safeDate(value?: string) {
     return new Date();
   }
   return parsed;
+}
+
+function capitalize(value: string) {
+  if (!value) return "Wellness";
+  const normalized = value.replace(/[_-]+/g, " ").trim();
+  if (!normalized.length) return "Wellness";
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
