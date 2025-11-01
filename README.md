@@ -91,8 +91,71 @@ npm run dev    # Standard dev server (no auto-deploy)
 4. Run setup script: `./setup-deployment.sh`
 5. Start with auto-deployment: `npm run dev:auto`
 
+## 🤖 Custom GPT Integration (NEW!)
+
+Generate personalized wellness plans using ChatGPT's Custom GPT - **no OpenAI API costs in your app!**
+
+### Features
+- ✨ Beautiful plan generation through ChatGPT interface
+- 🎯 No API usage charges (GPT calls your endpoints)
+- 🔒 Rate limiting & security built-in (15 req/15sec)
+- 📊 Store plans in-memory (upgrade to DB later)
+- 🎨 Beautiful UI with gradient backgrounds
+
+### Quick Start
+
+1. **Visit the interface:**
+   ```
+   http://localhost:3000/use-custom-gpt
+   ```
+
+2. **Create your Custom GPT** (5 minutes):
+   - Follow the complete guide in `CUSTOM_GPT_SETUP.md`
+   - Copy/paste all configurations (system prompt, schema, etc.)
+   - Update OpenAPI server URL with your deployment URL
+
+3. **Set environment variable:**
+   ```bash
+   cp .env.local.example .env.local
+   # Add your GPT share URL:
+   NEXT_PUBLIC_LIFEENGINE_GPT_URL="https://chatgpt.com/g/YOUR_GPT_ID"
+   ```
+
+4. **Deploy and test:**
+   ```bash
+   npm run build:deploy
+   # Visit /use-custom-gpt and test the flow!
+   ```
+
+### API Endpoints (v1)
+- `GET /api/v1/profiles/[id]` - Fetch demo profiles (ritika-001, demo-002)
+- `POST /api/v1/plans` - Store GPT-generated plans
+- `GET /api/v1/plans/latest?profile_id=X` - Get latest plan by profile
+
+### Documentation
+- `CUSTOM_GPT_SETUP.md` - Complete setup guide (600+ lines)
+- `CUSTOM_GPT_QUICK_START.md` - Quick reference
+- `IMPLEMENTATION_COMPLETE.md` - Implementation summary
+
+### Demo Profiles Available
+- `ritika-001` - 34F, Mumbai, weight loss + PCOS, high stress
+- `demo-002` - 28M, Bangalore, core strength, motivated
+
+### User Flow
+```
+1. User opens /use-custom-gpt
+2. Clicks "Open Custom GPT" → ChatGPT opens
+3. Says: "Use profile_id ritika-001 and generate a combined plan"
+4. GPT fetches profile → generates plan → stores it
+5. User clicks "Refresh Latest Plan"
+6. Beautiful plan preview appears! 🎉
+```
+
+---
+
 ## Feature Flags (env or Denmark)
 
 - LIFEENGINE_ENABLED=true
 - LIFEENGINE_ROLLOUT_PERCENT=10
 - LIFEENGINE_COACH_MINI_ENABLED=false
+- NEXT_PUBLIC_LIFEENGINE_GPT_URL=""  # Your Custom GPT share link
