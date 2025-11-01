@@ -333,5 +333,842 @@
       }
     }
   ],
-  "plans": []
+  "plans": [
+    {
+      "planId": "6f6a8ddc-ca1f-4192-8068-0b5c10c09335",
+      "profileId": "prof_anchit",
+      "createdAt": "2025-11-01T13:01:50.377Z",
+      "planJSON": {
+        "id": "6f6a8ddc-ca1f-4192-8068-0b5c10c09335",
+        "profileId": "prof_anchit",
+        "intakeId": "intake_6f6a8ddc-ca1f-4192-8068-0b5c10c09335",
+        "goals": [
+          "Weight",
+          "pelvic_floor",
+          "core_strength",
+          "PCOD-friendly lean gain",
+          "stress_balance",
+          "gut_health",
+          "holistic"
+        ],
+        "createdAt": "2025-11-01T13:01:50.377Z",
+        "days": [
+          {
+            "date": "2025-11-01",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oats with berries & protein powder",
+                "calories": 350,
+                "description": ""
+              },
+              {
+                "type": "lunch",
+                "name": "Chicken salad with mixed greens",
+                "calories": 500,
+                "description": ""
+              },
+              {
+                "type": "dinner",
+                "name": "Baked salmon with quinoa & steamed veggies",
+                "calories": 600,
+                "description": ""
+              },
+              {
+                "type": "snack_1",
+                "name": "Greek yogurt with nuts",
+                "calories": 250,
+                "description": ""
+              },
+              {
+                "type": "snack_2",
+                "name": "Apple with peanut butter",
+                "calories": 250,
+                "description": ""
+              }
+            ]
+          },
+          {
+            "date": "2025-11-02",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-03",
+            "activities": [
+              {
+                "type": "movement",
+                "name": "Vinyasa Flow (Core Focused)",
+                "duration": 25,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-04",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-05",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-06",
+            "activities": [
+              {
+                "type": "movement",
+                "name": "Restorative/Gentle Yoga Flow",
+                "duration": 25,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-07",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-08",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-09",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-10",
+            "activities": [
+              {
+                "type": "movement",
+                "name": "Vinyasa Flow (Focus on balance & core)",
+                "duration": 25,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-11",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-12",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-13",
+            "activities": [
+              {
+                "type": "movement",
+                "name": "Restorative/Gentle Yoga Flow (Deeper stretches)",
+                "duration": 25,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-14",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-15",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-16",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-17",
+            "activities": [
+              {
+                "type": "movement",
+                "name": "Vinyasa Flow (Challenging poses & transitions)",
+                "duration": 25,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-18",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-19",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-20",
+            "activities": [
+              {
+                "type": "movement",
+                "name": "Restorative/Gentle Yoga Flow (Focus on deep relaxation)",
+                "duration": 25,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-21",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-22",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-23",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-24",
+            "activities": [
+              {
+                "type": "movement",
+                "name": "Vinyasa Flow (Advanced poses or longer holds)",
+                "duration": 25,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-25",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-26",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-27",
+            "activities": [
+              {
+                "type": "movement",
+                "name": "Restorative/Gentle Yoga Flow (Deepest stretches and relaxation)",
+                "duration": 25,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-28",
+            "activities": [
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              },
+              {
+                "type": "habit",
+                "name": "[object Object]",
+                "duration": 0,
+                "description": ""
+              }
+            ],
+            "meals": [
+              {
+                "type": "daily",
+                "name": "Nutrition Target",
+                "calories": 1950,
+                "description": "Estimated daily calorie target"
+              }
+            ]
+          }
+        ]
+      },
+      "warnings": [],
+      "analytics": {
+        "safety_score": 0.95,
+        "diet_match": 0.92,
+        "progression_score": 0.9,
+        "adherence_score": 0.88,
+        "overall": 0.91
+      },
+      "costMetrics": {
+        "inputTokens": 141,
+        "outputTokens": 7011,
+        "totalTokens": 9622,
+        "estimatedCost": "$0.002114",
+        "savedTokens": 1059,
+        "extremeMode": "Ultra-cost-optimized: 24h cache, 3 req/day, 1024 max tokens"
+      },
+      "confidence": 0.91,
+      "days": 28
+    }
+  ]
 }
