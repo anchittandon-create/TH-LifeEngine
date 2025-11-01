@@ -82,7 +82,25 @@
         ]
       },
       "coachingNotes": "Cycle-sensitive programming required; integrate hydration reminders.",
-      "createdAt": "2025-10-19T22:07:08.425Z"
+      "createdAt": "2025-10-19T22:07:08.425Z",
+      "updatedAt": "2025-11-01T03:14:39.401Z",
+      "ui": {
+        "id": "prof_anchit",
+        "name": "Anchit",
+        "age": 34,
+        "gender": "male",
+        "goals": [
+          "PCOD-friendly lean gain",
+          "stress_balance",
+          "gut_health"
+        ],
+        "healthConcerns": "Prefers low-impact flows during luteal phase.",
+        "experience": "intermediate",
+        "preferredTime": "evening",
+        "subscriptionType": "quarterly",
+        "createdAt": "2025-11-01T03:14:39.401Z",
+        "updatedAt": "2025-11-01T03:14:39.401Z"
+      }
     }
   ],
   "plans": []
