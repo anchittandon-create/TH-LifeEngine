@@ -88,10 +88,16 @@ export default function ProfilesPage() {
 
       if (response.ok) {
         await fetchProfiles();
-        setEditingId(payload.id);
+        // Reset form to create mode after successful save
+        setEditingId(null);
+        setForm(toFormState({ ...DEFAULT_PROFILE, id: "" } as Profile));
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to save profile: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Failed to save profile:', error);
+      alert('Failed to save profile: Network error');
     }
   };
 
@@ -99,17 +105,25 @@ export default function ProfilesPage() {
     if (!window.confirm('Remove this profile?')) return;
 
     try {
-      await fetch('/api/lifeengine/profiles', {
+      const response = await fetch('/api/lifeengine/profiles', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),
       });
-      await fetchProfiles();
-      if (editingId === id) {
-        setEditingId(null);
+      
+      if (response.ok) {
+        await fetchProfiles();
+        if (editingId === id) {
+          setEditingId(null);
+          setForm(toFormState({ ...DEFAULT_PROFILE, id: "" } as Profile));
+        }
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to delete profile: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Failed to delete profile:', error);
+      alert('Failed to delete profile: Network error');
     }
   };
 
