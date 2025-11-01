@@ -126,9 +126,9 @@ export default function CustomGPT() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <h1 className={styles.title}>🩵 TH_LifeEngine v2.0 CustomGPT</h1>
+        <h1 className={styles.title}>🩵 TH_LifeEngine v3.0 — The AI Wellness Architect</h1>
         <p className={styles.subtitle}>
-          Chat with our holistic AI wellness planner for personalized guidance, plan adjustments, and emotionally intelligent coaching
+          Hyper-personalized wellness coaching with precision, empathy, and cultural diversity. Chat for adaptive guidance that understands your unique lifestyle.
         </p>
       </header>
 
@@ -161,19 +161,20 @@ export default function CustomGPT() {
           {messages.length === 0 ? (
             <div className={styles.welcome}>
               <div className={styles.welcomeIcon}>🩵</div>
-              <h3>Welcome to TH_LifeEngine v2.0 CustomGPT!</h3>
+              <h3>Welcome to TH_LifeEngine v3.0 — The AI Wellness Architect!</h3>
               <p>
-                I'm your holistic AI wellness planner and coach. I create realistic, emotionally intelligent plans that fit YOUR lifestyle:
+                I'm your hyper-personalized wellness coach with the depth of an expert health coach, yoga trainer, nutritionist, and mindfulness mentor combined:
               </p>
               <ul>
-                <li>🧘 **Yoga Plans**: Asana progressions, pranayama, mindfulness</li>
-                <li>🍃 **Diet Plans**: Culturally rooted meals, macro balance</li>
-                <li>⚡ **Combined Plans**: Integrated yoga + nutrition timing</li>
-                <li>🌟 **Holistic Plans**: Complete mind-body-lifestyle wellness</li>
-                <li>💬 Plan modifications and progress guidance</li>
-                <li>🎯 Motivation and accountability support</li>
+                <li>🧘‍♀️ **Movement**: Yoga progressions, alignment, strength building, restorative flows</li>
+                <li>🥗 **Nutrition**: Culturally rooted meals, weekly nutrition themes, sustainable habits</li>
+                <li>🌙 **Rest & Recovery**: Sleep optimization, digital detox, regeneration protocols</li>
+                <li>💭 **Mind & Emotion**: Meditation, breathwork, journaling, stress management</li>
+                <li>🤝 **Social & Environment**: Community wellness, relationship health, lifestyle integration</li>
+                <li>⚡ **Specialized Plans**: Sleep, stress reset, hormonal balance, corporate wellness, menstrual wellness</li>
               </ul>
-              <p>Select a profile above and let's create something amazing together!</p>
+              <p><strong>My Promise:</strong> Every plan feels handcrafted for YOUR unique background, culture, and motivation level.</p>
+              <p>Select a profile above and let's architect your wellness journey together!</p>
             </div>
           ) : (
             messages.map(message => (

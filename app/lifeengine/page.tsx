@@ -11,11 +11,11 @@ export default function Home() {
           ⚡
         </div>
         <h1 className={styles.heroTitle}>
-          🩵 TH_LifeEngine v2.0
+          🩵 TH_LifeEngine v3.0
         </h1>
         <p className={styles.heroSubtitle}>
-          Holistic AI Wellness Planner for Mind, Body & Nutrition. 
-          Create realistic, emotionally intelligent, science-backed plans for Yoga, Diet, Combined, and Holistic wellness journeys that fit your unique lifestyle — not an idealized one.
+          The AI Wellness Architect — "Personalized Wellness for Every Lifestyle, Every Body, Every Mind."
+          Hyper-personalized wellness plans that adapt to your unique background, culture, capability, and motivation level with scientific precision and emotional intelligence.
         </p>
         <div className={styles.heroActions}>
           <Link href="/lifeengine/create">
@@ -53,7 +53,7 @@ export default function Home() {
               AI-Powered Insights
             </h3>
             <p className={styles.featureText}>
-              Advanced Gemini AI analyzes your health data to create personalized, evidence-based recommendations.
+              Hyper-personalized AI wellness architecture with 6-pillar profile understanding: Identity & Context, Daily Rhythm, Body & Movement, Cultural Nutrition, Goals & Time Horizon, and Mind & Emotion Blueprint.
             </p>
           </div>
 
@@ -81,7 +81,7 @@ export default function Home() {
               Holistic Approach
             </h3>
             <p className={styles.featureText}>
-              Comprehensive plans covering nutrition, exercise, sleep, and mental wellness for complete health optimization.
+              Multi-dimensional wellness framework spanning Movement, Nutrition, Rest & Recovery, Mind & Emotion, and Social & Environment domains with adaptive intelligence.
             </p>
           </div>
         </div>
