@@ -103,6 +103,72 @@
       }
     },
     {
+      "id": "prof_f6cf230b",
+      "name": "Data Persistence Test User",
+      "demographics": {
+        "age": 25,
+        "sex": "M",
+        "height": 170,
+        "weight": 70
+      },
+      "contact": {
+        "email": "",
+        "phone": "",
+        "location": "Global"
+      },
+      "lifestyle": {
+        "occupation": "Professional",
+        "timeZone": "UTC",
+        "activityLevel": "moderate",
+        "primaryGoal": "weight_loss",
+        "secondaryGoals": []
+      },
+      "health": {
+        "flags": [],
+        "allergies": [],
+        "chronicConditions": [],
+        "injuries": [],
+        "medications": [],
+        "notes": ""
+      },
+      "nutrition": {
+        "dietType": "veg",
+        "cuisinePreference": "indian",
+        "dislikes": [],
+        "supplements": [],
+        "hydrationTargetMl": 2500,
+        "fastingWindow": "12:12"
+      },
+      "schedule": {
+        "timeBudgetMin": 30,
+        "daysPerWeek": 5,
+        "preferredSlots": [
+          {
+            "start": "18:00",
+            "end": "19:00"
+          }
+        ],
+        "notes": ""
+      },
+      "equipment": [
+        "mat"
+      ],
+      "preferences": {
+        "modules": [
+          "fitness",
+          "nutrition"
+        ],
+        "tone": "balanced",
+        "indoorOnly": false,
+        "level": "beginner",
+        "coachingNotes": "",
+        "focusAreas": []
+      },
+      "coachingNotes": "",
+      "createdAt": "2025-11-01T09:13:37.270Z",
+      "updatedAt": "2025-11-01T09:13:37.270Z"
+    },
+    {
       "name": "Local Test",
       "age": 25,
       "gender": "male",

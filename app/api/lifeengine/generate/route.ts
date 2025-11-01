@@ -179,7 +179,7 @@ export async function POST(req: NextRequest) {
 
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash-8b",
+      model: "gemini-1.5-pro",
       generationConfig: {
         temperature: 0.3,
         topP: 0.6,
@@ -193,7 +193,7 @@ export async function POST(req: NextRequest) {
 
     const estimatedInputTokens = Math.ceil(compactPrompt.length / 4);
     logger.debug("Sending compact request to Gemini", {
-      model: "gemini-1.5-flash-8b",
+      model: "gemini-1.5-pro",
       promptLength: compactPrompt.length,
       estimatedInputTokens,
     });
@@ -207,7 +207,7 @@ export async function POST(req: NextRequest) {
     const totalTokens = usageMetadata?.totalTokenCount || 0;
     const estimatedCost = inputTokens / 1_000_000 * 0.075 + outputTokens / 1_000_000 * 0.3;
 
-    logger.info("✅ EXTREME COST MODE: Gemini API usage (flash-8b)", {
+    logger.info("✅ EXTREME COST MODE: Gemini API usage (1.5-pro)", {
       inputTokens,
       outputTokens,
       totalTokens,
