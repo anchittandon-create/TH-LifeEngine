@@ -195,6 +195,8 @@ export default function CreatePlan() {
           <Field label="Include Daily Routine">
             <input
               type="checkbox"
+              id="includeDailyRoutine"
+              aria-label="Include Daily Routine"
               checked={form.includeDailyRoutine}
               onChange={(e) => setForm({ ...form, includeDailyRoutine: e.target.checked })}
             />
