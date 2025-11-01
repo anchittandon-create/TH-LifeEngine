@@ -216,7 +216,8 @@ export async function POST(req: NextRequest) {
       estimatedCost: `$${estimatedCost.toFixed(6)}`,
     });
 
-    let planJson: any;
+  let planJson: any;
+  let parseWarning: string | null = null;
     let responseText = response.text().trim();
     
     // Remove markdown code block formatting if present
@@ -237,20 +238,17 @@ export async function POST(req: NextRequest) {
       planJson = JSON.parse(responseText);
       logger.info("✅ Plan JSON parsed successfully");
     } catch (parseError: any) {
-      logger.error("❌ JSON parse failed", {
+      // Fallback: proceed with an empty plan and let converter build a safe default schedule
+      parseWarning = `AI JSON parse failed: ${parseError.message}. Using safe fallback plan.`;
+      logger.error("❌ JSON parse failed - using fallback", {
         error: parseError.message,
         responsePreview: responseText.substring(0, 200),
       });
-      return NextResponse.json(
-        {
-          error: "Failed to generate valid plan. Please try again.",
-          details: parseError.message,
-        },
-        { status: 500 },
-      );
+      planJson = {};
     }
 
-    const verifiedPlan = verifyPlan(planJson, input);
+  const verifiedPlan = verifyPlan(planJson, input);
+  if (parseWarning) verifiedPlan.warnings.push(parseWarning);
     const planId = uuidv4();
 
     const storedPlan = convertPlanToStoredPlan(verifiedPlan.plan, input, context, planId);
