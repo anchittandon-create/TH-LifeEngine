@@ -11,11 +11,11 @@ export default function Home() {
           ⚡
         </div>
         <h1 className={styles.heroTitle}>
-          TH+ LifeEngine
+          🩵 TH_LifeEngine v2.0
         </h1>
         <p className={styles.heroSubtitle}>
-          Personalized, evidence-aligned health plans powered by Gemini AI.
-          Transform your wellness journey with intelligent recommendations tailored to your unique needs.
+          Holistic AI Wellness Planner for Mind, Body & Nutrition. 
+          Create realistic, emotionally intelligent, science-backed plans for Yoga, Diet, Combined, and Holistic wellness journeys that fit your unique lifestyle — not an idealized one.
         </p>
         <div className={styles.heroActions}>
           <Link href="/lifeengine/create">

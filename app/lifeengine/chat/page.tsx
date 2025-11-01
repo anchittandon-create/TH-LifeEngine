@@ -126,9 +126,9 @@ export default function CustomGPT() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <h1 className={styles.title}>TH_LifeEngine CustomGPT</h1>
+        <h1 className={styles.title}>🩵 TH_LifeEngine v2.0 CustomGPT</h1>
         <p className={styles.subtitle}>
-          Chat with our AI wellness assistant for personalized guidance and plan adjustments
+          Chat with our holistic AI wellness planner for personalized guidance, plan adjustments, and emotionally intelligent coaching
         </p>
       </header>
 
@@ -160,18 +160,20 @@ export default function CustomGPT() {
         <div className={styles.messages}>
           {messages.length === 0 ? (
             <div className={styles.welcome}>
-              <div className={styles.welcomeIcon}>💬</div>
-              <h3>Welcome to TH_LifeEngine CustomGPT!</h3>
+              <div className={styles.welcomeIcon}>🩵</div>
+              <h3>Welcome to TH_LifeEngine v2.0 CustomGPT!</h3>
               <p>
-                I'm your personal wellness AI assistant. I can help you with:
+                I'm your holistic AI wellness planner and coach. I create realistic, emotionally intelligent plans that fit YOUR lifestyle:
               </p>
               <ul>
-                <li>Plan modifications and adjustments</li>
-                <li>Wellness tips and motivation</li>
-                <li>Answers to health and fitness questions</li>
-                <li>Progress tracking guidance</li>
+                <li>🧘 **Yoga Plans**: Asana progressions, pranayama, mindfulness</li>
+                <li>🍃 **Diet Plans**: Culturally rooted meals, macro balance</li>
+                <li>⚡ **Combined Plans**: Integrated yoga + nutrition timing</li>
+                <li>🌟 **Holistic Plans**: Complete mind-body-lifestyle wellness</li>
+                <li>💬 Plan modifications and progress guidance</li>
+                <li>🎯 Motivation and accountability support</li>
               </ul>
-              <p>Select a profile above and start chatting!</p>
+              <p>Select a profile above and let's create something amazing together!</p>
             </div>
           ) : (
             messages.map(message => (
