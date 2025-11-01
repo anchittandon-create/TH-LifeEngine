@@ -1,7 +1,6 @@
 import { put, list, head, del } from "@vercel/blob";
 import { promises as fs } from 'fs';
 import path from 'path';
-import type { Plan } from "@/lib/domain/plan";
 import { hasVercelBlobStorage } from "./env";
 
 const BLOB_KEY = "lifeengine.state.json";
@@ -18,6 +17,31 @@ type Contact = {
 type PreferredSlot = {
   start?: string;
   end?: string;
+};
+
+export type StoredPlanDay = {
+  date: string;
+  activities: {
+    type: string;
+    name: string;
+    duration: number;
+    description: string;
+  }[];
+  meals: {
+    type: string;
+    name: string;
+    calories: number;
+    description: string;
+  }[];
+};
+
+export type StoredPlan = {
+  id: string;
+  profileId: string;
+  intakeId: string;
+  goals: string[];
+  createdAt: string;
+  days: StoredPlanDay[];
 };
 
 export type ProfileRow = {
@@ -78,7 +102,9 @@ type PlanRow = {
   days: number;
   confidence: number;
   warnings: string[];
-  planJSON: Plan;
+  planJSON: StoredPlan;
+  analytics?: Record<string, any>;
+  costMetrics?: Record<string, any>;
   createdAt?: string;
 };
 
@@ -251,6 +277,10 @@ export const db = {
   async getProfiles(): Promise<ProfileRow[]> {
     const state = await readState();
     return [...state.profiles].sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
+  },
+  async getProfile(id: string): Promise<ProfileRow | null> {
+    const state = await readState();
+    return state.profiles.find((profile) => profile.id === id) ?? null;
   },
   async saveProfile(profile: ProfileRow) {
     const payload = { ...profile, createdAt: profile.createdAt ?? new Date().toISOString() };

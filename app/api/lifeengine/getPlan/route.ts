@@ -1,15 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
-
-const globalState = globalThis as unknown as {
-  __LIFEENGINE_PLANS__?: Map<string, any>;
-};
-
-if (!globalState.__LIFEENGINE_PLANS__) {
-  globalState.__LIFEENGINE_PLANS__ = new Map<string, any>();
-}
-
-const PLAN_STORE = globalState.__LIFEENGINE_PLANS__;
+import { db } from "@/lib/utils/db";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -19,27 +9,16 @@ export async function GET(request: Request) {
   }
 
   try {
-    let plan = null;
-    if (supabase) {
-      const { data, error } = await supabase
-        .from('plans')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error || !data) {
-        return NextResponse.json({ error: "Plan not found" }, { status: 404 });
-      }
-      plan = data;
-    } else {
-      plan = PLAN_STORE.get(id);
-      if (!plan) {
-        return NextResponse.json({ error: "Plan not found" }, { status: 404 });
-      }
+    const plan = await db.getPlan(id);
+    if (!plan) {
+      return NextResponse.json({ error: "Plan not found" }, { status: 404 });
     }
 
     return NextResponse.json({
-      plan: plan.planJson,
+      plan: plan.planJSON,
+      warnings: plan.warnings,
+      analytics: plan.analytics,
+      costMetrics: plan.costMetrics,
     });
   } catch (error) {
     console.error("Error fetching plan:", error);
