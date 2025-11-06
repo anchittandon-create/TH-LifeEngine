@@ -6,6 +6,8 @@ type StoredPlanItem = { plan_id: string; plan: LifeEnginePlan };
 // Access the global store
 declare const __PLANS__: StoredPlanItem[] | undefined;
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
