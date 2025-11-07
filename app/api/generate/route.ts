@@ -181,10 +181,10 @@ export async function POST(request: NextRequest) {
       try {
         const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({
-          model: 'models/gemini-2.5-flash',
+          model: 'gemini-2.5-flash',
           generationConfig: {
             temperature: 0.3,
-            maxOutputTokens: isProd ? 1536 : 8192,
+            maxOutputTokens: isProd ? 2048 : 8192,
           },
         });
 
@@ -228,7 +228,7 @@ export async function POST(request: NextRequest) {
         inputTokens: usage?.promptTokenCount ?? usage?.inputTokens ?? 0,
         outputTokens: usage?.candidatesTokenCount ?? usage?.outputTokens ?? 0,
         totalTokens: (usage?.promptTokenCount ?? 0) + (usage?.candidatesTokenCount ?? 0),
-        model: 'models/gemini-2.5-flash',
+        model: 'gemini-2.5-flash',
       },
     });
 

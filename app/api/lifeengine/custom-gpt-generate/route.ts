@@ -24,12 +24,12 @@ export async function POST(req: Request) {
 
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
       generationConfig: {
         temperature: 0.7,
         topP: 0.9,
         topK: 40,
-        maxOutputTokens: 8192,
+        maxOutputTokens: 4096,
       },
     });
 
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
       plan: text,
       formatted: true,
       metadata: {
-        model: "gemini-2.5-pro",
+        model: "gemini-2.5-flash",
         tokens: {
           input: inputTokens,
           output: outputTokens,

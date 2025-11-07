@@ -335,6 +335,582 @@
   ],
   "plans": [
     {
+      "planId": "plan_id_c9u80go2",
+      "profileId": "prof_anchit",
+      "days": 3,
+      "confidence": 0.9,
+      "warnings": [],
+      "planJSON": {
+        "id": "plan_id_c9u80go2",
+        "profileId": "prof_anchit",
+        "intakeId": "intake_id_xhl39oou",
+        "goals": [],
+        "createdAt": "2025-11-07T23:06:10.181Z",
+        "days": [
+          {
+            "date": "2025-11-07",
+            "activities": [
+              {
+                "type": "strength",
+                "name": "Full Body Workout",
+                "duration": 45,
+                "description": "Compound movements for lean gain."
+              },
+              {
+                "type": "mindfulness",
+                "name": "Guided Meditation",
+                "duration": 15,
+                "description": "Focus on breath and body awareness."
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Overnight Oats",
+                "calories": 400,
+                "description": "With berries, nuts, and chia seeds."
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad",
+                "calories": 600,
+                "description": "With chickpeas, cucumber, tomatoes, and lemon dressing."
+              },
+              {
+                "type": "dinner",
+                "name": "Baked Salmon",
+                "calories": 700,
+                "description": "With roasted sweet potatoes and asparagus."
+              },
+              {
+                "type": "snack",
+                "name": "Apple with Almond Butter",
+                "calories": 250,
+                "description": "Fiber and healthy fats."
+              }
+            ]
+          },
+          {
+            "date": "2025-11-08",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Vinyasa Flow",
+                "duration": 40,
+                "description": "Dynamic sequence for flexibility and stress relief."
+              },
+              {
+                "type": "cardio",
+                "name": "Brisk Walk",
+                "duration": 30,
+                "description": "Moderate pace to improve circulation."
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Scrambled Eggs",
+                "calories": 450,
+                "description": "With spinach and whole wheat toast."
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup",
+                "calories": 550,
+                "description": "Hearty and fiber-rich with whole grain bread."
+              },
+              {
+                "type": "dinner",
+                "name": "Chicken Stir-fry",
+                "calories": 650,
+                "description": "With brown rice and mixed vegetables."
+              },
+              {
+                "type": "snack",
+                "name": "Walnuts & Orange",
+                "calories": 250,
+                "description": "Omega-3s and Vitamin C."
+              }
+            ]
+          },
+          {
+            "date": "2025-11-09",
+            "activities": [
+              {
+                "type": "strength",
+                "name": "Upper Body & Core",
+                "duration": 45,
+                "description": "Targeting chest, back, shoulders, and abs."
+              },
+              {
+                "type": "mindfulness",
+                "name": "Body Scan Meditation",
+                "duration": 15,
+                "description": "Bringing awareness to different body parts."
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Green Smoothie",
+                "calories": 400,
+                "description": "Spinach, banana, protein powder, almond milk."
+              },
+              {
+                "type": "lunch",
+                "name": "Turkey & Avocado Wrap",
+                "calories": 600,
+                "description": "On whole wheat tortilla with mixed greens."
+              },
+              {
+                "type": "dinner",
+                "name": "Chickpea & Vegetable Curry",
+                "calories": 700,
+                "description": "Served with brown rice for gut health."
+              },
+              {
+                "type": "snack",
+                "name": "Cottage Cheese with Pineapple",
+                "calories": 200,
+                "description": "Protein and digestive enzymes."
+              }
+            ]
+          }
+        ]
+      },
+      "analytics": {
+        "generatedAt": "2025-11-07T23:06:10.182Z",
+        "ms": 10923
+      },
+      "costMetrics": {
+        "inputTokens": 309,
+        "outputTokens": 1007,
+        "totalTokens": 1316,
+        "model": "gemini-2.5-flash"
+      },
+      "createdAt": "2025-11-07T23:06:10.182Z"
+    },
+    {
+      "planId": "plan_id_d56xzxia",
+      "profileId": "prof_anchit",
+      "days": 3,
+      "confidence": 0.6,
+      "warnings": [
+        "AI error: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent: [404 Not Found] models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+      ],
+      "planJSON": {
+        "id": "plan_id_d56xzxia",
+        "profileId": "prof_anchit",
+        "intakeId": "intake_id_c8hy7hh8",
+        "goals": [],
+        "createdAt": "2025-11-07T23:05:13.206Z",
+        "days": [
+          {
+            "date": "2025-11-07",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Gentle Flow",
+                "duration": 20,
+                "description": "Full-body mobility and breath"
+              },
+              {
+                "type": "mindfulness",
+                "name": "Box Breathing",
+                "duration": 5,
+                "description": "4-4-4-4 breathing to reset"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oats + Fruit",
+                "calories": 350,
+                "description": "Fiber-rich start"
+              },
+              {
+                "type": "lunch",
+                "name": "Dal + Roti + Salad",
+                "calories": 600,
+                "description": "Balanced Indian plate"
+              },
+              {
+                "type": "dinner",
+                "name": "Paneer + Veg Stir-fry",
+                "calories": 550,
+                "description": "High-protein veg dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-08",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Gentle Flow",
+                "duration": 20,
+                "description": "Full-body mobility and breath"
+              },
+              {
+                "type": "mindfulness",
+                "name": "Box Breathing",
+                "duration": 5,
+                "description": "4-4-4-4 breathing to reset"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oats + Fruit",
+                "calories": 350,
+                "description": "Fiber-rich start"
+              },
+              {
+                "type": "lunch",
+                "name": "Dal + Roti + Salad",
+                "calories": 600,
+                "description": "Balanced Indian plate"
+              },
+              {
+                "type": "dinner",
+                "name": "Paneer + Veg Stir-fry",
+                "calories": 550,
+                "description": "High-protein veg dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-09",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Gentle Flow",
+                "duration": 20,
+                "description": "Full-body mobility and breath"
+              },
+              {
+                "type": "mindfulness",
+                "name": "Box Breathing",
+                "duration": 5,
+                "description": "4-4-4-4 breathing to reset"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oats + Fruit",
+                "calories": 350,
+                "description": "Fiber-rich start"
+              },
+              {
+                "type": "lunch",
+                "name": "Dal + Roti + Salad",
+                "calories": 600,
+                "description": "Balanced Indian plate"
+              },
+              {
+                "type": "dinner",
+                "name": "Paneer + Veg Stir-fry",
+                "calories": 550,
+                "description": "High-protein veg dinner"
+              }
+            ]
+          }
+        ]
+      },
+      "analytics": {
+        "generatedAt": "2025-11-07T23:05:13.206Z",
+        "ms": 484
+      },
+      "costMetrics": {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0,
+        "model": "models/gemini-1.5-flash"
+      },
+      "createdAt": "2025-11-07T23:05:13.206Z"
+    },
+    {
+      "planId": "plan_id_m6cumqer",
+      "profileId": "prof_anchit",
+      "days": 3,
+      "confidence": 0.6,
+      "warnings": [
+        "AI error: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent: [404 Not Found] models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+      ],
+      "planJSON": {
+        "id": "plan_id_m6cumqer",
+        "profileId": "prof_anchit",
+        "intakeId": "intake_id_d59zr0i1",
+        "goals": [],
+        "createdAt": "2025-11-07T23:05:07.748Z",
+        "days": [
+          {
+            "date": "2025-11-07",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Gentle Flow",
+                "duration": 20,
+                "description": "Full-body mobility and breath"
+              },
+              {
+                "type": "mindfulness",
+                "name": "Box Breathing",
+                "duration": 5,
+                "description": "4-4-4-4 breathing to reset"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oats + Fruit",
+                "calories": 350,
+                "description": "Fiber-rich start"
+              },
+              {
+                "type": "lunch",
+                "name": "Dal + Roti + Salad",
+                "calories": 600,
+                "description": "Balanced Indian plate"
+              },
+              {
+                "type": "dinner",
+                "name": "Paneer + Veg Stir-fry",
+                "calories": 550,
+                "description": "High-protein veg dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-08",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Gentle Flow",
+                "duration": 20,
+                "description": "Full-body mobility and breath"
+              },
+              {
+                "type": "mindfulness",
+                "name": "Box Breathing",
+                "duration": 5,
+                "description": "4-4-4-4 breathing to reset"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oats + Fruit",
+                "calories": 350,
+                "description": "Fiber-rich start"
+              },
+              {
+                "type": "lunch",
+                "name": "Dal + Roti + Salad",
+                "calories": 600,
+                "description": "Balanced Indian plate"
+              },
+              {
+                "type": "dinner",
+                "name": "Paneer + Veg Stir-fry",
+                "calories": 550,
+                "description": "High-protein veg dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-09",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Gentle Flow",
+                "duration": 20,
+                "description": "Full-body mobility and breath"
+              },
+              {
+                "type": "mindfulness",
+                "name": "Box Breathing",
+                "duration": 5,
+                "description": "4-4-4-4 breathing to reset"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oats + Fruit",
+                "calories": 350,
+                "description": "Fiber-rich start"
+              },
+              {
+                "type": "lunch",
+                "name": "Dal + Roti + Salad",
+                "calories": 600,
+                "description": "Balanced Indian plate"
+              },
+              {
+                "type": "dinner",
+                "name": "Paneer + Veg Stir-fry",
+                "calories": 550,
+                "description": "High-protein veg dinner"
+              }
+            ]
+          }
+        ]
+      },
+      "analytics": {
+        "generatedAt": "2025-11-07T23:05:07.748Z",
+        "ms": 514
+      },
+      "costMetrics": {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0,
+        "model": "models/gemini-1.5-flash"
+      },
+      "createdAt": "2025-11-07T23:05:07.748Z"
+    },
+    {
+      "planId": "plan_id_khhizjmj",
+      "profileId": "prof_anchit",
+      "days": 3,
+      "confidence": 0.6,
+      "warnings": [
+        "AI error: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent: [404 Not Found] models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+      ],
+      "planJSON": {
+        "id": "plan_id_khhizjmj",
+        "profileId": "prof_anchit",
+        "intakeId": "intake_id_wxyxgyfx",
+        "goals": [],
+        "createdAt": "2025-11-07T23:04:32.500Z",
+        "days": [
+          {
+            "date": "2025-11-07",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Gentle Flow",
+                "duration": 20,
+                "description": "Full-body mobility and breath"
+              },
+              {
+                "type": "mindfulness",
+                "name": "Box Breathing",
+                "duration": 5,
+                "description": "4-4-4-4 breathing to reset"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oats + Fruit",
+                "calories": 350,
+                "description": "Fiber-rich start"
+              },
+              {
+                "type": "lunch",
+                "name": "Dal + Roti + Salad",
+                "calories": 600,
+                "description": "Balanced Indian plate"
+              },
+              {
+                "type": "dinner",
+                "name": "Paneer + Veg Stir-fry",
+                "calories": 550,
+                "description": "High-protein veg dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-08",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Gentle Flow",
+                "duration": 20,
+                "description": "Full-body mobility and breath"
+              },
+              {
+                "type": "mindfulness",
+                "name": "Box Breathing",
+                "duration": 5,
+                "description": "4-4-4-4 breathing to reset"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oats + Fruit",
+                "calories": 350,
+                "description": "Fiber-rich start"
+              },
+              {
+                "type": "lunch",
+                "name": "Dal + Roti + Salad",
+                "calories": 600,
+                "description": "Balanced Indian plate"
+              },
+              {
+                "type": "dinner",
+                "name": "Paneer + Veg Stir-fry",
+                "calories": 550,
+                "description": "High-protein veg dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-09",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Gentle Flow",
+                "duration": 20,
+                "description": "Full-body mobility and breath"
+              },
+              {
+                "type": "mindfulness",
+                "name": "Box Breathing",
+                "duration": 5,
+                "description": "4-4-4-4 breathing to reset"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oats + Fruit",
+                "calories": 350,
+                "description": "Fiber-rich start"
+              },
+              {
+                "type": "lunch",
+                "name": "Dal + Roti + Salad",
+                "calories": 600,
+                "description": "Balanced Indian plate"
+              },
+              {
+                "type": "dinner",
+                "name": "Paneer + Veg Stir-fry",
+                "calories": 550,
+                "description": "High-protein veg dinner"
+              }
+            ]
+          }
+        ]
+      },
+      "analytics": {
+        "generatedAt": "2025-11-07T23:04:32.500Z",
+        "ms": 786
+      },
+      "costMetrics": {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0,
+        "model": "gemini-1.5-flash"
+      },
+      "createdAt": "2025-11-07T23:04:32.500Z"
+    },
+    {
       "planId": "6f6a8ddc-ca1f-4192-8068-0b5c10c09335",
       "profileId": "prof_anchit",
       "createdAt": "2025-11-01T13:01:50.377Z",
