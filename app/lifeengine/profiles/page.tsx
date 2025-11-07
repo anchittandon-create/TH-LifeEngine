@@ -101,14 +101,14 @@ export default function ProfilesPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Remove this profile?')) return;
+  const handleDelete = async (id: string, name: string) => {
+    const confirmMessage = `Are you sure you want to delete the profile "${name}"?\n\nThis action cannot be undone and will remove all associated data.`;
+    
+    if (!window.confirm(confirmMessage)) return;
 
     try {
-      const response = await fetch('/api/lifeengine/profiles', {
+      const response = await fetch(`/api/lifeengine/profiles?id=${id}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
       });
       
       if (response.ok) {
@@ -117,6 +117,7 @@ export default function ProfilesPage() {
           setEditingId(null);
           setForm(toFormState({ ...DEFAULT_PROFILE, id: "" } as Profile));
         }
+        alert(`Profile "${name}" deleted successfully.`);
       } else {
         const errorData = await response.json();
         alert(`Failed to delete profile: ${errorData.error || 'Unknown error'}`);
@@ -160,14 +161,15 @@ export default function ProfilesPage() {
                     size="sm"
                     onClick={() => setEditingId(profile.id)}
                   >
-                    Edit
+                    ✏️ Edit
                   </Button>
                   <Button
                     variant="danger"
                     size="sm"
-                    onClick={() => handleDelete(profile.id)}
+                    onClick={() => handleDelete(profile.id, profile.name)}
+                    title="Delete this profile"
                   >
-                    Delete
+                    🗑️ Delete
                   </Button>
                 </div>
               </div>

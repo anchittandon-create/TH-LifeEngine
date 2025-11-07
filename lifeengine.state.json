@@ -335,6 +335,119 @@
   ],
   "plans": [
     {
+      "planId": "plan_id_vcl1klty",
+      "profileId": "prof_anchit",
+      "days": 2,
+      "confidence": 0.9,
+      "warnings": [],
+      "planJSON": {
+        "id": "plan_id_vcl1klty",
+        "profileId": "prof_anchit",
+        "intakeId": "intake_id_c685okpg",
+        "goals": [],
+        "createdAt": "2025-11-07T23:31:41.278Z",
+        "days": [
+          {
+            "date": "2025-11-07",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Gentle Flow Yoga",
+                "duration": 45,
+                "description": "Low-impact session focusing on flexibility and stress relief."
+              },
+              {
+                "type": "mindfulness",
+                "name": "Evening Meditation",
+                "duration": 15,
+                "description": "Breathwork and body scan for mental clarity."
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oats with Protein Powder & Berries",
+                "calories": 400,
+                "description": "Complex carbs, protein, and antioxidants."
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Chickpeas & Veggies",
+                "calories": 500,
+                "description": "Fiber-rich, plant-based protein, and essential nutrients."
+              },
+              {
+                "type": "snack",
+                "name": "Apple with Almond Butter",
+                "calories": 250,
+                "description": "Healthy fats and fiber for sustained energy."
+              },
+              {
+                "type": "dinner",
+                "name": "Chicken Stir-fry with Brown Rice",
+                "calories": 700,
+                "description": "Lean protein, diverse vegetables, and complex carbs."
+              }
+            ]
+          },
+          {
+            "date": "2025-11-08",
+            "activities": [
+              {
+                "type": "strength",
+                "name": "Bodyweight Strength Circuit",
+                "duration": 40,
+                "description": "Low-impact full-body routine, focusing on core and stability."
+              },
+              {
+                "type": "mindfulness",
+                "name": "Guided Relaxation",
+                "duration": 20,
+                "description": "Deep relaxation and stress reduction techniques."
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Green Smoothie",
+                "calories": 450,
+                "description": "Spinach, banana, protein powder, and almond milk for nutrients."
+              },
+              {
+                "type": "lunch",
+                "name": "Whole Wheat Wrap with Hummus & Grilled Veggies",
+                "calories": 500,
+                "description": "Fiber-rich, plant-based protein, and healthy fats."
+              },
+              {
+                "type": "snack",
+                "name": "Handful of Walnuts & Dates",
+                "calories": 250,
+                "description": "Healthy fats, fiber, and natural sweetness."
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu Scramble with Sweet Potato",
+                "calories": 650,
+                "description": "Plant-based protein, complex carbs, and antioxidants."
+              }
+            ]
+          }
+        ]
+      },
+      "analytics": {
+        "generatedAt": "2025-11-07T23:31:41.278Z",
+        "ms": 10885
+      },
+      "costMetrics": {
+        "inputTokens": 309,
+        "outputTokens": 731,
+        "totalTokens": 1040,
+        "model": "gemini-2.5-flash"
+      },
+      "createdAt": "2025-11-07T23:31:41.278Z"
+    },
+    {
       "planId": "plan_id_z2uhc34r",
       "profileId": "prof_anchit",
       "days": 1,
