@@ -70,7 +70,10 @@ export async function POST(req: NextRequest) {
   
   try {
     const body = await req.json();
+    console.log('🔍 [GENERATE] Received request body:', JSON.stringify(body, null, 2));
+    
     const input = await normalizeGenerationRequest(body);
+    console.log('✅ [GENERATE] Normalized input:', JSON.stringify(input, null, 2));
 
     const today = new Date().toISOString().split('T')[0];
 
@@ -140,30 +143,37 @@ export async function POST(req: NextRequest) {
 
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-flash-8b', // 💰 Already 50% CHEAPER than gemini-1.5-flash
+      model: 'gemini-2.5-pro', // Using Pro model for longer output support
       generationConfig: {
-        temperature: 0.3, // 💰 ULTRA-LOW = maximum focus, minimum tokens
-        topP: 0.6, // 💰 Further reduced from 0.7
-        topK: 25, // 💰 Further reduced from 30
-        maxOutputTokens: 1024, // 💰 EXTREME: Reduced from 1536 (33% further savings)
-        responseMimeType: "application/json", // Force JSON output - no markdown
+        temperature: 0.3,
+        topP: 0.6,
+        topK: 25,
+        maxOutputTokens: 16384, // Increased to handle full 5-week plans
       },
     });
 
     // ULTRA-COMPACT PROMPT: Absolute minimal tokens
-    const compactPrompt = `${input.duration.value}${input.duration.unit} plan JSON:
-${input.profileSnapshot.gender}${input.profileSnapshot.age}y ${input.profileSnapshot.weight_kg}kg ${input.profileSnapshot.activity_level}
-Diet:${input.profileSnapshot.dietary.type} Avoid:${input.profileSnapshot.dietary.allergies.join(',')||'none'}
-Goals:${input.goals.map(g => g.name).join(',')}
-Medical:${input.profileSnapshot.medical_flags.join(',')||'none'}
-${input.time_budget_min_per_day}min/day ${input.experience_level}
-Equipment:${input.equipment.join(',')||'none'}
+    const compactPrompt = `Generate a ${input.duration.value}${input.duration.unit} wellness plan. Respond ONLY with valid, complete JSON. Be CONCISE.
 
-JSON:{"meta":{"title":"","duration_days":${input.duration.unit === 'weeks' ? input.duration.value * 7 : input.duration.value},"weeks":${input.duration.unit === 'weeks' ? input.duration.value : Math.ceil(input.duration.value / 7)}},"weekly_plan":[{"week_index":1,"days":[{"day_index":1,"yoga":[{"name":"","duration_min":0}],"nutrition":{"kcal_target":${Math.round(calculateKcalTarget(input.profileSnapshot))},"meals":[{"meal":"breakfast","name":"","kcal":0}]},"habits":[]}]}],"warnings":[]}`;
+Profile: ${input.profileSnapshot.gender}${input.profileSnapshot.age}y, ${input.profileSnapshot.weight_kg}kg, ${input.profileSnapshot.activity_level}
+Diet: ${input.profileSnapshot.dietary.type}, Avoid: ${input.profileSnapshot.dietary.allergies.join(',') || 'none'}
+Goals: ${input.goals.map(g => g.name).join(',')}
+Medical: ${input.profileSnapshot.medical_flags.join(',') || 'none'}
+Time: ${input.time_budget_min_per_day}min/day, Level: ${input.experience_level}
+Equipment: ${input.equipment.join(',') || 'none'}
+
+Keep it SHORT and COMPLETE:
+- Only 3-4 yoga poses per session (max 30 chars each)
+- Only 3 main meals (breakfast/lunch/dinner, max 40 chars each)
+- Max 2-3 habits per day (max 25 chars each)
+- Use simple names, no long descriptions
+
+Return JSON format:
+{"meta":{"title":"","duration_days":${input.duration.unit === 'weeks' ? input.duration.value * 7 : input.duration.value},"weeks":${input.duration.unit === 'weeks' ? input.duration.value : Math.ceil(input.duration.value / 7)}},"weekly_plan":[{"week_index":1,"days":[{"day_index":1,"yoga":[{"name":"","duration_min":0}],"nutrition":{"kcal_target":${Math.round(calculateKcalTarget(input.profileSnapshot))},"meals":[{"meal":"breakfast","name":"","kcal":0}]},"habits":[]}]}],"warnings":[]}`;
 
     const estimatedInputTokens = Math.ceil(compactPrompt.length / 4);
     logger.debug('Sending compact request to Gemini', { 
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-pro',
       promptLength: compactPrompt.length,
       estimatedInputTokens,
       savings: `~${Math.round(((1500 - estimatedInputTokens) / 1500) * 100)}% reduction from original`
@@ -179,17 +189,29 @@ JSON:{"meta":{"title":"","duration_days":${input.duration.unit === 'weeks' ? inp
     const totalTokens = usageMetadata?.totalTokenCount || 0;
     const estimatedCost = ((inputTokens / 1000000) * 0.075) + ((outputTokens / 1000000) * 0.30);
 
-    logger.info('✅ EXTREME COST MODE: Gemini API usage (flash-8b)', {
+    logger.info('✅ Cost-optimized mode: Gemini API usage', {
+      model: 'gemini-2.5-pro',
       inputTokens: `${inputTokens} tokens (saved ~${Math.max(0, 1200 - inputTokens)} tokens!)`,
-      outputTokens: `${outputTokens} tokens (max: 1024, was: 2048 = 50% reduction)`,
+      outputTokens: `${outputTokens} tokens (max: 16384)`,
       totalTokens,
       estimatedCost: `$${estimatedCost.toFixed(6)}`,
       estimatedCostINR: `₹${(estimatedCost * 84).toFixed(4)}`,
-      extremeSavings: `~80% cheaper than original implementation`
     });
     
     let planJson;
-    const responseText = response.text().trim()
+    let responseText = response.text().trim()
+    
+    // Log response for debugging
+    console.log('📦 [RAW RESPONSE]:', responseText.substring(0, 500));
+    console.log('📦 [RESPONSE LENGTH]:', responseText.length);
+    console.log('📦 [LAST 200 CHARS]:', responseText.substring(responseText.length - 200));
+    
+    // Strip markdown code blocks if present
+    if (responseText.startsWith('```json')) {
+      responseText = responseText.replace(/^```json\n/, '').replace(/\n```$/, '');
+    } else if (responseText.startsWith('```')) {
+      responseText = responseText.replace(/^```\n/, '').replace(/\n```$/, '');
+    }
     
     try {
       planJson = JSON.parse(responseText);
@@ -197,7 +219,8 @@ JSON:{"meta":{"title":"","duration_days":${input.duration.unit === 'weeks' ? inp
     } catch (parseError: any) {
       logger.error('❌ JSON parse failed', { 
         error: parseError.message, 
-        responsePreview: responseText.substring(0, 200) 
+        responsePreview: responseText.substring(0, 200),
+        responseTail: responseText.substring(Math.max(0, responseText.length - 200))
       });
       // Return error instead of retrying to save costs
       return NextResponse.json({ 
@@ -279,12 +302,17 @@ JSON:{"meta":{"title":"","duration_days":${input.duration.unit === 'weeks' ? inp
     return NextResponse.json(planData);
   } catch (error: any) {
     const duration = Date.now() - startTime;
+    console.error('❌ [GENERATE] Plan generation failed:', error);
+    console.error('❌ [GENERATE] Error stack:', error.stack);
     logger.error('Plan generation failed', { 
       error: error.message,
       duration: `${duration}ms`,
       stack: error.stack
     });
-    return NextResponse.json({ error: 'Failed to generate plan' }, { status: 500 });
+    return NextResponse.json({ 
+      error: error.message || 'Failed to generate plan',
+      details: error.stack
+    }, { status: 500 });
   }
 }
 
@@ -334,20 +362,30 @@ type IntakePayload = {
 };
 
 async function normalizeGenerationRequest(body: any) {
+  console.log('🔍 [NORMALIZE] Starting normalization...', JSON.stringify(body, null, 2));
+  
   if (body && typeof body === "object" && "profileSnapshot" in body) {
+    console.log('✅ [NORMALIZE] Using direct profileSnapshot');
     return inputSchema.parse(body);
   }
 
   if (!body?.profileId) {
+    console.error('❌ [NORMALIZE] Missing profileId');
     throw new Error("profileId is required");
   }
 
+  console.log(`🔍 [NORMALIZE] Fetching profile: ${body.profileId}`);
   const profile = await db.getProfile(body.profileId);
   if (!profile) {
+    console.error(`❌ [NORMALIZE] Profile not found: ${body.profileId}`);
     throw new Error("Profile not found");
   }
+  
+  console.log('✅ [NORMALIZE] Profile found:', profile.name);
 
   const intake: IntakePayload = body.intake ?? {};
+  console.log('🔍 [NORMALIZE] Processing intake:', JSON.stringify(intake, null, 2));
+  
   const snapshot = buildProfileSnapshot(profile);
   const planType = buildPlanType(intake, profile);
   const goals = buildGoals(profile, intake);
@@ -357,7 +395,7 @@ async function normalizeGenerationRequest(body: any) {
   const experience = determineExperienceLevel(profile);
   const equipment = Array.isArray(profile.equipment) ? profile.equipment : [];
 
-  return inputSchema.parse({
+  const normalized = {
     profileId: body.profileId,
     profileSnapshot: snapshot,
     plan_type: planType,
@@ -367,7 +405,11 @@ async function normalizeGenerationRequest(body: any) {
     time_budget_min_per_day: timeBudget,
     experience_level: experience,
     equipment,
-  });
+  };
+  
+  console.log('✅ [NORMALIZE] Normalized data:', JSON.stringify(normalized, null, 2));
+  
+  return inputSchema.parse(normalized);
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
