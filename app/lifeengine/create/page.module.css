@@ -1,8 +1,9 @@
 .page {
-  max-width: 900px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: var(--space-6);
   min-height: 100vh;
+  width: 95%;
 }
 
 .header {

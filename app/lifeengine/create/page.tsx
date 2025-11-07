@@ -237,7 +237,7 @@ export default function CreatePlan() {
               <span className="text-3xl">📋</span>
               <h2 className="text-xl font-bold text-gray-800">Generation Summary</h2>
             </div>
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
               <div className="flex items-start gap-3 p-3 bg-white rounded-xl">
                 <span className="text-xl">👤</span>
                 <div>
@@ -249,25 +249,23 @@ export default function CreatePlan() {
                 <span className="text-xl">🎯</span>
                 <div>
                   <p className="font-semibold text-gray-700">Plan Types</p>
-                  <p className="text-gray-600">{form.planTypes.map(pt => 
+                  <p className="text-gray-600 text-sm">{form.planTypes.map(pt => 
                     PLAN_TYPE_OPTIONS.find(opt => opt.value === pt)?.label || pt
                   ).join(', ')}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-start gap-2 p-3 bg-white rounded-xl">
-                  <span className="text-lg">⏱️</span>
-                  <div>
-                    <p className="font-semibold text-gray-700 text-sm">Duration</p>
-                    <p className="text-gray-600 text-sm">{DURATION_OPTIONS.find(opt => opt.value === form.duration)?.label || form.duration}</p>
-                  </div>
+              <div className="flex items-start gap-2 p-3 bg-white rounded-xl">
+                <span className="text-lg">⏱️</span>
+                <div>
+                  <p className="font-semibold text-gray-700 text-sm">Duration</p>
+                  <p className="text-gray-600 text-sm">{DURATION_OPTIONS.find(opt => opt.value === form.duration)?.label || form.duration}</p>
                 </div>
-                <div className="flex items-start gap-2 p-3 bg-white rounded-xl">
-                  <span className="text-lg">💪</span>
-                  <div>
-                    <p className="font-semibold text-gray-700 text-sm">Intensity</p>
-                    <p className="text-gray-600 text-sm capitalize">{form.intensity}</p>
-                  </div>
+              </div>
+              <div className="flex items-start gap-2 p-3 bg-white rounded-xl">
+                <span className="text-lg">💪</span>
+                <div>
+                  <p className="font-semibold text-gray-700 text-sm">Intensity</p>
+                  <p className="text-gray-600 text-sm capitalize">{form.intensity}</p>
                 </div>
               </div>
               {form.focusAreas.length > 0 && (
@@ -275,7 +273,7 @@ export default function CreatePlan() {
                   <span className="text-xl">🎨</span>
                   <div>
                     <p className="font-semibold text-gray-700">Focus Areas</p>
-                    <p className="text-gray-600">{form.focusAreas.join(', ')}</p>
+                    <p className="text-gray-600 text-sm">{form.focusAreas.join(', ')}</p>
                   </div>
                 </div>
               )}
@@ -284,7 +282,7 @@ export default function CreatePlan() {
                   <span className="text-xl">🎖️</span>
                   <div>
                     <p className="font-semibold text-gray-700">Goals</p>
-                    <p className="text-gray-600">{form.goals.join(', ')}</p>
+                    <p className="text-gray-600 text-sm">{form.goals.join(', ')}</p>
                   </div>
                 </div>
               )}

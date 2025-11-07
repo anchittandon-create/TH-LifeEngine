@@ -56,7 +56,7 @@ export function PlanConfigurator({ form, setForm }: Props) {
         <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
           ⚙️ Core Settings
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <SelectField
             label="⏱️ Duration"
             value={form.duration}
@@ -125,7 +125,7 @@ export function PlanConfigurator({ form, setForm }: Props) {
         <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
           🌱 Lifestyle Settings
         </h3>
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <SelectField
             label="🥗 Diet Preference"
             value={form.dietType}
@@ -140,27 +140,25 @@ export function PlanConfigurator({ form, setForm }: Props) {
             onChange={(value) => setForm((prev) => ({ ...prev, activityLevel: value }))}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-            <InputField
-              label="😴 Sleep Hours"
-              value={form.sleepHours}
-              onChange={(value) => setForm((prev) => ({ ...prev, sleepHours: value }))}
-              type="number"
-              min={4}
-              max={12}
-              icon="😴"
-            />
-            <SelectField
-              label="😰 Stress Level"
-              value={form.stressLevel}
-              options={[
-                { label: "Low", value: "low" },
-                { label: "Medium", value: "medium" },
-                { label: "High", value: "high" },
-              ]}
-              onChange={(value) => setForm((prev) => ({ ...prev, stressLevel: value }))}
-            />
-          </div>
+          <InputField
+            label="😴 Sleep Hours"
+            value={form.sleepHours}
+            onChange={(value) => setForm((prev) => ({ ...prev, sleepHours: value }))}
+            type="number"
+            min={4}
+            max={12}
+            icon="😴"
+          />
+          <SelectField
+            label="😰 Stress Level"
+            value={form.stressLevel}
+            options={[
+              { label: "Low", value: "low" },
+              { label: "Medium", value: "medium" },
+              { label: "High", value: "high" },
+            ]}
+            onChange={(value) => setForm((prev) => ({ ...prev, stressLevel: value }))}
+          />
         </div>
       </div>
     </div>
@@ -190,7 +188,7 @@ function CheckboxGroup({ label, helper, options, selected, onToggle, icon }: Che
         )}
       </div>
       {helper && <p className="text-sm text-gray-600 mb-4">{helper}</p>}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         {options.map((option) => {
           const checked = selected.includes(option.value);
           return (
