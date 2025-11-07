@@ -13,7 +13,6 @@ export default function SettingsPage() {
   const [language, setLanguage] = useState("en");
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
-  const [geminiApiKey, setGeminiApiKey] = useState("");
 
   // Load settings from localStorage on mount
   useEffect(() => {
@@ -22,14 +21,12 @@ export default function SettingsPage() {
     const savedLanguage = localStorage.getItem("language") || "en";
     const savedDisplayName = localStorage.getItem("displayName") || "";
     const savedEmail = localStorage.getItem("email") || "";
-    const savedApiKey = localStorage.getItem("geminiApiKey") || "";
 
     setTheme(savedTheme);
     setAutoSave(savedAutoSave);
     setLanguage(savedLanguage);
     setDisplayName(savedDisplayName);
     setEmail(savedEmail);
-    setGeminiApiKey(savedApiKey);
 
     // Apply theme
     applyTheme(savedTheme);
@@ -57,9 +54,6 @@ export default function SettingsPage() {
     localStorage.setItem("language", language);
     localStorage.setItem("displayName", displayName);
     localStorage.setItem("email", email);
-    if (geminiApiKey) {
-      localStorage.setItem("geminiApiKey", geminiApiKey);
-    }
 
     alert("Settings saved successfully!");
   };
@@ -138,19 +132,6 @@ export default function SettingsPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your.email@example.com"
-            />
-          </Field>
-        </section>
-
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>API Configuration</h2>
-
-          <Field label="Gemini API Key" helper="Required for AI plan generation and chat features">
-            <Input
-              type="password"
-              value={geminiApiKey}
-              onChange={(e) => setGeminiApiKey(e.target.value)}
-              placeholder="Enter your Gemini API key"
             />
           </Field>
         </section>
