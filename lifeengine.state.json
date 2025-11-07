@@ -335,6 +335,76 @@
   ],
   "plans": [
     {
+      "planId": "plan_id_z2uhc34r",
+      "profileId": "prof_anchit",
+      "days": 1,
+      "confidence": 0.9,
+      "warnings": [],
+      "planJSON": {
+        "id": "plan_id_z2uhc34r",
+        "profileId": "prof_anchit",
+        "intakeId": "intake_id_8nhk3h47",
+        "goals": [],
+        "createdAt": "2025-11-07T23:26:53.777Z",
+        "days": [
+          {
+            "date": "2025-11-07",
+            "activities": [
+              {
+                "type": "strength",
+                "name": "Full Body Strength",
+                "duration": 45,
+                "description": "Compound movements for lean muscle gain."
+              },
+              {
+                "type": "mindfulness",
+                "name": "Guided Meditation",
+                "duration": 15,
+                "description": "Focus on breath and body scan for stress reduction."
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oats with Berries & Nuts",
+                "calories": 380,
+                "description": "Rolled oats, mixed berries, chia seeds, almonds."
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil & Veggie Salad with Quinoa",
+                "calories": 520,
+                "description": "Quinoa, mixed greens, lentils, cucumber, bell peppers, light vinaigrette."
+              },
+              {
+                "type": "snack",
+                "name": "Greek Yogurt with Apple Slices",
+                "calories": 230,
+                "description": "Plain Greek yogurt, sliced apple, sprinkle of cinnamon."
+              },
+              {
+                "type": "dinner",
+                "name": "Baked Salmon with Roasted Sweet Potato & Broccoli",
+                "calories": 680,
+                "description": "Baked salmon fillet, roasted sweet potato, steamed broccoli."
+              }
+            ]
+          }
+        ]
+      },
+      "analytics": {
+        "generatedAt": "2025-11-07T23:26:53.777Z",
+        "ms": 8089
+      },
+      "costMetrics": {
+        "inputTokens": 309,
+        "outputTokens": 374,
+        "totalTokens": 683,
+        "model": "gemini-2.5-flash"
+      },
+      "createdAt": "2025-11-07T23:26:53.777Z"
+    },
+    {
       "planId": "plan_id_dn28asjt",
       "profileId": "prof_anchit",
       "days": 2,

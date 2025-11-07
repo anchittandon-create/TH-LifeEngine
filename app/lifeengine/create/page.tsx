@@ -27,6 +27,8 @@ export default function CreatePlan() {
   const [error, setError] = useState<string>("");
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [generatedPlanId, setGeneratedPlanId] = useState<string>("");
+  const [generatedPlan, setGeneratedPlan] = useState<any>(null);
+  const [showPlan, setShowPlan] = useState(false);
 
   useEffect(() => {
     fetchProfiles();
@@ -86,11 +88,16 @@ export default function CreatePlan() {
       console.log('✅ [CreatePlan] Plan generated successfully:', result.planId);
       
       setGeneratedPlanId(result.planId);
+      setGeneratedPlan(result.plan);
+      setShowPlan(true);
       
-      // Show success message
+      // Scroll to plan view
       setTimeout(() => {
-        router.push(`/lifeengine/plan/${result.planId}`);
-      }, 1500);
+        document.getElementById('generated-plan')?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }, 300);
       
     } catch (err: any) {
       console.error('❌ [CreatePlan] Generation failed:', err);
@@ -306,6 +313,134 @@ export default function CreatePlan() {
           </Button>
         </div>
       </form>
+
+      {/* Generated Plan Display */}
+      {showPlan && generatedPlan && (
+        <div id="generated-plan" className="mt-8">
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border-2 border-green-300 shadow-xl">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <span className="text-4xl">🎉</span>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">Your Plan is Ready!</h2>
+                  <p className="text-gray-600">Generated {generatedPlan.days?.length || 0} days of personalized wellness activities</p>
+                </div>
+              </div>
+              <Button
+                onClick={() => router.push(`/lifeengine/plan/${generatedPlanId}`)}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                View Full Plan →
+              </Button>
+            </div>
+
+            {/* Plan Preview */}
+            <div className="space-y-4">
+              {generatedPlan.days?.slice(0, 3).map((day: any, index: number) => (
+                <div key={index} className="bg-white rounded-xl p-5 shadow-md border border-green-200">
+                  <h3 className="font-bold text-lg text-gray-800 mb-3 flex items-center gap-2">
+                    📅 Day {index + 1} - {day.date}
+                  </h3>
+                  
+                  {/* Activities */}
+                  {day.activities && day.activities.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        🏃 Activities ({day.activities.length})
+                      </h4>
+                      <div className="space-y-2">
+                        {day.activities.slice(0, 3).map((activity: any, idx: number) => (
+                          <div key={idx} className="flex items-start gap-2 text-sm">
+                            <span className="text-blue-600">•</span>
+                            <div>
+                              <span className="font-medium">{activity.name}</span>
+                              <span className="text-gray-600"> - {activity.duration} min</span>
+                              {activity.description && (
+                                <p className="text-gray-500 text-xs mt-1">{activity.description}</p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                        {day.activities.length > 3 && (
+                          <p className="text-xs text-gray-500 italic">+ {day.activities.length - 3} more activities</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Meals */}
+                  {day.meals && day.meals.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        🍽️ Meals ({day.meals.length})
+                      </h4>
+                      <div className="space-y-2">
+                        {day.meals.slice(0, 3).map((meal: any, idx: number) => (
+                          <div key={idx} className="flex items-start gap-2 text-sm">
+                            <span className="text-green-600">•</span>
+                            <div>
+                              <span className="font-medium">{meal.name}</span>
+                              <span className="text-gray-600"> - {meal.calories} cal</span>
+                              {meal.description && (
+                                <p className="text-gray-500 text-xs mt-1">{meal.description}</p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                        {day.meals.length > 3 && (
+                          <p className="text-xs text-gray-500 italic">+ {day.meals.length - 3} more meals</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {generatedPlan.days && generatedPlan.days.length > 3 && (
+                <div className="text-center p-4 bg-blue-50 rounded-xl border border-blue-200">
+                  <p className="text-blue-800 font-medium">
+                    + {generatedPlan.days.length - 3} more days in your complete plan
+                  </p>
+                  <Button
+                    onClick={() => router.push(`/lifeengine/plan/${generatedPlanId}`)}
+                    variant="ghost"
+                    className="mt-2"
+                  >
+                    View Complete Plan →
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-wrap gap-3 mt-6 pt-6 border-t border-green-200">
+              <Button
+                onClick={() => router.push(`/lifeengine/plan/${generatedPlanId}`)}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                📋 View Full Plan
+              </Button>
+              <Button
+                onClick={() => router.push('/lifeengine/dashboard')}
+                variant="ghost"
+              >
+                📊 Go to Dashboard
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowPlan(false);
+                  setGeneratedPlan(null);
+                  setGeneratedPlanId("");
+                  setForm(defaultPlanFormState);
+                }}
+                variant="ghost"
+              >
+                ✨ Create Another Plan
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
