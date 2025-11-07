@@ -48,7 +48,12 @@ const inputSchema = z.object({
   equipment: z.array(z.string()),
 });
 
-const TH_PLANS = new Map<string, any>();
+// Make TH_PLANS global so it can be accessed by other API routes
+declare global {
+  var TH_PLANS: Map<string, any> | undefined;
+}
+
+const TH_PLANS = globalThis.TH_PLANS ?? (globalThis.TH_PLANS = new Map<string, any>());
 
 const ENABLE_PLAN_CACHE = process.env.LIFEENGINE_PLAN_CACHE === "true";
 const CACHE_TTL_MS = Number(process.env.LIFEENGINE_PLAN_CACHE_TTL_MS ?? "0");

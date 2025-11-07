@@ -15,7 +15,7 @@ const GPT_URL =
   "https://chatgpt.com/g/g-690630c1dfe48191b63fc09f8f024ccb-th-lifeengine-companion?ref=mini";
 
 export default function UseCustomGPTPage() {
-  const [profileId, setProfileId] = useState("ritika-001");
+  const [profileId, setProfileId] = useState("prof_anchit");
   const [form, setForm] = useState(defaultPlanFormState);
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<LifeEnginePlan | null>(null);
@@ -208,7 +208,7 @@ function ProfileControls({
           placeholder="e.g., ritika-001"
         />
         <p className="text-xs text-gray-500 mt-1">
-          Available demo profiles: <code>ritika-001</code>, <code>demo-002</code>
+          Available profiles: <code>prof_anchit</code>, <code>prof_f6cf230b</code>, <code>ritika-001</code>, <code>demo-002</code>
         </p>
       </div>
       <div className="flex gap-3 flex-wrap">

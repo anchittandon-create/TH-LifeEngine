@@ -3,8 +3,11 @@ import type { LifeEnginePlan } from "@/app/types/lifeengine";
 
 type StoredPlanItem = { plan_id: string; plan: LifeEnginePlan };
 
-// Access the global store
-declare const __PLANS__: StoredPlanItem[] | undefined;
+// Access the global stores
+declare global {
+  var __PLANS__: StoredPlanItem[] | undefined;
+  var TH_PLANS: Map<string, any> | undefined;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -20,29 +23,53 @@ export async function GET(req: Request) {
       );
     }
 
-    // Access the global store
-    const store: StoredPlanItem[] = (globalThis as any).__PLANS__ ?? [];
+    // Check both storage systems
+    const v1Store: StoredPlanItem[] = globalThis.__PLANS__ ?? [];
+    const thPlansMap: Map<string, any> = globalThis.TH_PLANS ?? new Map();
 
-    // Filter plans by profile_id in metadata
-    const matchingPlans = store.filter(
+    // Collect all matching plans from both stores
+    const allMatchingPlans: any[] = [];
+
+    // From v1 store (__PLANS__)
+    const v1Matches = v1Store.filter(
       (item) => item.plan?.metadata?.profile_id === profile_id
     );
+    allMatchingPlans.push(...v1Matches.map((item) => ({
+      plan: item.plan,
+      timestamp: item.plan?.metadata?.timestamp || 0,
+      source: 'v1'
+    })));
 
-    if (matchingPlans.length === 0) {
+    // From TH_PLANS Map
+    for (const [planId, planData] of thPlansMap.entries()) {
+      if (planData.profileId === profile_id) {
+        allMatchingPlans.push({
+          plan: planData.plan,
+          timestamp: new Date(planData.createdAt).getTime(),
+          source: 'th_plans',
+          planId
+        });
+      }
+    }
+
+    if (allMatchingPlans.length === 0) {
       return NextResponse.json(
-        { error: "No plans found for this profile_id" },
+        { error: `No plans found for profile_id: ${profile_id}. Try generating a plan first.` },
         { status: 404 }
       );
     }
 
-    // Return the most recent plan (last in array)
-    const latestPlan = matchingPlans[matchingPlans.length - 1].plan;
+    // Sort by timestamp and return the most recent
+    allMatchingPlans.sort((a, b) => b.timestamp - a.timestamp);
+    const latestPlan = allMatchingPlans[0].plan;
+
+    console.log(`[Latest Plan] Found ${allMatchingPlans.length} plans for ${profile_id}, returning most recent from ${allMatchingPlans[0].source}`);
 
     return NextResponse.json(latestPlan);
   } catch (error) {
     console.error("Error fetching latest plan:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error: " + (error as Error).message },
       { status: 500 }
     );
   }
