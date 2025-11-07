@@ -1,3 +1,34 @@
 "use client";
-import Link from "next/link"; import { usePathname } from "next/navigation";
-export default function NavLink({ href, label }:{ href:string; label:string }){ const p=usePathname()||"/"; const a=(p===href||p.startsWith(href+"/")); return (<Link href={href} aria-current={a?"page":undefined} data-active={a?"true":"false"}><span>{label}</span></Link>); }
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+function normalize(path: string) {
+  if (!path) return "/";
+  const trimmed = path.replace(/\/+$/, "");
+  return trimmed || "/";
+}
+
+export default function NavLink({ href, label }: { href: string; label: string }) {
+  const pathname = usePathname() || "/";
+  const current = normalize(pathname);
+  const target = normalize(href);
+  const isRootLink = target === "/lifeengine";
+
+  let isActive = false;
+  if (isRootLink) {
+    isActive = current === target;
+  } else {
+    isActive = current === target || current.startsWith(`${target}/`);
+  }
+
+  return (
+    <Link
+      href={href}
+      aria-current={isActive ? "page" : undefined}
+      data-active={isActive ? "true" : "false"}
+    >
+      <span>{label}</span>
+    </Link>
+  );
+}

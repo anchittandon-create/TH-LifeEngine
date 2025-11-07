@@ -3,23 +3,46 @@
 import React, { useState } from "react";
 import PlanPreview from "@/app/components/PlanPreview";
 import type { LifeEnginePlan } from "@/app/types/lifeengine";
+import {
+  PLAN_TYPE_OPTIONS,
+  DURATION_OPTIONS,
+  INTENSITY_OPTIONS,
+  FORMAT_OPTIONS,
+  FOCUS_AREA_OPTIONS,
+  ROUTINE_OPTIONS,
+  defaultPlanFormState,
+  describePlanBrief,
+} from "@/lib/lifeengine/planConfig";
 
 const GPT_URL =
-  process.env.NEXT_PUBLIC_LIFEENGINE_GPT_URL || "";
+  process.env.NEXT_PUBLIC_LIFEENGINE_GPT_URL ||
+  "https://chatgpt.com/g/g-690630c1dfe48191b63fc09f8f024ccb-th-lifeengine-companion?ref=mini";
 
 export default function UseCustomGPTPage() {
   const [profileId, setProfileId] = useState("ritika-001");
+  const [form, setForm] = useState(defaultPlanFormState);
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<LifeEnginePlan | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const openGPT = () => {
+  const planBrief = describePlanBrief(profileId, form);
+
+  const copyPlanBrief = async () => {
+    try {
+      await navigator.clipboard.writeText(planBrief);
+    } catch (err) {
+      console.warn("Failed to copy", err);
+    }
+  };
+
+  const openGPT = async () => {
     if (!GPT_URL) {
       alert(
         "Please set NEXT_PUBLIC_LIFEENGINE_GPT_URL in your .env.local file with your Custom GPT share URL"
       );
       return;
     }
+    await copyPlanBrief();
     window.open(GPT_URL, "_blank", "noopener,noreferrer");
   };
 
@@ -105,76 +128,19 @@ export default function UseCustomGPTPage() {
         </div>
 
         {/* Controls Card */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 space-y-4">
           <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <span className="text-2xl">⚙️</span> Controls
+            <span className="text-2xl">⚙️</span> Plan Configuration
           </h2>
-          <div className="space-y-4">
-            {/* Profile ID Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Profile ID
-              </label>
-              <input
-                type="text"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                value={profileId}
-                onChange={(e) => setProfileId(e.target.value)}
-                placeholder="e.g., ritika-001"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Available demo profiles: <code>ritika-001</code>,{" "}
-                <code>demo-002</code>
-              </p>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 flex-wrap">
-              <button
-                onClick={openGPT}
-                className="flex-1 min-w-[200px] bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
-              >
-                <span className="text-xl">🚀</span>
-                Open Custom GPT
-              </button>
-              <button
-                onClick={refreshPlan}
-                disabled={loading}
-                className="flex-1 min-w-[200px] bg-white border-2 border-purple-600 text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <svg
-                      className="animate-spin h-5 w-5"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    Loading...
-                  </>
-                ) : (
-                  <>
-                    <span className="text-xl">🔄</span>
-                    Refresh Latest Plan
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
+          <PlanConfigFields form={form} setForm={setForm} />
+          <ProfileControls
+            profileId={profileId}
+            setProfileId={setProfileId}
+            openGPT={openGPT}
+            refreshPlan={refreshPlan}
+            loading={loading}
+          />
+          <PlanBrief block={planBrief} copyBrief={copyPlanBrief} />
         </div>
 
         {/* Error Display */}
@@ -214,5 +180,227 @@ export default function UseCustomGPTPage() {
         )}
       </div>
     </main>
+  );
+}
+
+type PlanConfigProps = {
+  form: typeof defaultPlanFormState;
+  setForm: React.Dispatch<React.SetStateAction<typeof defaultPlanFormState>>;
+};
+
+function PlanConfigFields({ form, setForm }: PlanConfigProps) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Plan Type
+        </label>
+        <select
+          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+          value={form.planType}
+          onChange={(e) => setForm((prev) => ({ ...prev, planType: e.target.value }))}
+        >
+          {PLAN_TYPE_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+        <select
+          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+          value={form.duration}
+          onChange={(e) => setForm((prev) => ({ ...prev, duration: e.target.value }))}
+        >
+          {DURATION_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Intensity</label>
+        <select
+          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+          value={form.intensity}
+          onChange={(e) => setForm((prev) => ({ ...prev, intensity: e.target.value }))}
+        >
+          {INTENSITY_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Output Format</label>
+        <select
+          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+          value={form.format}
+          onChange={(e) => setForm((prev) => ({ ...prev, format: e.target.value }))}
+        >
+          {FORMAT_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="md:col-span-2">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Focus Areas (pick up to 4)
+        </label>
+        <select
+          multiple
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 min-h-[120px]"
+          value={form.focusAreas}
+          onChange={(event) => {
+            const values = Array.from(event.target.selectedOptions, (option) => option.value).slice(
+              0,
+              4,
+            );
+            setForm((prev) => ({ ...prev, focusAreas: values }));
+          }}
+        >
+          {FOCUS_AREA_OPTIONS.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Include Daily Routine?
+        </label>
+        <select
+          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+          value={form.includeDailyRoutine}
+          onChange={(e) => setForm((prev) => ({ ...prev, includeDailyRoutine: e.target.value }))}
+        >
+          {ROUTINE_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
+
+type ProfileControlsProps = {
+  profileId: string;
+  setProfileId: (value: string) => void;
+  openGPT: () => void;
+  refreshPlan: () => Promise<void>;
+  loading: boolean;
+};
+
+function ProfileControls({
+  profileId,
+  setProfileId,
+  openGPT,
+  refreshPlan,
+  loading,
+}: ProfileControlsProps) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Profile ID
+        </label>
+        <input
+          type="text"
+          className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          value={profileId}
+          onChange={(e) => setProfileId(e.target.value)}
+          placeholder="e.g., ritika-001"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Available demo profiles: <code>ritika-001</code>, <code>demo-002</code>
+        </p>
+      </div>
+      <div className="flex gap-3 flex-wrap">
+        <button
+          onClick={openGPT}
+          className="flex-1 min-w-[200px] bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+        >
+          <span className="text-xl">🚀</span>
+          Open Custom GPT (plan brief copied)
+        </button>
+        <button
+          onClick={refreshPlan}
+          disabled={loading}
+          className="flex-1 min-w-[200px] bg-white border-2 border-purple-600 text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {loading ? (
+            <>
+              <svg
+                className="animate-spin h-5 w-5"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+              Loading...
+            </>
+          ) : (
+            <>
+              <span className="text-xl">🔄</span>
+              Refresh Latest Plan
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+type PlanBriefProps = {
+  block: string;
+  copyBrief: () => Promise<void> | void;
+};
+
+function PlanBrief({ block, copyBrief }: PlanBriefProps) {
+  return (
+    <div className="bg-purple-50 border border-purple-100 rounded-xl p-4 space-y-3">
+      <div className="flex items-center gap-2 justify-between">
+        <div className="font-semibold text-purple-800 flex items-center gap-2">
+          <span className="text-xl">📝</span> Plan Brief for GPT
+        </div>
+        <button
+          onClick={copyBrief}
+          className="text-sm text-purple-600 hover:text-purple-800 font-semibold"
+        >
+          Copy Brief
+        </button>
+      </div>
+      <textarea
+        readOnly
+        className="w-full border border-purple-200 rounded-lg bg-white/80 text-sm p-3 text-gray-700"
+        rows={6}
+        value={block}
+      />
+      <p className="text-xs text-purple-600">
+        The brief is automatically copied when you open the Custom GPT tab.
+      </p>
+    </div>
   );
 }

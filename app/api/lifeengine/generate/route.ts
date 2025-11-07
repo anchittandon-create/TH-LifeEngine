@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@/lib/logging/logger';
+import { db } from '@/lib/utils/db';
+import type { ProfileRow } from '@/lib/utils/db';
 
 const logger = new Logger('system');
 
@@ -68,7 +70,7 @@ export async function POST(req: NextRequest) {
   
   try {
     const body = await req.json();
-    const input = inputSchema.parse(body);
+    const input = await normalizeGenerationRequest(body);
 
     const today = new Date().toISOString().split('T')[0];
 
@@ -316,4 +318,256 @@ function verifyPlan(planJson: any, input: any) {
   const warnings: string[] = [];
   const analytics = { safety_score: 0.95, diet_match: 0.92, progression_score: 0.9, adherence_score: 0.88, overall: 0.91 };
   return { plan: planJson, warnings, analytics };
+}
+
+type IntakePayload = {
+  primaryPlanType?: string;
+  secondaryPlanType?: string;
+  startDate?: string;
+  endDate?: string;
+  preferences?: {
+    intensity?: string;
+    focusAreas?: string[];
+    format?: string;
+    includeDailyRoutine?: boolean;
+  };
+};
+
+async function normalizeGenerationRequest(body: any) {
+  if (body && typeof body === "object" && "profileSnapshot" in body) {
+    return inputSchema.parse(body);
+  }
+
+  if (!body?.profileId) {
+    throw new Error("profileId is required");
+  }
+
+  const profile = await db.getProfile(body.profileId);
+  if (!profile) {
+    throw new Error("Profile not found");
+  }
+
+  const intake: IntakePayload = body.intake ?? {};
+  const snapshot = buildProfileSnapshot(profile);
+  const planType = buildPlanType(intake, profile);
+  const goals = buildGoals(profile, intake);
+  const conditions = buildConditions(profile);
+  const duration = buildDuration(intake);
+  const timeBudget = deriveTimeBudget(intake?.preferences?.intensity, profile);
+  const experience = determineExperienceLevel(profile);
+  const equipment = Array.isArray(profile.equipment) ? profile.equipment : [];
+
+  return inputSchema.parse({
+    profileId: body.profileId,
+    profileSnapshot: snapshot,
+    plan_type: planType,
+    goals,
+    conditions,
+    duration,
+    time_budget_min_per_day: timeBudget,
+    experience_level: experience,
+    equipment,
+  });
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const ALLOWED_PLAN_TYPES = new Set(["yoga", "diet", "combined", "holistic"]);
+
+function buildProfileSnapshot(profile: ProfileRow) {
+  const demographics = profile.demographics ?? {};
+  const nutrition = profile.nutrition ?? {};
+  const health = profile.health ?? {};
+  const preferences = profile.preferences ?? {};
+  const schedule = profile.schedule ?? {};
+
+  return {
+    id: profile.id,
+    name: profile.name ?? "Member",
+    gender: normalizeGender(demographics.sex ?? profile.gender),
+    age: Number(demographics.age ?? profile.age ?? 30),
+    height_cm: Number(demographics.height ?? 170),
+    weight_kg: Number(demographics.weight ?? 70),
+    region: mapRegion(profile.contact?.location),
+    activity_level: normalizeActivityLevel(preferences.level ?? profile.lifestyle?.activityLevel),
+    dietary: {
+      type: mapDietType(nutrition.dietType),
+      allergies: health.allergies ?? [],
+      avoid_items: nutrition.dislikes ?? [],
+      cuisine_pref: normalizeArray(nutrition.cuisinePreference),
+    },
+    medical_flags: health.flags ?? [],
+    preferences: {
+      tone: preferences.tone ?? "balanced",
+      indoor_only: Boolean(preferences.indoorOnly),
+      notes: preferences.coachingNotes ?? profile.coachingNotes ?? "",
+    },
+    availability: {
+      days_per_week: Number(schedule.daysPerWeek ?? 5),
+      preferred_slots: normalizeSlots(schedule.preferredSlots),
+    },
+  };
+}
+
+function buildPlanType(intake: IntakePayload, profile: ProfileRow) {
+  const requested = sanitizePlanType(intake.primaryPlanType);
+  const inferred = sanitizePlanType(profile.lifestyle?.primaryGoal);
+  const primary = requested || inferred || "holistic";
+
+  const secondary = [
+    sanitizePlanType(intake.secondaryPlanType),
+    ...(profile.lifestyle?.secondaryGoals ?? []),
+  ]
+    .map((goal) => sanitizePlanType(goal))
+    .filter((goal) => goal && goal !== primary);
+
+  return { primary, secondary };
+}
+
+function buildGoals(profile: ProfileRow, intake: IntakePayload) {
+  const fromIntake = intake.preferences?.focusAreas ?? [];
+  const fromProfile = profile.goals ?? [];
+  const fromLifestyle = [
+    profile.lifestyle?.primaryGoal,
+    ...(profile.lifestyle?.secondaryGoals ?? []),
+  ];
+
+  const combined = [...fromIntake, ...fromProfile, ...fromLifestyle].map((goal) =>
+    goal?.toString().trim(),
+  );
+
+  const deduped = Array.from(new Set(combined.filter(Boolean)));
+
+  if (!deduped.length) {
+    deduped.push("general_wellness");
+  }
+
+  return deduped.map((name, index) => ({ name, priority: index + 1 }));
+}
+
+function buildConditions(profile: ProfileRow) {
+  const health = profile.health ?? {};
+  const set = new Set<string>();
+  (health.flags ?? []).forEach((item) => set.add(item));
+  (health.chronicConditions ?? []).forEach((item) => set.add(item));
+  return Array.from(set).filter(Boolean);
+}
+
+function buildDuration(intake: IntakePayload) {
+  const start = safeDate(intake.startDate);
+  const rawEnd = intake.endDate ? safeDate(intake.endDate) : null;
+  const end = rawEnd ?? new Date(start.getTime() + 28 * DAY_MS);
+  const diff = Math.max(DAY_MS * 7, end.getTime() - start.getTime());
+  const days = Math.round(diff / DAY_MS);
+  return {
+    unit: "weeks",
+    value: Math.max(1, Math.ceil(days / 7)),
+  };
+}
+
+function deriveTimeBudget(intensity: string | undefined, profile: ProfileRow) {
+  if (intensity) {
+    const normalized = intensity.toLowerCase();
+    if (normalized.includes("high")) return 60;
+    if (normalized.includes("medium")) return 45;
+    if (normalized.includes("low")) return 30;
+  }
+  return profile.schedule?.timeBudgetMin ?? 45;
+}
+
+function determineExperienceLevel(profile: ProfileRow) {
+  const level = profile.preferences?.level ?? profile.experience;
+  if (typeof level === "string" && level.trim()) {
+    return level;
+  }
+  return "beginner";
+}
+
+function normalizeGender(value: any): "F" | "M" | "Other" {
+  if (typeof value === "string") {
+    const normalized = value.toUpperCase();
+    if (normalized.startsWith("F")) return "F";
+    if (normalized.startsWith("M")) return "M";
+  }
+  return "Other";
+}
+
+function mapRegion(location?: string) {
+  if (!location) return "Global";
+  const normalized = location.toUpperCase();
+  if (normalized.includes("IND") || normalized.endsWith("IN")) return "IN";
+  if (normalized.includes("USA") || normalized.endsWith("US")) return "US";
+  if (normalized.includes("UK") || normalized.includes("EUROPE") || normalized.includes("EU")) {
+    return "EU";
+  }
+  return "Global";
+}
+
+function normalizeActivityLevel(value: any) {
+  if (typeof value === "string") {
+    const normalized = value.toLowerCase();
+    if (["sedentary", "light", "moderate", "intense"].includes(normalized)) {
+      return normalized as "sedentary" | "light" | "moderate" | "intense";
+    }
+    if (normalized.includes("high")) return "intense";
+    if (normalized.includes("low")) return "light";
+  }
+  return "moderate";
+}
+
+function mapDietType(value: any) {
+  if (typeof value === "string") {
+    const normalized = value.toLowerCase().replace(/\s+/g, "_");
+    if (
+      ["veg", "vegan", "eggetarian", "non_veg", "jain", "gluten_free", "lactose_free"].includes(
+        normalized,
+      )
+    ) {
+      return normalized as
+        | "veg"
+        | "vegan"
+        | "eggetarian"
+        | "non_veg"
+        | "jain"
+        | "gluten_free"
+        | "lactose_free";
+    }
+  }
+  return "veg";
+}
+
+function normalizeArray(value: any) {
+  if (!value) return ["regional_home_cooking"];
+  if (Array.isArray(value)) {
+    const normalized = value.map((item) => item?.toString().trim()).filter(Boolean);
+    return normalized.length ? normalized : ["regional_home_cooking"];
+  }
+  return [value.toString()];
+}
+
+function normalizeSlots(slots: any) {
+  if (Array.isArray(slots) && slots.length) {
+    return slots.map((slot) => ({
+      start: slot?.start ?? "07:00",
+      end: slot?.end ?? "08:00",
+    }));
+  }
+  return [{ start: "07:00", end: "08:00" }];
+}
+
+function sanitizePlanType(value?: string | null) {
+  if (!value) return "";
+  const normalized = value.toLowerCase().replace(/\s+/g, "_");
+  if (ALLOWED_PLAN_TYPES.has(normalized)) {
+    return normalized;
+  }
+  return "";
+}
+
+function safeDate(value?: string) {
+  if (!value) return new Date();
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return new Date();
+  }
+  return parsed;
 }

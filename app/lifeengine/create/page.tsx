@@ -7,67 +7,23 @@ import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { Actions } from "@/components/ui/Actions";
 import type { Profile } from "@/lib/ai/schemas";
+import {
+  PLAN_TYPE_OPTIONS,
+  DURATION_OPTIONS,
+  INTENSITY_OPTIONS,
+  FORMAT_OPTIONS,
+  FOCUS_AREA_OPTIONS,
+  ROUTINE_OPTIONS,
+  defaultPlanFormState,
+  buildIntakeFromForm,
+} from "@/lib/lifeengine/planConfig";
 import styles from "./page.module.css";
-
-const PLAN_TYPE_OPTIONS = [
-  { label: "Yoga Optimization", value: "yoga" },
-  { label: "Diet & Nutrition", value: "diet" },
-  { label: "Combined (Movement + Diet)", value: "combined" },
-  { label: "Holistic Lifestyle Reset", value: "holistic" },
-] as { label: string; value: string }[];
-
-const DURATION_OPTIONS = [
-  { label: "4 Weeks", value: "1" },
-  { label: "8 Weeks", value: "2" },
-  { label: "12 Weeks", value: "3" },
-  { label: "24 Weeks", value: "6" },
-  { label: "1 Year", value: "12" },
-];
-
-const INTENSITY_OPTIONS = [
-  { label: "Regenerative (Low)", value: "Low" },
-  { label: "Balanced (Medium)", value: "Medium" },
-  { label: "Athletic (High)", value: "High" },
-];
-
-const FORMAT_OPTIONS = [
-  { label: "Text Summary", value: "text" },
-  { label: "Downloadable PDF", value: "pdf" },
-  { label: "Text + PDF", value: "both" },
-];
-
-const FOCUS_AREA_OPTIONS = [
-  "Metabolic health",
-  "Hormone balance",
-  "Stress resilience",
-  "Mobility & flexibility",
-  "Posture & spine",
-  "Gut health",
-  "Sleep quality",
-  "Strength & conditioning",
-  "Weight management",
-  "Energy & focus",
-] as string[];
-
-const ROUTINE_OPTIONS = [
-  { label: "Yes – include daily routines", value: "yes" },
-  { label: "No – skip daily routines", value: "no" },
-];
-
-const defaultFormState = {
-  planType: PLAN_TYPE_OPTIONS[0].value,
-  duration: DURATION_OPTIONS[0].value,
-  intensity: INTENSITY_OPTIONS[1].value,
-  focusAreas: [] as string[],
-  format: FORMAT_OPTIONS[0].value,
-  includeDailyRoutine: ROUTINE_OPTIONS[0].value,
-};
 
 export default function CreatePlan() {
   const router = useRouter();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState<string>("");
-  const [form, setForm] = useState(defaultFormState);
+  const [form, setForm] = useState(defaultPlanFormState);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -90,28 +46,10 @@ export default function CreatePlan() {
       alert("Please select a profile");
       return;
     }
-    if (!form.planType || !form.duration || !form.intensity) {
-      alert("Please fill every plan configuration field.");
-      return;
-    }
     setLoading(true);
 
     try {
-      const durationMonths = Number(form.duration);
-      const planTypeSlug = form.planType;
-
-      const intake = {
-        primaryPlanType: planTypeSlug,
-        secondaryPlanType: "",
-        startDate: new Date().toISOString().split('T')[0],
-        endDate: new Date(Date.now() + durationMonths * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        preferences: {
-          intensity: form.intensity,
-          focusAreas: form.focusAreas,
-          format: form.format,
-          includeDailyRoutine: form.includeDailyRoutine === "yes",
-        },
-      };
+      const intake = buildIntakeFromForm(form);
 
       const response = await fetch("/api/lifeengine/generate", {
         method: "POST",
@@ -279,7 +217,7 @@ export default function CreatePlan() {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => setForm(defaultFormState)}
+            onClick={() => setForm(defaultPlanFormState)}
           >
             Reset Fields
           </Button>
