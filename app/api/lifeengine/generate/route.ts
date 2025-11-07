@@ -48,13 +48,16 @@ const inputSchema = z.object({
 
 const TH_PLANS = new Map<string, any>();
 
-// 💰 EXTREME COST OPTIMIZATION: 24-hour caching - prevent duplicate calls within full day
-const requestCache = new Map<string, { timestamp: number; response: any }>();
-const THROTTLE_MS = 86400000; // 24 hours = 86,400,000ms (was 1 hour)
+const ENABLE_PLAN_CACHE = process.env.LIFEENGINE_PLAN_CACHE === "true";
+const CACHE_TTL_MS = Number(process.env.LIFEENGINE_PLAN_CACHE_TTL_MS ?? "0");
+const CACHE_PURGE_MS =
+  Number(process.env.LIFEENGINE_PLAN_CACHE_PURGE_MS ?? String((CACHE_TTL_MS || 0) * 2)) || 0;
+const PLAN_CACHE_ENABLED = ENABLE_PLAN_CACHE && CACHE_TTL_MS > 0;
 
-// 💰 ULTRA-STRICT: Daily request limit reduced to 3 per profile
+const requestCache = new Map<string, { timestamp: number; response: any }>();
+
+const MAX_REQUESTS_PER_DAY = Number(process.env.LIFEENGINE_MAX_REQUESTS_PER_DAY ?? "0");
 const dailyRequestCount = new Map<string, { date: string; count: number }>();
-const MAX_REQUESTS_PER_DAY = 3; // Reduced from 10 - extreme cost savings
 
 // 💰 COST CIRCUIT BREAKER: Global daily budget protection
 const globalDailySpend = new Map<string, { date: string; totalCost: number }>();
@@ -67,30 +70,31 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const input = inputSchema.parse(body);
 
-    // 💰 COST CONTROL: Ultra-strict daily request limit per profile
     const today = new Date().toISOString().split('T')[0];
-    const profileLimit = dailyRequestCount.get(input.profileId);
-    
-    if (profileLimit) {
-      if (profileLimit.date === today && profileLimit.count >= MAX_REQUESTS_PER_DAY) {
-        logger.warn('EXTREME: Daily request limit exceeded', { 
-          profileId: input.profileId,
-          count: profileLimit.count,
-          limit: MAX_REQUESTS_PER_DAY
-        });
-        return NextResponse.json({ 
-          error: `ULTRA-STRICT MODE: Only ${MAX_REQUESTS_PER_DAY} plans per day allowed. Try again tomorrow.`,
-          retryAfter: 'tomorrow',
-          costSaving: 'This limit prevents excessive API costs'
-        }, { status: 429 });
-      }
-      if (profileLimit.date !== today) {
-        dailyRequestCount.set(input.profileId, { date: today, count: 1 });
+
+    if (MAX_REQUESTS_PER_DAY > 0) {
+      const profileLimit = dailyRequestCount.get(input.profileId);
+      
+      if (profileLimit) {
+        if (profileLimit.date === today && profileLimit.count >= MAX_REQUESTS_PER_DAY) {
+          logger.warn('EXTREME: Daily request limit exceeded', { 
+            profileId: input.profileId,
+            count: profileLimit.count,
+            limit: MAX_REQUESTS_PER_DAY
+          });
+          return NextResponse.json({ 
+            error: `Only ${MAX_REQUESTS_PER_DAY} plans per day allowed for this profile.`,
+            retryAfter: 'tomorrow'
+          }, { status: 429 });
+        }
+        if (profileLimit.date !== today) {
+          dailyRequestCount.set(input.profileId, { date: today, count: 1 });
+        } else {
+          profileLimit.count++;
+        }
       } else {
-        profileLimit.count++;
+        dailyRequestCount.set(input.profileId, { date: today, count: 1 });
       }
-    } else {
-      dailyRequestCount.set(input.profileId, { date: today, count: 1 });
     }
 
     // 💰 GLOBAL BUDGET CIRCUIT BREAKER: Check total daily spend
@@ -108,18 +112,17 @@ export async function POST(req: NextRequest) {
       }, { status: 503 });
     }
 
-    // Create cache key from profile + plan type
     const cacheKey = `${input.profileId}-${input.plan_type.primary}-${JSON.stringify(input.goals)}`;
     
-    // 💰 Check 24-hour cache - MASSIVE cost savings!
-    const cached = requestCache.get(cacheKey);
-    if (cached && (Date.now() - cached.timestamp) < THROTTLE_MS) {
-      logger.warn('Request served from 24-HOUR cache', { 
-        profileId: input.profileId,
-        timeSinceLastCall: Math.round((Date.now() - cached.timestamp) / 3600000) + ' hours',
-        costSaved: '$0.02-0.03 (100% API cost avoided)'
-      });
-      return NextResponse.json(cached.response);
+    if (PLAN_CACHE_ENABLED) {
+      const cached = requestCache.get(cacheKey);
+      if (cached && (Date.now() - cached.timestamp) < CACHE_TTL_MS) {
+        logger.warn('Request served from plan cache', { 
+          profileId: input.profileId,
+          timeSinceLastCall: Math.round((Date.now() - cached.timestamp) / 60000) + ' minutes'
+        });
+        return NextResponse.json(cached.response);
+      }
     }
 
     logger.info('Plan generation started', { 
@@ -242,23 +245,27 @@ JSON:{"meta":{"title":"","duration_days":${input.duration.unit === 'weeks' ? inp
       remainingBudget: `$${(MAX_DAILY_BUDGET_USD - currentGlobalSpend.totalCost).toFixed(4)}`
     });
 
-    // 💰 Cache the response for 24 HOURS - extreme savings!
-    requestCache.set(cacheKey, { 
-      timestamp: Date.now(), 
-      response: planData 
-    });
-    
-    // 💰 Clear old cache entries (older than 48 hours) to prevent memory issues
-    for (const [key, value] of requestCache.entries()) {
-      if (Date.now() - value.timestamp > 172800000) { // 48 hours
-        requestCache.delete(key);
+    if (PLAN_CACHE_ENABLED) {
+      requestCache.set(cacheKey, { 
+        timestamp: Date.now(), 
+        response: planData 
+      });
+      
+      const purgeWindow = CACHE_PURGE_MS || CACHE_TTL_MS * 2;
+      if (purgeWindow > 0) {
+        for (const [key, value] of requestCache.entries()) {
+          if (Date.now() - value.timestamp > purgeWindow) {
+            requestCache.delete(key);
+          }
+        }
       }
     }
     
-    // 💰 Clean up old daily counters and global spend tracking
-    for (const [profileId, data] of dailyRequestCount.entries()) {
-      if (data.date !== today) {
-        dailyRequestCount.delete(profileId);
+    if (MAX_REQUESTS_PER_DAY > 0) {
+      for (const [profileId, data] of dailyRequestCount.entries()) {
+        if (data.date !== today) {
+          dailyRequestCount.delete(profileId);
+        }
       }
     }
     for (const [date, data] of globalDailySpend.entries()) {

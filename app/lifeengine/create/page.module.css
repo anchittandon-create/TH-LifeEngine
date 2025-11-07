@@ -52,6 +52,20 @@
   gap: var(--space-4);
 }
 
+.multiSelect {
+  width: 100%;
+  min-height: 120px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  padding: var(--space-2);
+  background: var(--panel);
+  color: var(--text);
+}
+
+.multiSelect option {
+  padding: var(--space-1);
+}
+
 @media (max-width: 640px) {
   .grid {
     grid-template-columns: 1fr;
