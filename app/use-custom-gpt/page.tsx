@@ -137,71 +137,32 @@ export default function UseCustomGPTPage() {
       <div className="max-w-7xl mx-auto p-6 space-y-8 w-95%">
         {/* Header */}
         <div className="text-center space-y-3 pt-8">
+          <div className="text-6xl mb-4">🤖</div>
           <h1 className="text-4xl font-bold text-gray-900">
-            🤖 Use Custom GPT
+            Generate with Custom GPT
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Generate personalized wellness plans using TH_LifeEngine Companion
-            GPT
+            AI-powered planning with ChatGPT integration - same powerful features as Create Plan
           </p>
         </div>
 
-        {/* Instructions Card */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <span className="text-2xl">📋</span> How It Works
-          </h2>
-          <ol className="space-y-3 text-gray-700">
-            <li className="flex gap-3">
-              <span className="flex-shrink-0 w-6 h-6 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center text-sm font-bold">
-                1
-              </span>
-              <span>
-                Click <strong>"Open Custom GPT"</strong> to launch the
-                TH_LifeEngine Companion in ChatGPT
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <span className="flex-shrink-0 w-6 h-6 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center text-sm font-bold">
-                2
-              </span>
-              <span>
-                In the chat, ask it to generate a plan using your{" "}
-                <code className="bg-gray-100 px-2 py-1 rounded text-sm">
-                  profile_id
-                </code>
-                <br />
-                <span className="text-sm text-gray-500 italic">
-                  Example: "Use profile_id ritika-001 and generate a combined
-                  7-day plan"
-                </span>
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <span className="flex-shrink-0 w-6 h-6 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center text-sm font-bold">
-                3
-              </span>
-              <span>
-                Return here and click <strong>"Refresh Latest Plan"</strong> to
-                view the generated plan
-              </span>
-            </li>
-          </ol>
-        </div>
-
-        {/* Controls Card */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 space-y-4">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <span className="text-2xl">⚙️</span> Plan Configuration
-          </h2>
+        {/* Profile Selection */}
+        <section className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border-2 border-blue-200 shadow-lg">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-3xl">�</span>
+            <h2 className="text-xl font-bold text-gray-800">Select Your Profile</h2>
+          </div>
           
-          {/* Profile Selector */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Profile
+          <div>
+            <label htmlFor="profile-select" className="block text-sm font-semibold text-gray-700 mb-2">
+              Choose Profile
             </label>
             <select
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              id="profile-select"
+              aria-label="Select your profile"
+              className="w-full border-2 border-gray-300 rounded-xl px-4 py-3 bg-white text-gray-800 
+                         focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none
+                         transition-all duration-200 cursor-pointer hover:border-gray-400"
               value={profileId}
               onChange={(e) => setProfileId(e.target.value)}
             >
@@ -213,105 +174,131 @@ export default function UseCustomGPTPage() {
             </select>
           </div>
 
-          {/* Validation Errors */}
-          {validationErrors.length > 0 && (
-            <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-4">
-              <p className="text-red-800 font-semibold mb-2">⚠️ Please fix the following:</p>
-              <ul className="text-red-700 text-sm space-y-1 pl-4">
-                {validationErrors.map((err, idx) => (
-                  <li key={idx}>• {err}</li>
-                ))}
-              </ul>
+          {profiles.length === 0 && (
+            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-300 rounded-xl">
+              <p className="text-yellow-800 mb-3">📋 No profiles found. Please create a profile first.</p>
             </div>
           )}
+        </section>
 
-          <PlanConfigurator form={form} setForm={setForm} />
-          
-          {/* Action Buttons */}
-          <div className="flex gap-3 flex-wrap mt-6">
-            <button
-              onClick={generateWithGPT}
-              disabled={generating}
-              className="flex-1 min-w-[200px] bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {generating ? (
-                <>
-                  <svg
-                    className="animate-spin h-5 w-5"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  Generating with AI...
-                </>
-              ) : (
-                <>
-                  <span className="text-xl">✨</span>
-                  Generate Plan with AI
-                </>
-              )}
-            </button>
-            
-            <button
-              onClick={openGPT}
-              className="flex-1 min-w-[200px] bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
-            >
-              <span className="text-xl">🚀</span>
-              Open Custom GPT
-            </button>
-            
-            <button
-              onClick={refreshPlan}
-              disabled={loading}
-              className="flex-1 min-w-[200px] bg-white border-2 border-purple-600 text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <svg
-                    className="animate-spin h-5 w-5"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  Loading...
-                </>
-              ) : (
-                <>
-                  <span className="text-xl">🔄</span>
-                  Refresh Latest Plan
-                </>
-              )}
-            </button>
+        {/* Validation Errors */}
+        {validationErrors.length > 0 && (
+          <div className="bg-red-50 border-2 border-red-400 rounded-2xl p-5 shadow-lg animate-shake">
+            <div className="flex items-start gap-3">
+              <span className="text-3xl">⚠️</span>
+              <div className="flex-1">
+                <p className="font-bold text-red-800 text-lg mb-2">
+                  Please fix the following errors:
+                </p>
+                <ul className="space-y-1 text-red-700">
+                  {validationErrors.map((err, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <span className="text-red-500 mt-1">•</span>
+                      <span>{err}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           </div>
+        )}
+
+        {/* Plan Configuration - Same as Create Plan */}
+        <section>
+          <div className="flex items-center gap-3 mb-6">
+            <span className="text-3xl">⚙️</span>
+            <h2 className="text-xl font-bold text-gray-800">Customize Your Plan</h2>
+          </div>
+          <PlanConfigurator form={form} setForm={setForm} />
+        </section>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+          <button
+            onClick={generateWithGPT}
+            disabled={generating || !profileId}
+            className="w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
+          >
+            {generating ? (
+              <span className="flex items-center gap-2">
+                <svg
+                  className="animate-spin h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                <span className="font-semibold">Generating with AI...</span>
+              </span>
+            ) : (
+              "✨ Generate Plan with Custom GPT"
+            )}
+          </button>
           
+          <button
+            onClick={openGPT}
+            className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+          >
+            <span className="text-xl">🚀</span>
+            Open Custom GPT in ChatGPT
+          </button>
+        </div>
+
+        {/* Additional Options - Collapsible Instructions */}
+        <details className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border-2 border-purple-200 shadow-lg">
+          <summary className="cursor-pointer text-lg font-bold text-gray-800 flex items-center gap-2 hover:text-purple-700 transition-colors">
+            <span className="text-2xl">📋</span>
+            <span>How to Use Custom GPT (Click to expand)</span>
+          </summary>
+          
+          <div className="mt-4 space-y-3 text-gray-700">
+            <div className="flex gap-3 p-3 bg-white rounded-xl">
+              <span className="flex-shrink-0 w-8 h-8 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center text-sm font-bold">
+                1
+              </span>
+              <div>
+                <strong>Generate with AI Button:</strong>
+                <p className="text-sm mt-1">Click the "Generate Plan with Custom GPT" button above to create your plan directly using AI with your selected preferences.</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 p-3 bg-white rounded-xl">
+              <span className="flex-shrink-0 w-8 h-8 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center text-sm font-bold">
+                2
+              </span>
+              <div>
+                <strong>Open in ChatGPT (Alternative):</strong>
+                <p className="text-sm mt-1">Click "Open Custom GPT in ChatGPT" to launch TH_LifeEngine Companion in ChatGPT. Ask it to generate a plan using your profile_id.</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 p-3 bg-white rounded-xl">
+              <span className="flex-shrink-0 w-8 h-8 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center text-sm font-bold">
+                3
+              </span>
+              <div>
+                <strong>View Results:</strong>
+                <p className="text-sm mt-1">Your generated plan will appear below, and you can also find it in your dashboard.</p>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        {/* Plan Brief for Reference */}
+        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
           <PlanBrief block={planBrief} copyBrief={copyPlanBrief} />
         </div>
 
@@ -472,6 +459,8 @@ function PlanBrief({ block, copyBrief }: PlanBriefProps) {
       </div>
       <textarea
         readOnly
+        aria-label="Plan brief for Custom GPT"
+        placeholder="Plan brief will appear here..."
         className="w-full border border-purple-200 rounded-lg bg-white/80 text-sm p-3 text-gray-700"
         rows={6}
         value={block}
