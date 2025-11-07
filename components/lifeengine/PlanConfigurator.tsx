@@ -41,7 +41,7 @@ export function PlanConfigurator({ form, setForm }: Props) {
     <div className="space-y-6">
       <CheckboxGroup
         label="Plan Types"
-        helper="Select any number of plan types to generate simultaneously"
+        helper="Select one or more plan types (at least 1 recommended)"
         options={planTypeOptions}
         selected={form.planTypes}
         onToggle={(val) => toggleValue("planTypes", val)}
@@ -75,24 +75,24 @@ export function PlanConfigurator({ form, setForm }: Props) {
       </div>
 
       <CheckboxGroup
-        label="Focus Areas"
-        helper="Select any number of areas to emphasize"
+        label="Focus Areas (Optional)"
+        helper="Select specific areas to emphasize in your plan"
         options={FOCUS_AREA_OPTIONS.map((value) => ({ label: value, value }))}
         selected={form.focusAreas}
         onToggle={(val) => toggleValue("focusAreas", val)}
       />
 
       <CheckboxGroup
-        label="Goals"
-        helper="Select any number of primary goals"
+        label="Primary Goals (Optional)"
+        helper="What are you trying to achieve?"
         options={GOAL_OPTIONS.map((value) => ({ label: value, value }))}
         selected={form.goals}
         onToggle={(val) => toggleValue("goals", val)}
       />
 
       <CheckboxGroup
-        label="Chronic Conditions"
-        helper="Select conditions to factor in"
+        label="Health Conditions (Optional)"
+        helper="Select any conditions to account for in your plan"
         options={CHRONIC_CONDITION_OPTIONS.map((value) => ({ label: value, value }))}
         selected={form.chronicConditions}
         onToggle={(val) => toggleValue("chronicConditions", val)}
@@ -145,19 +145,38 @@ type CheckboxGroupProps = {
 function CheckboxGroup({ label, helper, options, selected, onToggle }: CheckboxGroupProps) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-800 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-gray-800 mb-1">
+        {label}
+        {selected.length > 0 && (
+          <span className="ml-2 text-xs text-blue-600 font-normal">
+            ({selected.length} selected)
+          </span>
+        )}
+      </label>
       {helper && <p className="text-xs text-gray-500 mb-2">{helper}</p>}
       <div className={styles.checkboxList}>
         {options.map((option) => {
           const checked = selected.includes(option.value);
           return (
-            <label key={option.value} className={styles.checkboxItem}>
+            <label 
+              key={option.value} 
+              className={`${styles.checkboxItem} ${checked ? styles.checkboxItemSelected : ''}`}
+              style={{
+                backgroundColor: checked ? '#e0f2fe' : 'transparent',
+                borderColor: checked ? '#0284c7' : '#d1d5db',
+                borderWidth: '2px',
+                transition: 'all 0.2s ease',
+              }}
+            >
               <input
                 type="checkbox"
                 checked={checked}
                 onChange={() => onToggle(option.value)}
+                style={{ accentColor: '#0284c7' }}
               />
-              <span>{option.label}</span>
+              <span style={{ fontWeight: checked ? '600' : '400' }}>
+                {option.label}
+              </span>
             </label>
           );
         })}

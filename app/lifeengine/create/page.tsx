@@ -12,6 +12,7 @@ import {
   defaultPlanFormState,
   buildIntakeFromForm,
   PLAN_TYPE_OPTIONS,
+  DURATION_OPTIONS,
 } from "@/lib/lifeengine/planConfig";
 import styles from "./page.module.css";
 
@@ -21,6 +22,8 @@ export default function CreatePlan() {
   const [selectedProfileId, setSelectedProfileId] = useState<string>("");
   const [form, setForm] = useState(defaultPlanFormState);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>("");
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   useEffect(() => {
     fetchProfiles();
@@ -38,10 +41,23 @@ export default function CreatePlan() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    setValidationErrors([]);
+    
+    // Validation
+    const errors: string[] = [];
     if (!selectedProfileId) {
-      alert("Please select a profile");
+      errors.push("Please select a profile");
+    }
+    if (form.planTypes.length === 0) {
+      errors.push("Please select at least one plan type");
+    }
+    
+    if (errors.length > 0) {
+      setValidationErrors(errors);
       return;
     }
+    
     const planSelections = form.planTypes.length ? form.planTypes.slice(0, 3) : [PLAN_TYPE_OPTIONS[0].value];
     setLoading(true);
 
@@ -49,6 +65,13 @@ export default function CreatePlan() {
       const planIds: string[] = [];
       for (const planType of planSelections) {
         const intake = buildIntakeFromForm(form, planType);
+        console.log('🔍 Submitting plan generation request:', {
+          profileId: selectedProfileId,
+          planType,
+          intake,
+          formState: form
+        });
+        
         const response = await fetch("/api/lifeengine/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -57,21 +80,32 @@ export default function CreatePlan() {
             intake,
           }),
         });
+        
+        console.log('📥 Response status:', response.status, response.statusText);
+        
         const payload = await response.json().catch(() => ({}));
+        console.log('📦 Response payload:', payload);
+        
         if (!response.ok) {
-          throw new Error(payload?.error || "Failed to generate plan");
+          const errorMsg = payload?.error || `Failed to generate plan (${response.status})`;
+          throw new Error(errorMsg);
+        }
+        if (!payload.planId) {
+          throw new Error("Server did not return a plan ID");
         }
         planIds.push(payload.planId);
       }
 
       const lastPlan = planIds[planIds.length - 1];
       if (planIds.length > 1) {
-        alert(`Generated ${planIds.length} plans. Opening the most recent one now.`);
+        alert(`✅ Successfully generated ${planIds.length} plans! Opening the most recent one now.`);
       }
       router.push(`/lifeengine/plan/${lastPlan}`);
     } catch (error: any) {
       console.error("Error creating plan:", error);
-      alert(error?.message ?? "Failed to create plan. Please try again.");
+      const errorMessage = error?.message ?? "Failed to create plan. Please try again.";
+      setError(errorMessage);
+      alert("❌ " + errorMessage);
     } finally {
       setLoading(false);
     }
@@ -87,6 +121,38 @@ export default function CreatePlan() {
       </header>
 
       <form onSubmit={handleSubmit} className={styles.form}>
+        {validationErrors.length > 0 && (
+          <div style={{
+            padding: '12px 16px',
+            backgroundColor: '#fef2f2',
+            border: '2px solid #ef4444',
+            borderRadius: '8px',
+            marginBottom: '16px'
+          }}>
+            <p style={{ color: '#dc2626', fontWeight: '600', marginBottom: '8px' }}>
+              ⚠️ Please fix the following errors:
+            </p>
+            <ul style={{ color: '#dc2626', paddingLeft: '20px' }}>
+              {validationErrors.map((err, idx) => (
+                <li key={idx}>{err}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        
+        {error && (
+          <div style={{
+            padding: '12px 16px',
+            backgroundColor: '#fef2f2',
+            border: '2px solid #ef4444',
+            borderRadius: '8px',
+            marginBottom: '16px',
+            color: '#dc2626'
+          }}>
+            ❌ {error}
+          </div>
+        )}
+
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Select Profile</h2>
 
@@ -119,6 +185,43 @@ export default function CreatePlan() {
           <h2 className={styles.sectionTitle}>Plan Configuration</h2>
           <PlanConfigurator form={form} setForm={setForm} />
         </section>
+
+        {selectedProfileId && form.planTypes.length > 0 && (
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>📋 Generation Summary</h2>
+            <div style={{
+              backgroundColor: '#f0f9ff',
+              padding: '16px',
+              borderRadius: '8px',
+              border: '1px solid #bae6fd'
+            }}>
+              <p style={{ marginBottom: '8px' }}>
+                <strong>Profile:</strong> {profiles.find(p => p.id === selectedProfileId)?.name || 'Selected'}
+              </p>
+              <p style={{ marginBottom: '8px' }}>
+                <strong>Plan Types:</strong> {form.planTypes.map(pt => 
+                  PLAN_TYPE_OPTIONS.find(opt => opt.value === pt)?.label || pt
+                ).join(', ')}
+              </p>
+              <p style={{ marginBottom: '8px' }}>
+                <strong>Duration:</strong> {DURATION_OPTIONS.find(opt => opt.value === form.duration)?.label || form.duration}
+              </p>
+              <p style={{ marginBottom: '8px' }}>
+                <strong>Intensity:</strong> {form.intensity}
+              </p>
+              {form.focusAreas.length > 0 && (
+                <p style={{ marginBottom: '8px' }}>
+                  <strong>Focus Areas:</strong> {form.focusAreas.join(', ')}
+                </p>
+              )}
+              {form.goals.length > 0 && (
+                <p style={{ marginBottom: '8px' }}>
+                  <strong>Goals:</strong> {form.goals.join(', ')}
+                </p>
+              )}
+            </div>
+          </section>
+        )}
 
         <Actions>
           <Button type="button" variant="ghost" onClick={() => router.back()}>

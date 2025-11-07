@@ -10,11 +10,11 @@ export const PLAN_TYPE_OPTIONS = [
 ] as const;
 
 export const DURATION_OPTIONS = [
-  { label: "4 Weeks", value: "1" },
-  { label: "8 Weeks", value: "2" },
-  { label: "12 Weeks", value: "3" },
-  { label: "24 Weeks", value: "6" },
-  { label: "1 Year", value: "12" },
+  { label: "1 Month (4 Weeks)", value: "1" },
+  { label: "2 Months (8 Weeks)", value: "2" },
+  { label: "3 Months (12 Weeks)", value: "3" },
+  { label: "6 Months (24 Weeks)", value: "6" },
+  { label: "12 Months (1 Year)", value: "12" },
 ] as const;
 
 export const INTENSITY_OPTIONS = [
