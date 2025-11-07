@@ -110,60 +110,68 @@ export default function CreatePlan() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <h1 className={styles.title}>Create Your Personalized Plan</h1>
+        <div className="text-6xl mb-4">🚀</div>
+        <h1 className={styles.title}>Create Your Personalized Wellness Plan</h1>
         <p className={styles.subtitle}>
-          Select a profile and customize your wellness plan
+          AI-powered planning tailored to your unique profile and goals
         </p>
       </header>
 
       <form onSubmit={handleSubmit} className={styles.form}>
+        {/* Validation Errors */}
         {validationErrors.length > 0 && (
-          <div style={{
-            padding: '12px 16px',
-            backgroundColor: '#fef2f2',
-            border: '2px solid #ef4444',
-            borderRadius: '8px',
-            marginBottom: '16px'
-          }}>
-            <p style={{ color: '#dc2626', fontWeight: '600', marginBottom: '8px' }}>
-              ⚠️ Please fix the following errors:
-            </p>
-            <ul style={{ color: '#dc2626', paddingLeft: '20px' }}>
-              {validationErrors.map((err, idx) => (
-                <li key={idx}>{err}</li>
-              ))}
-            </ul>
+          <div className="bg-red-50 border-2 border-red-400 rounded-2xl p-5 shadow-lg animate-shake">
+            <div className="flex items-start gap-3">
+              <span className="text-3xl">⚠️</span>
+              <div className="flex-1">
+                <p className="font-bold text-red-800 text-lg mb-2">
+                  Please fix the following errors:
+                </p>
+                <ul className="space-y-1 text-red-700">
+                  {validationErrors.map((err, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <span className="text-red-500 mt-1">•</span>
+                      <span>{err}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           </div>
         )}
         
+        {/* Error Message */}
         {error && (
-          <div style={{
-            padding: '12px 16px',
-            backgroundColor: '#fef2f2',
-            border: '2px solid #ef4444',
-            borderRadius: '8px',
-            marginBottom: '16px',
-            color: '#dc2626'
-          }}>
-            ❌ {error}
+          <div className="bg-red-50 border-2 border-red-400 rounded-2xl p-5 shadow-lg">
+            <div className="flex items-start gap-3">
+              <span className="text-3xl">❌</span>
+              <div className="flex-1">
+                <p className="font-bold text-red-800 text-lg mb-1">Generation Failed</p>
+                <p className="text-red-700">{error}</p>
+              </div>
+            </div>
           </div>
         )}
         
+        {/* Success Message */}
         {generatedPlanId && (
-          <div style={{
-            padding: '12px 16px',
-            backgroundColor: '#f0fdf4',
-            border: '2px solid #22c55e',
-            borderRadius: '8px',
-            marginBottom: '16px',
-            color: '#16a34a'
-          }}>
-            ✅ Plan generated successfully! Redirecting...
+          <div className="bg-green-50 border-2 border-green-400 rounded-2xl p-5 shadow-lg">
+            <div className="flex items-start gap-3">
+              <span className="text-3xl">✅</span>
+              <div className="flex-1">
+                <p className="font-bold text-green-800 text-lg mb-1">Plan Generated Successfully!</p>
+                <p className="text-green-700">Redirecting to your personalized plan...</p>
+              </div>
+            </div>
           </div>
         )}
 
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Select Profile</h2>
+        {/* Profile Selection */}
+        <section className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border-2 border-blue-200 shadow-lg">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-3xl">👤</span>
+            <h2 className="text-xl font-bold text-gray-800">Select Your Profile</h2>
+          </div>
 
           <Field label="Choose Profile" required>
             <Select
@@ -181,72 +189,122 @@ export default function CreatePlan() {
           </Field>
 
           {profiles.length === 0 && (
-            <div className={styles.noProfiles}>
-              <p>No profiles found. Please create a profile first.</p>
+            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-300 rounded-xl">
+              <p className="text-yellow-800 mb-3">📋 No profiles found. Please create a profile first.</p>
               <Button variant="ghost" onClick={() => router.push('/lifeengine/profiles')}>
-                Go to Profiles
+                Go to Profiles →
               </Button>
             </div>
           )}
         </section>
 
+        {/* Plan Configuration */}
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Plan Configuration</h2>
+          <div className="flex items-center gap-3 mb-6">
+            <span className="text-3xl">⚙️</span>
+            <h2 className="text-xl font-bold text-gray-800">Customize Your Plan</h2>
+          </div>
           <PlanConfigurator form={form} setForm={setForm} />
         </section>
 
+        {/* Generation Summary */}
         {selectedProfileId && form.planTypes.length > 0 && (
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>📋 Generation Summary</h2>
-            <div style={{
-              backgroundColor: '#f0f9ff',
-              padding: '16px',
-              borderRadius: '8px',
-              border: '1px solid #bae6fd'
-            }}>
-              <p style={{ marginBottom: '8px' }}>
-                <strong>Profile:</strong> {profiles.find(p => p.id === selectedProfileId)?.name || 'Selected'}
-              </p>
-              <p style={{ marginBottom: '8px' }}>
-                <strong>Plan Types:</strong> {form.planTypes.map(pt => 
-                  PLAN_TYPE_OPTIONS.find(opt => opt.value === pt)?.label || pt
-                ).join(', ')}
-              </p>
-              <p style={{ marginBottom: '8px' }}>
-                <strong>Duration:</strong> {DURATION_OPTIONS.find(opt => opt.value === form.duration)?.label || form.duration}
-              </p>
-              <p style={{ marginBottom: '8px' }}>
-                <strong>Intensity:</strong> {form.intensity}
-              </p>
+          <section className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border-2 border-purple-200 shadow-lg">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-3xl">📋</span>
+              <h2 className="text-xl font-bold text-gray-800">Generation Summary</h2>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3 p-3 bg-white rounded-xl">
+                <span className="text-xl">👤</span>
+                <div>
+                  <p className="font-semibold text-gray-700">Profile</p>
+                  <p className="text-gray-600">{profiles.find(p => p.id === selectedProfileId)?.name || 'Selected'}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 bg-white rounded-xl">
+                <span className="text-xl">🎯</span>
+                <div>
+                  <p className="font-semibold text-gray-700">Plan Types</p>
+                  <p className="text-gray-600">{form.planTypes.map(pt => 
+                    PLAN_TYPE_OPTIONS.find(opt => opt.value === pt)?.label || pt
+                  ).join(', ')}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-start gap-2 p-3 bg-white rounded-xl">
+                  <span className="text-lg">⏱️</span>
+                  <div>
+                    <p className="font-semibold text-gray-700 text-sm">Duration</p>
+                    <p className="text-gray-600 text-sm">{DURATION_OPTIONS.find(opt => opt.value === form.duration)?.label || form.duration}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 p-3 bg-white rounded-xl">
+                  <span className="text-lg">💪</span>
+                  <div>
+                    <p className="font-semibold text-gray-700 text-sm">Intensity</p>
+                    <p className="text-gray-600 text-sm capitalize">{form.intensity}</p>
+                  </div>
+                </div>
+              </div>
               {form.focusAreas.length > 0 && (
-                <p style={{ marginBottom: '8px' }}>
-                  <strong>Focus Areas:</strong> {form.focusAreas.join(', ')}
-                </p>
+                <div className="flex items-start gap-3 p-3 bg-white rounded-xl">
+                  <span className="text-xl">🎨</span>
+                  <div>
+                    <p className="font-semibold text-gray-700">Focus Areas</p>
+                    <p className="text-gray-600">{form.focusAreas.join(', ')}</p>
+                  </div>
+                </div>
               )}
               {form.goals.length > 0 && (
-                <p style={{ marginBottom: '8px' }}>
-                  <strong>Goals:</strong> {form.goals.join(', ')}
-                </p>
+                <div className="flex items-start gap-3 p-3 bg-white rounded-xl">
+                  <span className="text-xl">🎖️</span>
+                  <div>
+                    <p className="font-semibold text-gray-700">Goals</p>
+                    <p className="text-gray-600">{form.goals.join(', ')}</p>
+                  </div>
+                </div>
               )}
             </div>
           </section>
         )}
 
-        <Actions>
-          <Button type="button" variant="ghost" onClick={() => router.back()}>
-            Cancel
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+          <Button 
+            type="button" 
+            variant="ghost" 
+            onClick={() => router.back()}
+            className="w-full sm:w-auto"
+          >
+            ← Cancel
           </Button>
-          <Button type="submit" disabled={loading || !selectedProfileId}>
-            {loading ? "Generating..." : "Generate Plan"}
+          <Button 
+            type="submit" 
+            disabled={loading || !selectedProfileId}
+            className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+          >
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Generating...
+              </span>
+            ) : (
+              "✨ Generate My Plan"
+            )}
           </Button>
           <Button
             type="button"
             variant="ghost"
             onClick={() => setForm(defaultPlanFormState)}
+            className="w-full sm:w-auto"
           >
-            Reset Fields
+            🔄 Reset
           </Button>
-        </Actions>
+        </div>
       </form>
     </div>
   );
