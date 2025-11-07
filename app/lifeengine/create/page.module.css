@@ -66,6 +66,21 @@
   padding: var(--space-1);
 }
 
+.checkboxList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.5rem 0;
+}
+
+.checkboxItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
 @media (max-width: 640px) {
   .grid {
     grid-template-columns: 1fr;

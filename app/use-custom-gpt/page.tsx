@@ -4,16 +4,11 @@ import React, { useState } from "react";
 import PlanPreview from "@/app/components/PlanPreview";
 import type { LifeEnginePlan } from "@/app/types/lifeengine";
 import {
-  PLAN_TYPE_OPTIONS,
-  DURATION_OPTIONS,
-  INTENSITY_OPTIONS,
-  FORMAT_OPTIONS,
-  FOCUS_AREA_OPTIONS,
-  ROUTINE_OPTIONS,
   defaultPlanFormState,
   describePlanBrief,
 } from "@/lib/lifeengine/planConfig";
 import type { PlanFormState } from "@/lib/lifeengine/planConfig";
+import { PlanConfigurator } from "@/components/lifeengine/PlanConfigurator";
 
 const GPT_URL =
   process.env.NEXT_PUBLIC_LIFEENGINE_GPT_URL ||
@@ -133,7 +128,7 @@ export default function UseCustomGPTPage() {
           <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <span className="text-2xl">⚙️</span> Plan Configuration
           </h2>
-          <PlanConfigFields form={form} setForm={setForm} />
+          <PlanConfigurator form={form} setForm={setForm} />
           <ProfileControls
             profileId={profileId}
             setProfileId={setProfileId}
@@ -181,122 +176,6 @@ export default function UseCustomGPTPage() {
         )}
       </div>
     </main>
-  );
-}
-
-type PlanConfigProps = {
-  form: PlanFormState;
-  setForm: React.Dispatch<React.SetStateAction<PlanFormState>>;
-};
-
-function PlanConfigFields({ form, setForm }: PlanConfigProps) {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="md:col-span-2">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Plan Types (pick up to 3)
-        </label>
-        <select
-          multiple
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 min-h-[120px]"
-          value={form.planTypes}
-          onChange={(event) => {
-            const values = Array.from(event.target.selectedOptions, (option) => option.value).slice(
-              0,
-              3,
-            );
-            setForm((prev) => ({ ...prev, planTypes: values }));
-          }}
-        >
-          {PLAN_TYPE_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
-        <select
-          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          value={form.duration}
-          onChange={(e) => setForm((prev) => ({ ...prev, duration: e.target.value }))}
-        >
-          {DURATION_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Intensity</label>
-        <select
-          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          value={form.intensity}
-          onChange={(e) => setForm((prev) => ({ ...prev, intensity: e.target.value }))}
-        >
-          {INTENSITY_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Output Format</label>
-        <select
-          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          value={form.format}
-          onChange={(e) => setForm((prev) => ({ ...prev, format: e.target.value }))}
-        >
-          {FORMAT_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="md:col-span-2">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Focus Areas (pick up to 4)
-        </label>
-        <select
-          multiple
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 min-h-[120px]"
-          value={form.focusAreas}
-          onChange={(event) => {
-            const values = Array.from(event.target.selectedOptions, (option) => option.value).slice(
-              0,
-              4,
-            );
-            setForm((prev) => ({ ...prev, focusAreas: values }));
-          }}
-        >
-          {FOCUS_AREA_OPTIONS.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Include Daily Routine?
-        </label>
-        <select
-          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          value={form.includeDailyRoutine}
-          onChange={(e) => setForm((prev) => ({ ...prev, includeDailyRoutine: e.target.value }))}
-        >
-          {ROUTINE_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    </div>
   );
 }
 

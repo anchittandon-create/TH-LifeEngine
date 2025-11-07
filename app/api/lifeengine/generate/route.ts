@@ -371,7 +371,16 @@ async function normalizeGenerationRequest(body: any) {
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const ALLOWED_PLAN_TYPES = new Set(["yoga", "diet", "combined", "holistic"]);
+const ALLOWED_PLAN_TYPES = new Set([
+  "yoga",
+  "diet",
+  "combined",
+  "holistic",
+  "strength",
+  "mobility",
+  "stress_relief",
+  "prenatal",
+]);
 
 function buildProfileSnapshot(profile: ProfileRow) {
   const demographics = profile.demographics ?? {};

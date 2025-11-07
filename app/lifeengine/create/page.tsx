@@ -7,15 +7,11 @@ import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { Actions } from "@/components/ui/Actions";
 import type { Profile } from "@/lib/ai/schemas";
+import { PlanConfigurator } from "@/components/lifeengine/PlanConfigurator";
 import {
-  PLAN_TYPE_OPTIONS,
-  DURATION_OPTIONS,
-  INTENSITY_OPTIONS,
-  FORMAT_OPTIONS,
-  FOCUS_AREA_OPTIONS,
-  ROUTINE_OPTIONS,
   defaultPlanFormState,
   buildIntakeFromForm,
+  PLAN_TYPE_OPTIONS,
 } from "@/lib/lifeengine/planConfig";
 import styles from "./page.module.css";
 
@@ -61,12 +57,11 @@ export default function CreatePlan() {
             intake,
           }),
         });
+        const payload = await response.json().catch(() => ({}));
         if (!response.ok) {
-          const err = await response.json().catch(() => ({}));
-          throw new Error(err?.error || "Failed to generate plan");
+          throw new Error(payload?.error || "Failed to generate plan");
         }
-        const { planId } = await response.json();
-        planIds.push(planId);
+        planIds.push(payload.planId);
       }
 
       const lastPlan = planIds[planIds.length - 1];
@@ -74,9 +69,9 @@ export default function CreatePlan() {
         alert(`Generated ${planIds.length} plans. Opening the most recent one now.`);
       }
       router.push(`/lifeengine/plan/${lastPlan}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating plan:", error);
-      alert("Failed to create plan. Please try again.");
+      alert(error?.message ?? "Failed to create plan. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -122,107 +117,7 @@ export default function CreatePlan() {
 
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Plan Configuration</h2>
-
-          <Field
-            label="Plan Types"
-            helper="Pick up to 3 plan types to generate simultaneously"
-          >
-            <select
-              multiple
-              className={styles.multiSelect}
-              value={form.planTypes}
-              onChange={(event) => {
-                const selections = Array.from(event.target.selectedOptions, (option) => option.value).slice(0, 3);
-                setForm({ ...form, planTypes: selections });
-              }}
-            >
-              {PLAN_TYPE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </Field>
-
-          <div className={styles.grid}>
-            <Field label="Duration">
-              <Select
-                value={form.duration}
-                onChange={(e) => setForm({ ...form, duration: e.target.value })}
-              >
-                {DURATION_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-
-            <Field label="Intensity">
-              <Select
-                value={form.intensity}
-                onChange={(e) => setForm({ ...form, intensity: e.target.value })}
-              >
-                {INTENSITY_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-          </div>
-
-          <Field
-            label="Focus Areas"
-            helper="Pick up to 4 areas to emphasize"
-          >
-            <select
-              multiple
-              className={styles.multiSelect}
-              value={form.focusAreas}
-              onChange={(event) => {
-                const selections = Array.from(
-                  event.target.selectedOptions,
-                  (option) => option.value,
-                ).slice(0, 4);
-                setForm({ ...form, focusAreas: selections });
-              }}
-            >
-              {FOCUS_AREA_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </Field>
-
-          <Field label="Output Format">
-            <Select
-              value={form.format}
-              onChange={(e) => setForm({ ...form, format: e.target.value })}
-            >
-              {FORMAT_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-
-          <Field label="Daily Routine Guidance">
-            <Select
-              value={form.includeDailyRoutine}
-              onChange={(event) =>
-                setForm({ ...form, includeDailyRoutine: event.target.value })
-              }
-            >
-              {ROUTINE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Select>
-          </Field>
+          <PlanConfigurator form={form} setForm={setForm} />
         </section>
 
         <Actions>
