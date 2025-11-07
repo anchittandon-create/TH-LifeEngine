@@ -237,7 +237,7 @@ Return JSON format:
     // Verifier
     const verifiedPlan = verifyPlan(planJson, input);
 
-    const planId = uuidv4();
+    const planId = `plan_${uuidv4().replace(/-/g, '').slice(0, 12)}`;
     const planData = {
       planId,
       profileId: input.profileId,
@@ -255,7 +255,39 @@ Return JSON format:
       }
     };
 
+    // Store in memory cache
     TH_PLANS.set(planId, planData);
+    
+    // ✅ PERSIST TO DATABASE - This ensures plans appear in dashboard and can be loaded later
+    try {
+      await db.savePlan({
+        planId,
+        profileId: input.profileId,
+        days: verifiedPlan.plan?.days?.length || 0,
+        confidence: 0.9,
+        warnings: verifiedPlan.warnings || [],
+        planJSON: {
+          id: planId,
+          profileId: input.profileId,
+          intakeId: input.profileId, // Use profileId as intakeId for now
+          goals: [],
+          createdAt: planData.createdAt,
+          days: verifiedPlan.plan?.days || [],
+        },
+        analytics: verifiedPlan.analytics,
+        costMetrics: {
+          inputTokens,
+          outputTokens,
+          totalTokens,
+          model: 'gemini-2.5-flash',
+        },
+        createdAt: planData.createdAt,
+      });
+      console.log('✅ [GENERATE] Plan persisted to database:', planId);
+    } catch (dbError: any) {
+      console.error('⚠️ [GENERATE] Failed to persist plan to database:', dbError);
+      // Continue anyway - plan is still in memory cache
+    }
 
     const duration = Date.now() - startTime;
     
@@ -304,7 +336,16 @@ Return JSON format:
       }
     }
 
-    return NextResponse.json(planData);
+    // Return response in format expected by frontend
+    return NextResponse.json({
+      success: true,
+      planId,
+      plan: verifiedPlan.plan,
+      days: verifiedPlan.plan?.days?.length || 0,
+      warnings: verifiedPlan.warnings,
+      analytics: verifiedPlan.analytics,
+      costMetrics: planData.costMetrics,
+    });
   } catch (error: any) {
     const duration = Date.now() - startTime;
     console.error('❌ [GENERATE] Plan generation failed:', error);
@@ -350,7 +391,72 @@ function verifyPlan(planJson: any, input: any) {
   // Implement verifier logic as per prompt
   const warnings: string[] = [];
   const analytics = { safety_score: 0.95, diet_match: 0.92, progression_score: 0.9, adherence_score: 0.88, overall: 0.91 };
-  return { plan: planJson, warnings, analytics };
+  
+  // ✅ NORMALIZE PLAN STRUCTURE - Convert weekly_plan to days array
+  let normalizedPlan = planJson;
+  
+  if (planJson?.weekly_plan && Array.isArray(planJson.weekly_plan)) {
+    console.log('🔄 [VERIFY] Converting weekly_plan structure to days array');
+    const days: any[] = [];
+    const today = new Date();
+    
+    // Flatten weekly_plan into days array
+    planJson.weekly_plan.forEach((week: any, weekIndex: number) => {
+      if (week.days && Array.isArray(week.days)) {
+        week.days.forEach((day: any, dayIndex: number) => {
+          const absoluteDayIndex = weekIndex * 7 + dayIndex;
+          const date = new Date(today.getTime() + absoluteDayIndex * 86400000).toISOString().split('T')[0];
+          
+          // Convert yoga/nutrition structure to activities/meals
+          const activities: any[] = [];
+          if (day.yoga && Array.isArray(day.yoga)) {
+            day.yoga.forEach((yoga: any) => {
+              activities.push({
+                type: 'yoga',
+                name: yoga.name || 'Yoga Practice',
+                duration: yoga.duration_min || 30,
+                description: yoga.description || `${yoga.name} yoga practice`,
+              });
+            });
+          }
+          
+          const meals: any[] = [];
+          if (day.nutrition?.meals && Array.isArray(day.nutrition.meals)) {
+            day.nutrition.meals.forEach((meal: any) => {
+              meals.push({
+                type: meal.meal || 'meal',
+                name: meal.name || 'Nutritious Meal',
+                calories: meal.kcal || 500,
+                description: meal.description || `Healthy ${meal.meal}`,
+              });
+            });
+          }
+          
+          days.push({
+            date,
+            activities,
+            meals,
+          });
+        });
+      }
+    });
+    
+    normalizedPlan = {
+      ...planJson,
+      days,
+    };
+    
+    console.log(`✅ [VERIFY] Converted ${days.length} days from weekly structure`);
+  } else if (!planJson?.days || !Array.isArray(planJson.days)) {
+    // If no days array exists, create empty structure
+    console.warn('⚠️ [VERIFY] No days array in plan, creating empty structure');
+    normalizedPlan = {
+      ...planJson,
+      days: [],
+    };
+  }
+  
+  return { plan: normalizedPlan, warnings, analytics };
 }
 
 type IntakePayload = {

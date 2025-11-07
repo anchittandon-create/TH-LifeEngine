@@ -14,11 +14,19 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Plan not found" }, { status: 404 });
     }
 
+    // Return plan in consistent format
     return NextResponse.json({
-      plan: plan.planJSON,
-      warnings: plan.warnings,
-      analytics: plan.analytics,
-      costMetrics: plan.costMetrics,
+      plan: {
+        id: plan.planJSON.id || plan.planId,
+        profileId: plan.profileId,
+        intakeId: plan.planJSON.intakeId || plan.profileId,
+        goals: plan.planJSON.goals || [],
+        createdAt: plan.planJSON.createdAt || plan.createdAt,
+        days: plan.planJSON.days || [],
+      },
+      warnings: plan.warnings || [],
+      analytics: plan.analytics || {},
+      costMetrics: plan.costMetrics || {},
     });
   } catch (error) {
     console.error("Error fetching plan:", error);
