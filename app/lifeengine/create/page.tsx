@@ -46,24 +46,34 @@ export default function CreatePlan() {
       alert("Please select a profile");
       return;
     }
+    const planSelections = form.planTypes.length ? form.planTypes.slice(0, 3) : [PLAN_TYPE_OPTIONS[0].value];
     setLoading(true);
 
     try {
-      const intake = buildIntakeFromForm(form);
+      const planIds: string[] = [];
+      for (const planType of planSelections) {
+        const intake = buildIntakeFromForm(form, planType);
+        const response = await fetch("/api/lifeengine/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            profileId: selectedProfileId,
+            intake,
+          }),
+        });
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error(err?.error || "Failed to generate plan");
+        }
+        const { planId } = await response.json();
+        planIds.push(planId);
+      }
 
-      const response = await fetch("/api/lifeengine/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          profileId: selectedProfileId,
-          intake,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Failed to generate plan");
-
-      const { planId } = await response.json();
-      router.push(`/lifeengine/plan/${planId}`);
+      const lastPlan = planIds[planIds.length - 1];
+      if (planIds.length > 1) {
+        alert(`Generated ${planIds.length} plans. Opening the most recent one now.`);
+      }
+      router.push(`/lifeengine/plan/${lastPlan}`);
     } catch (error) {
       console.error("Error creating plan:", error);
       alert("Failed to create plan. Please try again.");
@@ -113,17 +123,25 @@ export default function CreatePlan() {
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Plan Configuration</h2>
 
-          <Field label="Plan Type" helper="Choose the primary objective">
-            <Select
-              value={form.planType}
-              onChange={(e) => setForm({ ...form, planType: e.target.value })}
+          <Field
+            label="Plan Types"
+            helper="Pick up to 3 plan types to generate simultaneously"
+          >
+            <select
+              multiple
+              className={styles.multiSelect}
+              value={form.planTypes}
+              onChange={(event) => {
+                const selections = Array.from(event.target.selectedOptions, (option) => option.value).slice(0, 3);
+                setForm({ ...form, planTypes: selections });
+              }}
             >
               {PLAN_TYPE_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
-            </Select>
+            </select>
           </Field>
 
           <div className={styles.grid}>

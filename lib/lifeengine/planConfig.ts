@@ -44,7 +44,7 @@ export const ROUTINE_OPTIONS = [
 ] as const;
 
 export type PlanFormState = {
-  planType: string;
+  planTypes: string[];
   duration: string;
   intensity: string;
   focusAreas: string[];
@@ -53,7 +53,7 @@ export type PlanFormState = {
 };
 
 export const defaultPlanFormState: PlanFormState = {
-  planType: PLAN_TYPE_OPTIONS[0].value,
+  planTypes: [PLAN_TYPE_OPTIONS[0].value],
   duration: DURATION_OPTIONS[0].value,
   intensity: INTENSITY_OPTIONS[1].value,
   focusAreas: [],
@@ -61,13 +61,14 @@ export const defaultPlanFormState: PlanFormState = {
   includeDailyRoutine: ROUTINE_OPTIONS[0].value,
 };
 
-export function buildIntakeFromForm(form: PlanFormState) {
+export function buildIntakeFromForm(form: PlanFormState, overridePlanType?: string) {
   const durationMonths = Number(form.duration) || 1;
   const now = Date.now();
   const end = new Date(now + durationMonths * 30 * 24 * 60 * 60 * 1000);
+  const planType = overridePlanType ?? form.planTypes[0] ?? PLAN_TYPE_OPTIONS[0].value;
 
   return {
-    primaryPlanType: form.planType,
+    primaryPlanType: planType,
     secondaryPlanType: "",
     startDate: new Date(now).toISOString().split("T")[0],
     endDate: end.toISOString().split("T")[0],
@@ -81,9 +82,10 @@ export function buildIntakeFromForm(form: PlanFormState) {
 }
 
 export function describePlanBrief(profileId: string, form: PlanFormState) {
+  const planTypes = form.planTypes.length ? form.planTypes : [PLAN_TYPE_OPTIONS[0].value];
   return [
     `profile_id: ${profileId}`,
-    `plan_type: ${form.planType}`,
+    `plan_types: ${planTypes.join(", ")}`,
     `duration_months: ${form.duration}`,
     `intensity: ${form.intensity}`,
     `focus_areas: ${form.focusAreas.length ? form.focusAreas.join(", ") : "coach to determine"}`,

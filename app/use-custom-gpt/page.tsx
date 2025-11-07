@@ -13,6 +13,7 @@ import {
   defaultPlanFormState,
   describePlanBrief,
 } from "@/lib/lifeengine/planConfig";
+import type { PlanFormState } from "@/lib/lifeengine/planConfig";
 
 const GPT_URL =
   process.env.NEXT_PUBLIC_LIFEENGINE_GPT_URL ||
@@ -184,21 +185,28 @@ export default function UseCustomGPTPage() {
 }
 
 type PlanConfigProps = {
-  form: typeof defaultPlanFormState;
-  setForm: React.Dispatch<React.SetStateAction<typeof defaultPlanFormState>>;
+  form: PlanFormState;
+  setForm: React.Dispatch<React.SetStateAction<PlanFormState>>;
 };
 
 function PlanConfigFields({ form, setForm }: PlanConfigProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
+      <div className="md:col-span-2">
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Plan Type
+          Plan Types (pick up to 3)
         </label>
         <select
-          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          value={form.planType}
-          onChange={(e) => setForm((prev) => ({ ...prev, planType: e.target.value }))}
+          multiple
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 min-h-[120px]"
+          value={form.planTypes}
+          onChange={(event) => {
+            const values = Array.from(event.target.selectedOptions, (option) => option.value).slice(
+              0,
+              3,
+            );
+            setForm((prev) => ({ ...prev, planTypes: values }));
+          }}
         >
           {PLAN_TYPE_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
