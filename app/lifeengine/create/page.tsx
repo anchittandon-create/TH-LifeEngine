@@ -14,6 +14,8 @@ import {
   PLAN_TYPE_OPTIONS,
   DURATION_OPTIONS,
 } from "@/lib/lifeengine/planConfig";
+import { validatePlanForm, formatFormForAPI } from "@/lib/lifeengine/promptBuilder";
+import { generatePlan, formatErrorMessage, type ApiError } from "@/lib/lifeengine/api";
 import styles from "./page.module.css";
 
 export default function CreatePlan() {
@@ -24,6 +26,7 @@ export default function CreatePlan() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [generatedPlanId, setGeneratedPlanId] = useState<string>("");
 
   useEffect(() => {
     fetchProfiles();
@@ -34,6 +37,11 @@ export default function CreatePlan() {
       const response = await fetch('/api/lifeengine/profiles');
       const data = await response.json();
       setProfiles(data.profiles || []);
+      
+      // Auto-select first profile if available
+      if (data.profiles && data.profiles.length > 0 && !selectedProfileId) {
+        setSelectedProfileId(data.profiles[0].id);
+      }
     } catch (error) {
       console.error('Failed to fetch profiles:', error);
     }
@@ -43,14 +51,17 @@ export default function CreatePlan() {
     e.preventDefault();
     setError("");
     setValidationErrors([]);
+    setGeneratedPlanId("");
     
     // Validation
     const errors: string[] = [];
     if (!selectedProfileId) {
       errors.push("Please select a profile");
     }
-    if (form.planTypes.length === 0) {
-      errors.push("Please select at least one plan type");
+    
+    const formValidation = validatePlanForm(form);
+    if (!formValidation.valid) {
+      errors.push(...formValidation.errors);
     }
     
     if (errors.length > 0) {
@@ -58,54 +69,39 @@ export default function CreatePlan() {
       return;
     }
     
-    const planSelections = form.planTypes.length ? form.planTypes.slice(0, 3) : [PLAN_TYPE_OPTIONS[0].value];
     setLoading(true);
 
     try {
-      const planIds: string[] = [];
-      for (const planType of planSelections) {
-        const intake = buildIntakeFromForm(form, planType);
-        console.log('🔍 Submitting plan generation request:', {
-          profileId: selectedProfileId,
-          planType,
-          intake,
-          formState: form
-        });
-        
-        const response = await fetch("/api/lifeengine/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            profileId: selectedProfileId,
-            intake,
-          }),
-        });
-        
-        console.log('📥 Response status:', response.status, response.statusText);
-        
-        const payload = await response.json().catch(() => ({}));
-        console.log('📦 Response payload:', payload);
-        
-        if (!response.ok) {
-          const errorMsg = payload?.error || `Failed to generate plan (${response.status})`;
-          throw new Error(errorMsg);
-        }
-        if (!payload.planId) {
-          throw new Error("Server did not return a plan ID");
-        }
-        planIds.push(payload.planId);
-      }
-
-      const lastPlan = planIds[planIds.length - 1];
-      if (planIds.length > 1) {
-        alert(`✅ Successfully generated ${planIds.length} plans! Opening the most recent one now.`);
-      }
-      router.push(`/lifeengine/plan/${lastPlan}`);
-    } catch (error: any) {
-      console.error("Error creating plan:", error);
-      const errorMessage = error?.message ?? "Failed to create plan. Please try again.";
+      const payload = formatFormForAPI(form, selectedProfileId);
+      
+      console.log('🔍 [CreatePlan] Submitting plan generation:', {
+        profileId: selectedProfileId,
+        planTypes: form.planTypes,
+        duration: form.duration,
+        intensity: form.intensity,
+      });
+      
+      const result = await generatePlan(payload);
+      
+      console.log('✅ [CreatePlan] Plan generated successfully:', result.planId);
+      
+      setGeneratedPlanId(result.planId);
+      
+      // Show success message
+      setTimeout(() => {
+        router.push(`/lifeengine/plan/${result.planId}`);
+      }, 1500);
+      
+    } catch (err: any) {
+      console.error('❌ [CreatePlan] Generation failed:', err);
+      
+      const errorMessage = formatErrorMessage(err);
       setError(errorMessage);
-      alert("❌ " + errorMessage);
+      
+      // Show specific error details
+      if (err.details) {
+        setValidationErrors([err.details]);
+      }
     } finally {
       setLoading(false);
     }
@@ -150,6 +146,19 @@ export default function CreatePlan() {
             color: '#dc2626'
           }}>
             ❌ {error}
+          </div>
+        )}
+        
+        {generatedPlanId && (
+          <div style={{
+            padding: '12px 16px',
+            backgroundColor: '#f0fdf4',
+            border: '2px solid #22c55e',
+            borderRadius: '8px',
+            marginBottom: '16px',
+            color: '#16a34a'
+          }}>
+            ✅ Plan generated successfully! Redirecting...
           </div>
         )}
 
