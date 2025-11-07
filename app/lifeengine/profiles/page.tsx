@@ -213,7 +213,6 @@ export default function ProfilesPage() {
             <Input
               type="number"
               min={1}
-              max={120}
               value={form.age}
               onChange={(event) =>
                 setForm((current) => ({

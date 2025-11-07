@@ -26,14 +26,12 @@ export function PlanConfigurator({ form, setForm }: Props) {
   const intensityOptions = INTENSITY_OPTIONS.map((opt) => ({ ...opt }));
   const formatOptions = FORMAT_OPTIONS.map((opt) => ({ ...opt }));
   const routineOptions = ROUTINE_OPTIONS.map((opt) => ({ ...opt }));
-  const toggleValue = (key: keyof PlanFormState, value: string, limit: number) => {
+  const toggleValue = (key: keyof PlanFormState, value: string) => {
     setForm((prev) => {
       const current = prev[key] as string[];
       const exists = current.includes(value);
       const next = exists
         ? current.filter((val) => val !== value)
-        : current.length >= limit
-        ? current
         : [...current, value];
       return { ...prev, [key]: next };
     });
@@ -43,10 +41,10 @@ export function PlanConfigurator({ form, setForm }: Props) {
     <div className="space-y-6">
       <CheckboxGroup
         label="Plan Types"
-        helper="Pick up to 3 plan types to generate simultaneously"
+        helper="Select any number of plan types to generate simultaneously"
         options={planTypeOptions}
         selected={form.planTypes}
-        onToggle={(val) => toggleValue("planTypes", val, 3)}
+        onToggle={(val) => toggleValue("planTypes", val)}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -78,18 +76,18 @@ export function PlanConfigurator({ form, setForm }: Props) {
 
       <CheckboxGroup
         label="Focus Areas"
-        helper="Pick up to 4 areas to emphasize"
+        helper="Select any number of areas to emphasize"
         options={FOCUS_AREA_OPTIONS.map((value) => ({ label: value, value }))}
         selected={form.focusAreas}
-        onToggle={(val) => toggleValue("focusAreas", val, 4)}
+        onToggle={(val) => toggleValue("focusAreas", val)}
       />
 
       <CheckboxGroup
         label="Goals"
-        helper="Pick up to 3 primary goals"
+        helper="Select any number of primary goals"
         options={GOAL_OPTIONS.map((value) => ({ label: value, value }))}
         selected={form.goals}
-        onToggle={(val) => toggleValue("goals", val, 3)}
+        onToggle={(val) => toggleValue("goals", val)}
       />
 
       <CheckboxGroup
@@ -97,7 +95,7 @@ export function PlanConfigurator({ form, setForm }: Props) {
         helper="Select conditions to factor in"
         options={CHRONIC_CONDITION_OPTIONS.map((value) => ({ label: value, value }))}
         selected={form.chronicConditions}
-        onToggle={(val) => toggleValue("chronicConditions", val, 4)}
+        onToggle={(val) => toggleValue("chronicConditions", val)}
       />
 
       <SelectField
@@ -120,8 +118,6 @@ export function PlanConfigurator({ form, setForm }: Props) {
           value={form.sleepHours}
           onChange={(value) => setForm((prev) => ({ ...prev, sleepHours: value }))}
           type="number"
-          min={4}
-          max={10}
         />
         <SelectField
           label="Stress Level"
