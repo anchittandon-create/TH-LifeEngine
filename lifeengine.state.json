@@ -335,6 +335,119 @@
   ],
   "plans": [
     {
+      "planId": "plan_id_dn28asjt",
+      "profileId": "prof_anchit",
+      "days": 2,
+      "confidence": 0.9,
+      "warnings": [],
+      "planJSON": {
+        "id": "plan_id_dn28asjt",
+        "profileId": "prof_anchit",
+        "intakeId": "intake_id_xvkciuqk",
+        "goals": [],
+        "createdAt": "2025-11-07T23:17:35.945Z",
+        "days": [
+          {
+            "date": "2025-11-07",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Gentle Flow Yoga",
+                "duration": 40,
+                "description": "Focus on hip openers and restorative poses for luteal phase comfort."
+              },
+              {
+                "type": "strength",
+                "name": "Bodyweight Core & Glutes",
+                "duration": 30,
+                "description": "Low-impact strength for lean gain, targeting core and glutes."
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Berry Protein Smoothie",
+                "calories": 350,
+                "description": "Spinach, berries, protein powder, almond milk."
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Chickpeas",
+                "calories": 600,
+                "description": "Quinoa, roasted vegetables, chickpeas, lemon-tahini dressing."
+              },
+              {
+                "type": "snack",
+                "name": "Apple Slices with Almond Butter",
+                "calories": 200,
+                "description": "Fiber and healthy fats."
+              },
+              {
+                "type": "dinner",
+                "name": "Baked Salmon with Steamed Asparagus",
+                "calories": 650,
+                "description": "Lean protein and green vegetables."
+              }
+            ]
+          },
+          {
+            "date": "2025-11-08",
+            "activities": [
+              {
+                "type": "mindfulness",
+                "name": "Guided Meditation for Stress Relief",
+                "duration": 20,
+                "description": "Focus on breath and body scan to reduce stress."
+              },
+              {
+                "type": "cardio",
+                "name": "Brisk Walk",
+                "duration": 40,
+                "description": "Low-impact cardio for cardiovascular health and mood boost."
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Scrambled Eggs with Avocado Toast",
+                "calories": 400,
+                "description": "Protein and healthy fats."
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup with Whole Grain Bread",
+                "calories": 580,
+                "description": "Fiber-rich and gut-friendly."
+              },
+              {
+                "type": "snack",
+                "name": "Greek Yogurt with Walnuts",
+                "calories": 220,
+                "description": "Probiotics and omega-3s."
+              },
+              {
+                "type": "dinner",
+                "name": "Chicken Stir-fry with Brown Rice",
+                "calories": 600,
+                "description": "Lean protein and colorful vegetables."
+              }
+            ]
+          }
+        ]
+      },
+      "analytics": {
+        "generatedAt": "2025-11-07T23:17:35.946Z",
+        "ms": 9857
+      },
+      "costMetrics": {
+        "inputTokens": 309,
+        "outputTokens": 718,
+        "totalTokens": 1027,
+        "model": "gemini-2.5-flash"
+      },
+      "createdAt": "2025-11-07T23:17:35.946Z"
+    },
+    {
       "planId": "plan_id_c9u80go2",
       "profileId": "prof_anchit",
       "days": 3,
