@@ -70,7 +70,7 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 ### Local Development
 1. Ensure `.env` file exists with:
    ```bash
-   GOOGLE_API_KEY=AIzaSyCxqXMWIEcuZRtIAJoEDIYZBd4EZrLcQZA
+   GOOGLE_API_KEY=YOUR_API_KEY_HERE
    ```
 
 2. Verify it's gitignored:

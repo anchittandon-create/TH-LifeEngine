@@ -237,7 +237,7 @@ Format Conversion          →  /lib/lifeengine/planConverter.ts
 
 | Variable | Brief | Implementation |
 |----------|-------|----------------|
-| Google API Key | Required | ✅ `GOOGLE_API_KEY=AIzaSyDH...` |
+| Google API Key | Required | ✅ `GOOGLE_API_KEY=YOUR_API_KEY_HERE` |
 | Model Selection | gemini-pro | ✅ Optimized to `gemini-1.5-flash-8b` |
 | OpenAI Key | Optional | ✅ `OPENAI_API_KEY` (fallback) |
 | Custom GPT ID | Optional | ✅ `LIFEENGINE_CUSTOM_GPT_ID` |

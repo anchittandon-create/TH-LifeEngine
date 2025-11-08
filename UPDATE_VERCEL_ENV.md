@@ -6,7 +6,7 @@ Your old API key was leaked and blocked by Google. I've updated the local `.env`
 
 ## New API Key
 ```
-AIzaSyB-0kJC-ZqyKbu6ZTh2Lvr5jt0xDWGxgkI
+YOUR_API_KEY_HERE
 ```
 
 ## Steps to Update Vercel
@@ -15,7 +15,7 @@ AIzaSyB-0kJC-ZqyKbu6ZTh2Lvr5jt0xDWGxgkI
 1. Go to: https://vercel.com/anchittandon-create/th-lifeengine/settings/environment-variables
 2. Find `GOOGLE_API_KEY`
 3. Click **Edit** or **Delete** (then add new)
-4. Set value to: `AIzaSyB-0kJC-ZqyKbu6ZTh2Lvr5jt0xDWGxgkI`
+4. Set value to: `YOUR_API_KEY_HERE`
 5. Select environments: **Production**, **Preview**, **Development**
 6. Click **Save**
 7. **Redeploy** your app for changes to take effect
@@ -28,7 +28,7 @@ npm i -g vercel
 # Set the environment variable
 vercel env rm GOOGLE_API_KEY production
 vercel env add GOOGLE_API_KEY production
-# Paste: AIzaSyB-0kJC-ZqyKbu6ZTh2Lvr5jt0xDWGxgkI
+# Paste: YOUR_API_KEY_HERE
 
 # Redeploy
 vercel --prod
@@ -41,7 +41,7 @@ cd /Users/Anchit.Tandon/Desktop/AI\ HUSTLE\ -\ APPS/TH-LifeEngine
 
 # Update environment variable
 vercel env add GOOGLE_API_KEY <<EOF
-AIzaSyB-0kJC-ZqyKbu6ZTh2Lvr5jt0xDWGxgkI
+YOUR_API_KEY_HERE
 EOF
 
 # Deploy

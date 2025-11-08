@@ -186,7 +186,7 @@ lib/
 
 ### Environment Variables
 ```bash
-GOOGLE_API_KEY=AIzaSyDH0puriqpOLvxsFJKTLY7oFvMAAz-IBLA  ✅
+GOOGLE_API_KEY=YOUR_API_KEY_HERE  ✅
 GEMINI_MODEL=gemini-1.5-flash-8b                        ✅
 OPENAI_API_KEY=<optional>                               ⏸️
 LIFEENGINE_CUSTOM_GPT_ID=<optional>                     ⏸️

@@ -87,6 +87,9 @@ firebase-key.json
 database.json
 lifeengine.state.json
 
+# API key cleanup backups
+.api-key-cleanup-backup/
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
