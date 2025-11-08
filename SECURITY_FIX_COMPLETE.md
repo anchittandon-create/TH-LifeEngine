@@ -8,7 +8,8 @@
 ## ✅ What Was Done
 
 ### 1. New API Key Installed
-- ✅ Updated `.env` with your new Google API key: `***GOOGLE_KEY_REDACTED***`
+
+- ✅ Updated `.env` with your new Google API key
 - ✅ File remains in `.gitignore` (never committed)
 
 ### 2. Documentation Cleaned
@@ -64,7 +65,7 @@ If you've deployed your app:
 
 1. Go to: https://vercel.com/dashboard
 2. Your project → **Settings** → **Environment Variables**
-3. Update `GOOGLE_API_KEY` to: `***GOOGLE_KEY_REDACTED***`
+3. Update `GOOGLE_API_KEY` with your new key from `.env`
 4. Redeploy
 
 ---
@@ -129,10 +130,11 @@ git status
 ## 📊 Current Configuration
 
 ### Your .env Setup
+
 ```bash
 # AI Provider Keys
-GOOGLE_API_KEY=***GOOGLE_KEY_REDACTED***  # ✅ Secure
-OPENAI_API_KEY=sk-YOUR_OPENAI_KEY                      # ⏳ Update if needed
+GOOGLE_API_KEY=AIzaSy***-YOUR-SECURE-KEY-HERE-***  # ✅ Secure (in .env only)
+OPENAI_API_KEY=sk-YOUR_OPENAI_KEY                  # ⏳ Update if needed
 
 # Model Configuration  
 GEMINI_MODEL=gemini-1.5-flash-8b                       # ✅ Cheapest option
