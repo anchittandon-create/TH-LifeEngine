@@ -14,7 +14,19 @@ export interface PromptBuilderInput extends PlanFormState {
 export function buildPromptFromForm(form: PromptBuilderInput): string {
   const parts: string[] = [];
 
-  // Header
+  // Header with critical emphasis
+  parts.push("═══════════════════════════════════════════════════════════════");
+  parts.push("🎯 WELLNESS PLAN GENERATOR - DETAILED STEP-BY-STEP INSTRUCTIONS REQUIRED");
+  parts.push("═══════════════════════════════════════════════════════════════");
+  parts.push("");
+  parts.push("⚠️  IMPORTANT: This plan will be followed by a REAL USER at home.");
+  parts.push("    You MUST provide EXTREMELY DETAILED, STEP-BY-STEP instructions for:");
+  parts.push("    - Every yoga pose (minimum 5 steps per pose)");
+  parts.push("    - Every exercise (minimum 5 steps per exercise)");
+  parts.push("    - Every meal recipe (minimum 5 cooking steps per meal)");
+  parts.push("    - Complete nutrition data for ALL meals");
+  parts.push("    - Calorie burn estimates for ALL activities");
+  parts.push("");
   parts.push("Create a personalized wellness plan with the following specifications:\n");
 
   // Personal Info
@@ -68,44 +80,49 @@ export function buildPromptFromForm(form: PromptBuilderInput): string {
 
   // Instructions
   parts.push("");
-  parts.push("**Instructions:**");
-  parts.push("Please generate a comprehensive wellness plan that:");
-  parts.push("1. Is tailored to the specifications above");
-  parts.push("2. Includes specific exercises, meal suggestions, and daily routines");
-  parts.push("3. Considers all health conditions and goals mentioned");
-  parts.push("4. Provides actionable, easy-to-follow guidance");
-  parts.push("5. Is structured in a clear, organized format");
+  parts.push("═══════════════════════════════════════════════════════════════");
+  parts.push("🚨 CRITICAL INSTRUCTIONS - READ CAREFULLY:");
+  parts.push("═══════════════════════════════════════════════════════════════");
   parts.push("");
-  parts.push("**CRITICAL: Include STEP-BY-STEP DETAILS for everything:**");
+  parts.push("This plan MUST be designed for a USER to FOLLOW AT HOME.");
+  parts.push("The user needs CLEAR, DETAILED, STEP-BY-STEP instructions for EVERYTHING.");
+  parts.push("Imagine you're writing a guide for someone who's never done these activities before.");
+  parts.push("");
+  parts.push("**MANDATORY: Include STEP-BY-STEP DETAILS for everything:**");
   parts.push("");
   parts.push("🧘 **For Yoga Poses:**");
-  parts.push("- Provide step-by-step instructions (e.g., 'Step 1: Stand with feet hip-width apart...')");
-  parts.push("- Include breathing instructions (e.g., 'Inhale as you raise arms, exhale as you fold forward')");
-  parts.push("- List specific benefits of each pose");
-  parts.push("- Specify exact duration in minutes");
-  parts.push("- Add modifications for beginners or those with limitations");
-  parts.push("- **MUST INCLUDE**: Estimated calories burned per pose");
+  parts.push("- **MINIMUM 5 DETAILED STEPS** for each pose (e.g., 'Step 1: Stand with feet hip-width apart, arms at sides')");
+  parts.push("- Include EXACT breathing pattern (e.g., 'Inhale deeply for 4 counts as you raise arms, exhale slowly for 6 counts as you fold forward')");
+  parts.push("- List 3-5 specific benefits (e.g., 'Improves flexibility in hamstrings', 'Relieves lower back tension')");
+  parts.push("- Specify EXACT duration (e.g., 'Hold for 3 minutes' NOT just '3 min')");
+  parts.push("- Add 2-3 modifications (e.g., 'Beginners: Use a yoga block under hands', 'Limited flexibility: Bend knees slightly')");
+  parts.push("- List 2-3 common mistakes (e.g., 'Don't lock knees', 'Avoid arching lower back')");
+  parts.push("- **MUST INCLUDE**: Estimated calories burned (realistic, e.g., 15-30 cal for 3 minutes)");
   parts.push("");
   parts.push("🏋️ **For Exercises:**");
-  parts.push("- Provide exact sets & reps (e.g., '3 sets of 12 reps')");
-  parts.push("- Include rest periods between sets (e.g., '60 seconds rest')");
-  parts.push("- Add detailed form cues (e.g., 'Keep back straight, core engaged')");
-  parts.push("- List common mistakes to avoid");
-  parts.push("- Provide progressions/regressions");
-  parts.push("- **MUST INCLUDE**: Estimated calories burned");
-  parts.push("- **MUST INCLUDE**: Target muscles worked (e.g., ['chest', 'triceps', 'shoulders'])");
+  parts.push("- **MINIMUM 5 DETAILED STEPS** for proper form (e.g., 'Step 1: Lie flat on bench, feet planted firmly on ground', 'Step 2: Grip barbell slightly wider than shoulder-width', 'Step 3: Lower bar slowly to mid-chest over 3 seconds')");
+  parts.push("- Include EXACT sets & reps (e.g., '3 sets of 12 reps' OR '4 sets of 30 seconds')");
+  parts.push("- Specify rest periods (e.g., '60 seconds rest between sets', '2 minutes rest before next exercise')");
+  parts.push("- Add 3-5 form cues (e.g., 'Keep back straight', 'Core engaged throughout', 'Shoulders pulled back', 'Control the movement')");
+  parts.push("- List 3-5 common mistakes (e.g., 'Don't arch back', 'Avoid locking elbows', 'Don't use momentum')");
+  parts.push("- Provide progression (e.g., 'Advanced: Add 5kg weight', 'Progress to single-leg variation')");
+  parts.push("- Provide regression (e.g., 'Beginners: Do on knees', 'Start with bodyweight only')");
+  parts.push("- **MUST INCLUDE**: Estimated calories burned (realistic based on intensity and duration)");
+  parts.push("- **MUST INCLUDE**: Target muscles worked as array (e.g., ['chest', 'triceps', 'shoulders', 'core'])");
   parts.push("");
-  parts.push("🥗 **For Meals (CRITICAL - ALWAYS INCLUDE FULL NUTRITION):**");
-  parts.push("- List all ingredients with exact quantities (e.g., '2 medium eggs', '100g chicken breast')");
-  parts.push("- Provide numbered recipe steps (e.g., 'Step 1: Heat oil in pan...', 'Step 2: Add chicken and cook...')");
-  parts.push("- Include preparation time and cooking time");
-  parts.push("- Add portion guidance (e.g., '1 cup serving', '2 pieces')");
-  parts.push("- Suggest healthy swaps when possible");
+  parts.push("🥗 **For Meals (MOST IMPORTANT - USER MUST BE ABLE TO COOK THIS):**");
+  parts.push("- List ALL ingredients with EXACT quantities (e.g., '2 large eggs', '100g boneless chicken breast', '1 tablespoon olive oil', '1/2 cup chopped spinach')");
+  parts.push("- **MINIMUM 5 DETAILED RECIPE STEPS** (e.g., 'Step 1: Heat 1 tbsp olive oil in non-stick pan over medium heat (2 minutes)', 'Step 2: Add chicken breast, season with salt and pepper, cook for 6-7 minutes per side until golden brown', 'Step 3: Remove chicken, add spinach to same pan, sauté for 2 minutes until wilted')");
+  parts.push("- Include EXACT preparation time (e.g., 'Prep time: 10 minutes')");
+  parts.push("- Include EXACT cooking time (e.g., 'Cook time: 15 minutes')");
+  parts.push("- Add portion guidance (e.g., 'Serves 1 person', '1.5 cups total', 'Fills a dinner plate')");
+  parts.push("- Suggest 1-2 healthy swaps (e.g., 'Swap chicken for tofu', 'Use whole wheat bread instead of white')");
+  parts.push("- Add cooking tips (e.g., 'For extra flavor, marinate chicken for 30 minutes', 'Toast bread lightly for better texture')");
   parts.push("- **MUST INCLUDE**: Total calories (e.g., 350 calories)");
-  parts.push("- **MUST INCLUDE**: Protein in grams (e.g., 25g protein)");
-  parts.push("- **MUST INCLUDE**: Carbs in grams (e.g., 30g carbs)");
-  parts.push("- **MUST INCLUDE**: Fat in grams (e.g., 12g fat)");
-  parts.push("- **MUST INCLUDE**: Fiber in grams (e.g., 5g fiber)");
+  parts.push("- **MUST INCLUDE**: Protein in grams (e.g., 25g)");
+  parts.push("- **MUST INCLUDE**: Carbs in grams (e.g., 30g)");
+  parts.push("- **MUST INCLUDE**: Fat in grams (e.g., 12g)");
+  parts.push("- **MUST INCLUDE**: Fiber in grams (e.g., 5g)");
   parts.push("- **OPTIONAL**: Sugar and sodium if relevant");
   parts.push("");
   parts.push("Return your answer as VALID JSON matching this shape:");
@@ -136,15 +153,22 @@ Where DayPlan contains:
     "warmup_min": number,
     "sequence": [
       {
-        "name": string,
-        "duration_min": number,
-        "focus": string,
-        "benefits": string,
-        "steps": string[], // ["Step 1: Begin in...", "Step 2: Inhale and...", ...]
-        "breathing_instructions": string, // "Inhale for 4 counts, exhale for 6 counts"
-        "modifications": string,
-        "common_mistakes": string[],
-        "calories_burned": number // Estimated calories burned for this pose
+        "name": "Downward Facing Dog (Adho Mukha Svanasana)",
+        "duration_min": 3,
+        "focus": "Full body stretch, hamstrings, shoulders",
+        "benefits": "Stretches hamstrings and calves, strengthens arms and shoulders, energizes the body, relieves tension in spine",
+        "steps": [
+          "Step 1: Start on hands and knees with wrists under shoulders and knees under hips",
+          "Step 2: Spread fingers wide and press palms firmly into mat",
+          "Step 3: Tuck toes under and lift hips up and back, straightening legs",
+          "Step 4: Press chest toward thighs, keeping spine long and neutral",
+          "Step 5: Relax head and neck, gaze toward feet or navel",
+          "Step 6: Hold position while breathing deeply, pressing heels toward floor"
+        ],
+        "breathing_instructions": "Inhale deeply through nose for 4 counts, exhale slowly through nose for 6 counts. Maintain steady breath throughout the pose.",
+        "modifications": "Beginners: Keep knees slightly bent if hamstrings are tight. Use yoga blocks under hands to reduce wrist strain. Advanced: Lift one leg at a time for three-legged dog variation.",
+        "common_mistakes": ["Don't round the spine or hunch shoulders", "Avoid locking elbows", "Don't let weight shift too far forward onto hands"],
+        "calories_burned": 25
       }
     ],
     "breathwork": string,
@@ -154,22 +178,39 @@ Where DayPlan contains:
   },
   "diet": {
     "breakfast": {
-      "title": string,
-      "ingredients": string[], // ["2 eggs", "1 cup spinach", "1 tbsp olive oil"]
-      "recipe_steps": string[], // ["Step 1: Heat oil...", "Step 2: Add eggs..."]
-      "preparation_time": string, // "10 minutes"
-      "cooking_time": string, // "5 minutes"
-      "portion_guidance": string,
-      "notes": string,
-      "swap": string,
-      // CRITICAL: ALWAYS include complete nutrition info
-      "calories": number, // e.g., 350
-      "protein_g": number, // e.g., 25
-      "carbs_g": number, // e.g., 30
-      "fat_g": number, // e.g., 12
-      "fiber_g": number, // e.g., 5
-      "sugar_g": number, // optional
-      "sodium_mg": number // optional
+      "title": "Protein-Packed Veggie Omelette",
+      "ingredients": [
+        "3 large eggs",
+        "1/2 cup chopped bell peppers (red and green)",
+        "1/4 cup diced onions",
+        "1/2 cup fresh spinach leaves",
+        "1 tablespoon olive oil",
+        "1/4 cup shredded cheese (optional)",
+        "Salt and black pepper to taste",
+        "Fresh herbs (parsley or chives) for garnish"
+      ],
+      "recipe_steps": [
+        "Step 1: Heat 1 tablespoon olive oil in a non-stick pan over medium heat for 1-2 minutes",
+        "Step 2: Add diced onions and bell peppers, sauté for 3-4 minutes until softened and slightly golden",
+        "Step 3: Add spinach leaves and cook for 1 minute until wilted, then transfer vegetables to a plate",
+        "Step 4: In a bowl, crack 3 eggs, add salt and pepper, whisk vigorously for 30 seconds until well combined and slightly frothy",
+        "Step 5: Pour egg mixture into the same pan, let it sit for 30 seconds without stirring",
+        "Step 6: Add cooked vegetables to one half of the omelette, sprinkle cheese if using",
+        "Step 7: When edges are set but center is still slightly runny (about 2 minutes), carefully fold omelette in half using spatula",
+        "Step 8: Cook for another 1-2 minutes until fully set, then slide onto plate and garnish with fresh herbs"
+      ],
+      "preparation_time": "5 minutes",
+      "cooking_time": "8 minutes",
+      "portion_guidance": "Serves 1 person. Fills approximately half a standard dinner plate.",
+      "notes": "For fluffier omelette, add 1 tablespoon of milk to eggs before whisking",
+      "swap": "Vegan option: Use 1/2 cup chickpea flour mixed with water instead of eggs. Dairy-free: Skip cheese or use nutritional yeast.",
+      "calories": 320,
+      "protein_g": 22,
+      "carbs_g": 12,
+      "fat_g": 21,
+      "fiber_g": 3,
+      "sugar_g": 6,
+      "sodium_mg": 380
     },
     "lunch": {...same as breakfast...},
     "snacks": [...same structure...],
@@ -184,33 +225,75 @@ Where DayPlan contains:
   },
   "exercises": [
     {
-      "name": string,
-      "type": string, // "strength", "cardio", "flexibility"
-      "sets": number,
-      "reps": number | string, // "12" or "30 seconds"
-      "rest_period": string, // "60 seconds"
-      "steps": string[], // ["Step 1: Start position...", "Step 2: Movement..."]
-      "form_cues": string[], // ["Keep back straight", "Engage core"]
-      "common_mistakes": string[], // ["Don't arch back", "Avoid locking knees"]
-      "progressions": string,
-      "regressions": string,
-      "duration_min": number,
-      "calories_burned": number, // Estimated calories burned
-      "target_muscles": string[] // Muscles worked (e.g., ["chest", "triceps"])
+      "name": "Push-ups",
+      "type": "strength",
+      "sets": 3,
+      "reps": 12,
+      "rest_period": "60 seconds between sets",
+      "steps": [
+        "Step 1: Start in plank position with hands placed slightly wider than shoulder-width apart, fingers pointing forward",
+        "Step 2: Position body in straight line from head to heels, feet hip-width apart, core engaged and glutes tight",
+        "Step 3: Lower body by bending elbows at 45-degree angle, keeping them close to sides (not flaring out)",
+        "Step 4: Descend until chest is 1-2 inches from floor, maintaining rigid body alignment throughout",
+        "Step 5: Press through palms explosively to return to start position, fully extending arms without locking elbows",
+        "Step 6: Repeat for prescribed reps, maintaining consistent tempo: 2 seconds down, 1 second pause, 1 second up"
+      ],
+      "form_cues": [
+        "Keep core tight and engaged throughout entire movement",
+        "Don't let hips sag or pike up - maintain straight body line",
+        "Look at floor about 6 inches in front of hands to keep neck neutral",
+        "Squeeze shoulder blades together at bottom of movement",
+        "Breathe in on way down, breathe out on way up"
+      ],
+      "common_mistakes": [
+        "Don't let elbows flare out to 90 degrees - keep them at 45 degrees",
+        "Avoid sagging hips or piking hips up high",
+        "Don't lock elbows at top of movement",
+        "Don't rush through reps - maintain control"
+      ],
+      "progressions": "Advanced: Elevate feet on bench for decline push-ups. Add weight vest. Progress to archer push-ups or one-arm push-ups.",
+      "regressions": "Beginners: Perform on knees (knee push-ups). Use wall push-ups if floor is too difficult. Reduce range of motion initially.",
+      "duration_min": 5,
+      "calories_burned": 35,
+      "target_muscles": ["chest", "triceps", "shoulders", "core"]
     }
   ]
 }`);
   parts.push("");
   parts.push("DO NOT include Markdown fences. Respond with pure JSON only.");
   parts.push("");
-  parts.push("**CRITICAL REQUIREMENTS** (Plan will be rejected if these are missing):");
-  parts.push("1. Every meal MUST have: calories, protein_g, carbs_g, fat_g, fiber_g");
-  parts.push("2. Every yoga pose MUST have: steps array (at least 3 steps), breathing_instructions, calories_burned");
-  parts.push("3. Every exercise MUST have: steps array, form_cues array, calories_burned, target_muscles");
-  parts.push("4. Every recipe MUST have: ingredients array, recipe_steps array (minimum 3 steps)");
-  parts.push("5. All nutritional values must be realistic and accurate");
+  parts.push("═══════════════════════════════════════════════════════════════");
+  parts.push("🚨 VALIDATION REQUIREMENTS - PLAN WILL BE REJECTED IF MISSING:");
+  parts.push("═══════════════════════════════════════════════════════════════");
   parts.push("");
-  parts.push("REMEMBER: A plan without detailed nutrition info and step-by-step instructions is INCOMPLETE!");
+  parts.push("✅ 1. EVERY MEAL must have: calories, protein_g, carbs_g, fat_g, fiber_g");
+  parts.push("      - Example: {'calories': 450, 'protein_g': 28, 'carbs_g': 35, 'fat_g': 15, 'fiber_g': 6}");
+  parts.push("");
+  parts.push("✅ 2. EVERY MEAL must have: ingredients array (with quantities) + recipe_steps array (minimum 5 steps)");
+  parts.push("      - Example ingredients: ['2 large eggs', '100g chicken breast', '1 tbsp olive oil']");
+  parts.push("      - Example steps: ['Step 1: Heat oil in pan...', 'Step 2: Add chicken...', 'Step 3: Cook for 7 minutes...']");
+  parts.push("");
+  parts.push("✅ 3. EVERY YOGA POSE must have: steps array (minimum 5 steps), breathing_instructions, calories_burned");
+  parts.push("      - Example steps: ['Step 1: Stand with feet...', 'Step 2: Raise arms...', 'Step 3: Bend forward...']");
+  parts.push("      - Example breathing: 'Inhale for 4 counts as you raise arms, exhale for 6 counts as you fold'");
+  parts.push("");
+  parts.push("✅ 4. EVERY EXERCISE must have: steps array (minimum 5 steps), form_cues array, calories_burned, target_muscles");
+  parts.push("      - Example steps: ['Step 1: Start position...', 'Step 2: Lower weight...', 'Step 3: Press up...']");
+  parts.push("      - Example form_cues: ['Keep back straight', 'Core engaged', 'Control the movement']");
+  parts.push("      - Example target_muscles: ['chest', 'triceps', 'shoulders']");
+  parts.push("");
+  parts.push("✅ 5. ALL nutritional values must be REALISTIC and ACCURATE for the portion sizes given");
+  parts.push("");
+  parts.push("✅ 6. ALL recipe_steps must be DETAILED enough that a beginner can follow them");
+  parts.push("      - Include cooking times, temperatures, visual cues (e.g., 'until golden brown')");
+  parts.push("");
+  parts.push("✅ 7. ALL exercise/yoga steps must describe the FULL MOVEMENT from start to finish");
+  parts.push("      - Don't just say 'Do a push-up' - explain hand position, body alignment, movement pattern");
+  parts.push("");
+  parts.push("🚨 REMEMBER: This plan is for a REAL USER who will follow these instructions AT HOME.");
+  parts.push("   They need COMPLETE, CLEAR, STEP-BY-STEP guidance. BE DETAILED!");
+  parts.push("");
+  parts.push("═══════════════════════════════════════════════════════════════");
 
   return parts.join("\n");
 }
