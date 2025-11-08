@@ -133,18 +133,19 @@ export default function UseCustomGPTPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
-      <div className="max-w-7xl mx-auto p-6 space-y-8 w-95%">
-        {/* Header */}
-        <div className="text-center space-y-3 pt-8">
-          <div className="text-6xl mb-4">🤖</div>
-          <h1 className="text-4xl font-bold text-gray-900">
-            Generate with Custom GPT
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            AI-powered planning with ChatGPT integration - same powerful features as Create Plan
-          </p>
-        </div>
+    <main className="max-w-[1400px] mx-auto p-6 space-y-8 w-[95%] min-h-screen">
+      {/* Header */}
+      <header className="text-center mb-8 p-6">
+        <div className="text-6xl mb-4">🤖</div>
+        <h1 className="text-4xl font-extrabold mb-3 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          Generate with Custom GPT
+        </h1>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          Use AI-powered generation with your profile to create personalized wellness plans
+        </p>
+      </header>
+
+      <div className="space-y-6">
 
         {/* Profile Selection */}
         <section className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border-2 border-blue-200 shadow-lg">
