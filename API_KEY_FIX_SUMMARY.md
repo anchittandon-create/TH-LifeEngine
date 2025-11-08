@@ -4,8 +4,8 @@
 
 ### 1. Updated `.env` with Your New API Key
 ```bash
-# Old (compromised): AIzaSyDH0puriqpOLvxsFJKTLY7oFvMAAz-IBLA
-# New (secure):      AIzaSyCjCasVmVYCAoeLcQ8COHkg1Day2Jbgb4M
+# Old (compromised): AIzaSy***-REVOKED-***
+# New (secure):      AIzaSy***-SECURE-KEY-IN-ENV-***
 ```
 
 ### 2. Cleaned All Exposed API Keys
@@ -30,7 +30,7 @@ Added `.api-key-cleanup-backup/` to prevent committing backups
 
 ### Step 1: Revoke the Old Key (5 minutes)
 1. Go to: https://makersuite.google.com/app/apikey
-2. Find key: `AIzaSyDH0puriqpOLvxsFJKTLY7oFvMAAz-IBLA`
+2. Find any old/leaked keys in your account
 3. Click **DELETE**
 
 ### Step 2: Test Locally (2 minutes)
@@ -55,7 +55,7 @@ npm run dev
 ### Step 4: Update Vercel (If Deployed)
 1. Go to: https://vercel.com/dashboard
 2. Your project → Settings → Environment Variables
-3. Update `GOOGLE_API_KEY` to: `AIzaSyCjCasVmVYCAoeLcQ8COHkg1Day2Jbgb4M`
+3. Update `GOOGLE_API_KEY` with your new secure key from `.env`
 4. Redeploy
 
 ---

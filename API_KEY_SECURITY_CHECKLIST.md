@@ -8,8 +8,8 @@
 ## 🎯 What We've Done
 
 ### ✅ 1. Updated .env with New API Key
-- **Old Key** (COMPROMISED): `AIzaSyDH0puriqpOLvxsFJKTLY7oFvMAAz-IBLA`
-- **New Key**: `AIzaSyCjCasVmVYCAoeLcQ8COHkg1Day2Jbgb4M`
+- **Old Key** (COMPROMISED): `AIzaSy***-REVOKED-***`
+- **New Key**: `AIzaSy***-SECURE-KEY-IN-ENV-***`
 - **Status**: ✅ Updated in `.env` file
 - **Safety**: ⚠️ Never commit this file!
 

@@ -26,9 +26,9 @@ Please use another API key.
 ### Step 1: Revoke the Leaked Key
 
 1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Find the leaked key: `AIzaSyCjCasVmVYCAoeLcQ8COHkg1Day2Jbgb4M`
-3. Click **DELETE** or **REVOKE** on that key
-4. **Do NOT use this key anywhere - it's compromised!**
+2. Find any leaked keys in your account
+3. Click **DELETE** or **REVOKE** on those keys
+4. **Do NOT use old keys anywhere - they're compromised!**
 
 ### Step 2: Create a New API Key
 
@@ -45,7 +45,7 @@ Please use another API key.
 
 ```bash
 # OLD (COMPROMISED - DELETE THIS)
-GOOGLE_API_KEY=AIzaSyCjCasVmVYCAoeLcQ8COHkg1Day2Jbgb4M
+GOOGLE_API_KEY=AIzaSy***-OLD-REVOKED-KEY-***
 
 # NEW (Replace with your actual new key)
 GOOGLE_API_KEY=YOUR_NEW_KEY_HERE
