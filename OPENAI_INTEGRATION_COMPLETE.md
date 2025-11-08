@@ -84,7 +84,7 @@ NEXT_PUBLIC_LIFEENGINE_GPT_ID=gpt-4o-mini
 ```bash
 # In .env:
 # OPENAI_API_KEY=sk-YOUR_OPENAI_KEY  # Commented out
-GOOGLE_API_KEY=AIzaSyCjCasVmVYCAoeLcQ8COHkg1Day2Jbgb4M
+GOOGLE_API_KEY=YOUR_GOOGLE_API_KEY_HERE
 ```
 
 ### Option 3: Use Best Model (Most Expensive)
