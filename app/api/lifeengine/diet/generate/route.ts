@@ -91,7 +91,14 @@ Format the response as a JSON object with this exact structure:
 
 Ensure the plan is realistic, nutritionally balanced, and considers all restrictions and preferences.`;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash-8b"; // Cost optimized
+    const model = genAI.getGenerativeModel({ 
+      model: modelName,
+      generationConfig: {
+        maxOutputTokens: 3072, // Reduced for cost optimization
+        temperature: 0.7,
+      }
+    });
 
     const result = await model.generateContent(prompt);
     const response = result.response;

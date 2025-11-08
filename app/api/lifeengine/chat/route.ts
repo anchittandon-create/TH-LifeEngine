@@ -133,7 +133,14 @@ ${conversationHistory && conversationHistory.length > 0 ?
 
 Respond as a helpful wellness coach who knows their profile and goals.`;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash-8b"; // Cost optimized
+    const model = genAI.getGenerativeModel({ 
+      model: modelName,
+      generationConfig: {
+        maxOutputTokens: 2048, // Reduced for cost optimization
+        temperature: 0.8,
+      }
+    });
 
     const result = await model.generateContent(context);
     const response = result.response;

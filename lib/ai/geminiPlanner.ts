@@ -9,7 +9,14 @@ export async function generatePlan(profile: Profile, intake: Intake): Promise<Pl
   }
 
   const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const modelName = process.env.GEMINI_MODEL || 'gemini-1.5-flash-8b'; // Cost optimized
+  const model = genAI.getGenerativeModel({ 
+    model: modelName,
+    generationConfig: {
+      maxOutputTokens: 4096, // Reduced for cost optimization
+      temperature: 0.7,
+    }
+  });
 
   const prompt = PLANNER_PROMPT
     .replace('{age}', profile.age.toString())
