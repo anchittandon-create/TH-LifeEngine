@@ -186,7 +186,7 @@ export default function UseCustomGPTPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-10">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-10">
       <div className="max-w-5xl mx-auto px-6 space-y-10">
         <div className="text-center space-y-3">
           <h1 className="text-4xl font-bold text-gray-900">🤖 Use Custom GPT</h1>
@@ -264,7 +264,7 @@ export default function UseCustomGPTPage() {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }
 

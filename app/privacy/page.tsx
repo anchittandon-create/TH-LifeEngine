@@ -1,6 +1,6 @@
 export default function PrivacyPage() {
   return (
-    <main className="prose mx-auto p-6">
+    <div className="prose mx-auto p-6">
       <h1>TH_LifeEngine Privacy Policy</h1>
       <p><strong>Effective Date:</strong> 01 Nov 2025</p>
 
@@ -59,6 +59,6 @@ export default function PrivacyPage() {
 
       <h2>Changes</h2>
       <p>We may update this policy and post a new effective date.</p>
-    </main>
+    </div>
   );
 }
