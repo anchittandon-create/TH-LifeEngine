@@ -37,7 +37,26 @@ export interface YogaPose {
   name: string;
   duration_min: number;
   focus?: string;
+  benefits?: string;
+  steps?: string[]; // Step-by-step instructions ["Step 1: ...", "Step 2: ..."]
+  breathing_instructions?: string; // Detailed breathing cues
   modifications?: string;
+  common_mistakes?: string[]; // Common mistakes to avoid
+}
+
+export interface Exercise {
+  name: string;
+  type: string; // "strength", "cardio", "flexibility", etc.
+  sets?: number;
+  reps?: number | string; // Can be "12" or "30 seconds"
+  rest_period?: string; // e.g., "60 seconds"
+  steps?: string[]; // Step-by-step movement instructions
+  form_cues?: string[]; // Proper form reminders
+  common_mistakes?: string[]; // What to avoid
+  progressions?: string; // How to make it harder
+  regressions?: string; // How to make it easier
+  duration_min?: number;
+  description?: string;
 }
 
 export interface YogaSession {
@@ -51,9 +70,13 @@ export interface YogaSession {
 
 export interface Meal {
   title: string;
+  ingredients?: string[]; // List of ingredients with quantities
+  recipe_steps?: string[]; // Step-by-step cooking instructions
+  preparation_time?: string; // e.g., "10 minutes"
+  cooking_time?: string; // e.g., "15 minutes"
   notes?: string;
   portion_guidance?: string;
-  swap?: string;
+  swap?: string; // Healthy alternatives
 }
 
 export interface DietDay {
@@ -78,6 +101,7 @@ export interface DayPlan {
   yoga?: YogaSession;
   diet?: DietDay;
   holistic?: HolisticDay;
+  exercises?: Exercise[]; // Fitness exercises for the day
 }
 
 export interface WeeklySchedule {

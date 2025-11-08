@@ -76,6 +76,29 @@ export function buildPromptFromForm(form: PromptBuilderInput): string {
   parts.push("4. Provides actionable, easy-to-follow guidance");
   parts.push("5. Is structured in a clear, organized format");
   parts.push("");
+  parts.push("**CRITICAL: Include STEP-BY-STEP DETAILS for everything:**");
+  parts.push("");
+  parts.push("🧘 **For Yoga Poses:**");
+  parts.push("- Provide step-by-step instructions (e.g., 'Step 1: Stand with feet hip-width apart...')");
+  parts.push("- Include breathing instructions (e.g., 'Inhale as you raise arms, exhale as you fold forward')");
+  parts.push("- List specific benefits of each pose");
+  parts.push("- Specify exact duration in minutes");
+  parts.push("- Add modifications for beginners or those with limitations");
+  parts.push("");
+  parts.push("🏋️ **For Exercises:**");
+  parts.push("- Provide exact sets & reps (e.g., '3 sets of 12 reps')");
+  parts.push("- Include rest periods between sets (e.g., '60 seconds rest')");
+  parts.push("- Add detailed form cues (e.g., 'Keep back straight, core engaged')");
+  parts.push("- List common mistakes to avoid");
+  parts.push("- Provide progressions/regressions");
+  parts.push("");
+  parts.push("🥗 **For Meals:**");
+  parts.push("- List all ingredients with exact quantities");
+  parts.push("- Provide numbered recipe steps (e.g., 'Step 1: Heat oil in pan...')");
+  parts.push("- Include preparation time and cooking time");
+  parts.push("- Add portion guidance (e.g., '1 cup serving')");
+  parts.push("- Suggest healthy swaps when possible");
+  parts.push("");
   parts.push("Return your answer as VALID JSON matching this shape:");
   parts.push(`{
   "motivation": string,
@@ -97,9 +120,70 @@ export function buildPromptFromForm(form: PromptBuilderInput): string {
   },
   "disclaimer": string
 }
-Where DayPlan contains optional "yoga", "diet", and "holistic" objects mirroring TH_LifeEngine schema.`);
+
+Where DayPlan contains:
+{
+  "yoga": {
+    "warmup_min": number,
+    "sequence": [
+      {
+        "name": string,
+        "duration_min": number,
+        "focus": string,
+        "benefits": string,
+        "steps": string[], // ["Step 1: Begin in...", "Step 2: Inhale and...", ...]
+        "breathing_instructions": string, // "Inhale for 4 counts, exhale for 6 counts"
+        "modifications": string,
+        "common_mistakes": string[]
+      }
+    ],
+    "breathwork": string,
+    "cooldown_min": number,
+    "journal_prompt": string,
+    "focus_area": string
+  },
+  "diet": {
+    "breakfast": {
+      "title": string,
+      "ingredients": string[], // ["2 eggs", "1 cup spinach", "1 tbsp olive oil"]
+      "recipe_steps": string[], // ["Step 1: Heat oil...", "Step 2: Add eggs..."]
+      "preparation_time": string, // "10 minutes"
+      "cooking_time": string, // "5 minutes"
+      "portion_guidance": string,
+      "notes": string,
+      "swap": string
+    },
+    "lunch": {...same as breakfast...},
+    "snacks": [...same structure...],
+    "dinner": {...same as breakfast...},
+    "evening_tea": {...}
+  },
+  "holistic": {
+    "mindfulness": string,
+    "affirmation": string,
+    "sleep": string,
+    "rest_day": boolean
+  },
+  "exercises": [
+    {
+      "name": string,
+      "type": string, // "strength", "cardio", "flexibility"
+      "sets": number,
+      "reps": number | string, // "12" or "30 seconds"
+      "rest_period": string, // "60 seconds"
+      "steps": string[], // ["Step 1: Start position...", "Step 2: Movement..."]
+      "form_cues": string[], // ["Keep back straight", "Engage core"]
+      "common_mistakes": string[], // ["Don't arch back", "Avoid locking knees"]
+      "progressions": string,
+      "regressions": string,
+      "duration_min": number
+    }
+  ]
+}`);
   parts.push("");
   parts.push("DO NOT include Markdown fences. Respond with pure JSON only.");
+  parts.push("");
+  parts.push("REMEMBER: Every yoga pose, exercise, and meal MUST include step-by-step instructions!");
 
   return parts.join("\n");
 }

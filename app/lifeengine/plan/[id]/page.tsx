@@ -4,11 +4,14 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
+import PlanPreview from "@/app/components/PlanPreview";
+import type { LifeEnginePlan } from "@/app/types/lifeengine";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import styles from "./page.module.css";
 
-type Plan = {
+// Old format from rule engine
+type RulePlan = {
   id: string;
   profileId: string;
   intakeId: string;
@@ -34,7 +37,8 @@ type Props = {
 };
 
 export default function PlanDetailPage({ params }: Props) {
-  const [plan, setPlan] = useState<Plan | null>(null);
+  const [rulePlan, setRulePlan] = useState<RulePlan | null>(null);
+  const [customGptPlan, setCustomGptPlan] = useState<LifeEnginePlan | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
@@ -46,10 +50,22 @@ export default function PlanDetailPage({ params }: Props) {
 
   const loadPlan = async () => {
     try {
+      // Try loading as LifeEnginePlan first (CustomGPT format)
+      const detailResponse = await fetch(`/api/lifeengine/plan/detail?planId=${params.id}`);
+      if (detailResponse.ok) {
+        const detailData = await detailResponse.json();
+        if (detailData.plan && detailData.plan.weekly_schedule) {
+          setCustomGptPlan(detailData.plan);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Fall back to old rule engine format
       const response = await fetch(`/api/lifeengine/getPlan?id=${params.id}`);
       if (!response.ok) throw new Error("Failed to load plan");
       const data = await response.json();
-      setPlan(data.plan);
+      setRulePlan(data.plan);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -58,7 +74,8 @@ export default function PlanDetailPage({ params }: Props) {
   };
 
   const downloadPDF = async () => {
-    if (!plan || !planRef.current) return;
+    if (!planRef.current) return;
+    if (!rulePlan && !customGptPlan) return;
 
     setDownloading(true);
     try {
@@ -91,7 +108,8 @@ export default function PlanDetailPage({ params }: Props) {
         heightLeft -= pageHeight;
       }
 
-      pdf.save(`TH_LifeEngine_Plan_${plan.id.slice(-8)}.pdf`);
+      const planId = rulePlan?.id || params.id;
+      pdf.save(`TH_LifeEngine_Plan_${planId.slice(-8)}.pdf`);
     } catch (error) {
       console.error('PDF generation failed:', error);
       alert('Failed to generate PDF. Please try again.');
@@ -150,7 +168,7 @@ export default function PlanDetailPage({ params }: Props) {
     );
   }
 
-  if (!plan) {
+  if (!rulePlan && !customGptPlan) {
     return (
       <div className={styles.page}>
         <div className={styles.error}>
@@ -164,12 +182,45 @@ export default function PlanDetailPage({ params }: Props) {
     );
   }
 
+  // If we have a CustomGPT plan with new format, use PlanPreview
+  if (customGptPlan) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-10">
+        <div className="max-w-5xl mx-auto px-6">
+          <header className="mb-6 flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Your Personalized Health Plan</h1>
+              <p className="text-gray-600 mt-1">Generated with CustomGPT</p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                onClick={downloadPDF}
+                disabled={downloading}
+              >
+                {downloading ? "Generating PDF..." : "📄 Download PDF"}
+              </Button>
+              <Link href="/lifeengine/dashboard">
+                <Button variant="ghost">← Back to Dashboard</Button>
+              </Link>
+            </div>
+          </header>
+
+          <div ref={planRef}>
+            <PlanPreview plan={customGptPlan} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Otherwise, render old rule-based plan format
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <div>
           <h1 className={styles.title}>Your Personalized Health Plan</h1>
-          <p className={styles.subtitle}>Plan #{plan.id.slice(-8)}</p>
+          <p className={styles.subtitle}>Plan #{rulePlan!.id.slice(-8)}</p>
         </div>
         <div className={styles.headerActions}>
           <Button
@@ -186,7 +237,7 @@ export default function PlanDetailPage({ params }: Props) {
       </header>
 
       <div ref={planRef} className={styles.days}>
-        {plan.days.map((day, index) => (
+        {rulePlan!.days.map((day: any, index: number) => (
           <div key={day.date} className={styles.day}>
             <div className={styles.dayHeader}>
               <h2 className={styles.dayTitle}>Day {index + 1}</h2>
@@ -203,7 +254,7 @@ export default function PlanDetailPage({ params }: Props) {
               <section className={styles.section}>
                 <h3 className={styles.sectionTitle}>Activities</h3>
                 <div className={styles.items}>
-                  {day.activities.map((activity, i) => (
+                  {day.activities.map((activity: any, i: number) => (
                     <div key={i} className={styles.item}>
                       <div className={styles.itemHeader}>
                         <span className={styles.type}>{activity.type}</span>
@@ -221,7 +272,7 @@ export default function PlanDetailPage({ params }: Props) {
               <section className={styles.section}>
                 <h3 className={styles.sectionTitle}>Meals</h3>
                 <div className={styles.items}>
-                  {day.meals.map((meal, i) => (
+                  {day.meals.map((meal: any, i: number) => (
                     <div key={i} className={styles.item}>
                       <div className={styles.itemHeader}>
                         <span className={styles.type}>{meal.type}</span>

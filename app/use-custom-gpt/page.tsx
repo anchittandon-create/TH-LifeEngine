@@ -285,6 +285,8 @@ function PlanBrief({ block, copyBrief }: PlanBriefProps) {
       </div>
       <textarea
         readOnly
+        aria-label="GPT Prompt Brief"
+        title="GPT Prompt Brief"
         className="w-full border border-purple-200 rounded-lg bg-white/80 text-sm p-3 text-gray-700"
         rows={6}
         value={block}
