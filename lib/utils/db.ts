@@ -114,6 +114,7 @@ export type ProfileRow = {
 type PlanRow = {
   planId: string;
   profileId: string;
+  planName?: string; // e.g., "Plan for Anchit Tandon"
   days: number;
   confidence: number;
   warnings: string[];
@@ -121,6 +122,7 @@ type PlanRow = {
   analytics?: Record<string, any>;
   costMetrics?: Record<string, any>;
   createdAt?: string;
+  inputSummary?: string; // Summary of input parameters
 };
 
 type MemoryState = {

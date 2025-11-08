@@ -260,9 +260,17 @@ Return JSON format:
     
     // ✅ PERSIST TO DATABASE - This ensures plans appear in dashboard and can be loaded later
     try {
+      const profileName = input.profileSnapshot?.name || "User";
+      const planName = `Plan for ${profileName}`;
+      
+      // Build input summary for dashboard
+      const inputSummary = `${input.plan_type.primary}${input.plan_type.secondary.length ? ' + ' + input.plan_type.secondary.join(', ') : ''} | ${input.duration.value} ${input.duration.unit} | ${input.experience_level}`;
+      
       await db.savePlan({
         planId,
         profileId: input.profileId,
+        planName, // ✅ Now includes user name: "Plan for Anchit Tandon"
+        inputSummary, // ✅ Now includes input details for dashboard
         days: verifiedPlan.plan?.days?.length || 0,
         confidence: 0.9,
         warnings: verifiedPlan.warnings || [],
@@ -283,7 +291,7 @@ Return JSON format:
         },
         createdAt: planData.createdAt,
       });
-      console.log('✅ [GENERATE] Plan persisted to database:', planId);
+      console.log('✅ [GENERATE] Plan persisted to database with name:', planName);
     } catch (dbError: any) {
       console.error('⚠️ [GENERATE] Failed to persist plan to database:', dbError);
       // Continue anyway - plan is still in memory cache

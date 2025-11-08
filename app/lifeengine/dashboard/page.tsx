@@ -4,11 +4,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
+import JSZip from "jszip";
 import styles from "./page.module.css";
 
 type PlanSummary = {
   id: string;
   profileId: string;
+  planName?: string; // e.g., "Plan for Anchit Tandon"
+  inputSummary?: string; // e.g., "Yoga + Diet | 4 weeks | intermediate"
   intakeId: string;
   createdAt: string;
   goals: string[];
@@ -119,10 +122,12 @@ export default function DashboardPage() {
     }
   };
 
-  const downloadPlanAsPDF = async (planId: string) => {
+  const downloadPlanAsPDF = async (planId: string, planName?: string) => {
     try {
-      window.open(`/lifeengine/plan/${planId}`, '_blank');
-      // User can use the PDF download button on the plan page
+      // Open the plan page which has PDF download functionality
+      const safePlanName = planName || "plan";
+      window.open(`/lifeengine/plan/${planId}?autoDownload=pdf`, '_blank');
+      alert(`Opening plan page. Use the "Download PDF" button to save as PDF.`);
     } catch (error) {
       console.error("Failed to open plan:", error);
       alert("Failed to open plan");
@@ -136,16 +141,39 @@ export default function DashboardPage() {
     }
 
     try {
-      // For now, we'll open each plan in a new tab
-      // In production, you'd want to create actual ZIP files server-side
-      alert(`Opening ${selectedPlans.size} plan(s) in new tabs. Use your browser's PDF save feature to download each one.`);
+      const zip = new JSZip();
+      const selectedPlansList = plans.filter(p => selectedPlans.has(p.id));
       
-      selectedPlans.forEach(planId => {
-        window.open(`/lifeengine/plan/${planId}`, '_blank');
-      });
+      // Fetch each plan's full data
+      for (const plan of selectedPlansList) {
+        try {
+          const response = await fetch(`/api/lifeengine/getPlan?planId=${plan.id}`);
+          if (response.ok) {
+            const planData = await response.json();
+            const planName = plan.planName || `Plan for ${getProfileName(plan.profileId)}`;
+            const fileName = `${planName.replace(/[^a-z0-9]/gi, '_')}_${plan.id.slice(-8)}.json`;
+            zip.file(fileName, JSON.stringify(planData, null, 2));
+          }
+        } catch (err) {
+          console.error(`Failed to fetch plan ${plan.id}:`, err);
+        }
+      }
+
+      // Generate ZIP file
+      const blob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `TH_LifeEngine_Plans_${new Date().toISOString().split('T')[0]}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      alert(`Successfully exported ${selectedPlans.size} plan(s) as ZIP`);
     } catch (error) {
       console.error("Failed to export plans:", error);
-      alert("Failed to export plans");
+      alert("Failed to export plans as ZIP");
     }
   };
 
@@ -156,11 +184,35 @@ export default function DashboardPage() {
     }
 
     try {
-      alert(`Opening all ${plans.length} plan(s) in new tabs. Use your browser's PDF save feature to download each one.`);
+      const zip = new JSZip();
       
-      plans.forEach(plan => {
-        window.open(`/lifeengine/plan/${plan.id}`, '_blank');
-      });
+      // Fetch all plans' full data
+      for (const plan of plans) {
+        try {
+          const response = await fetch(`/api/lifeengine/getPlan?planId=${plan.id}`);
+          if (response.ok) {
+            const planData = await response.json();
+            const planName = plan.planName || `Plan for ${getProfileName(plan.profileId)}`;
+            const fileName = `${planName.replace(/[^a-z0-9]/gi, '_')}_${plan.id.slice(-8)}.json`;
+            zip.file(fileName, JSON.stringify(planData, null, 2));
+          }
+        } catch (err) {
+          console.error(`Failed to fetch plan ${plan.id}:`, err);
+        }
+      }
+
+      // Generate ZIP file
+      const blob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `TH_LifeEngine_All_Plans_${new Date().toISOString().split('T')[0]}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      alert(`Successfully exported all ${plans.length} plan(s) as ZIP`);
     } catch (error) {
       console.error("Failed to export plans:", error);
       alert("Failed to export all plans");
@@ -382,7 +434,7 @@ export default function DashboardPage() {
                         <div className={styles.planName}>
                           <span className={styles.planIcon}>📋</span>
                           <span className={styles.planTitle}>
-                            Plan for {getProfileName(plan.profileId)}
+                            {plan.planName || `Plan for ${getProfileName(plan.profileId)}`}
                           </span>
                         </div>
                         <div className={styles.planId}>ID: {plan.id.slice(-8)}</div>
@@ -404,7 +456,9 @@ export default function DashboardPage() {
                       </td>
                       <td className={styles.paramsCell}>
                         <div className={styles.params}>
-                          {plan.planTypes && plan.planTypes.length > 0 ? (
+                          {plan.inputSummary ? (
+                            <span className={styles.paramValue}>{plan.inputSummary}</span>
+                          ) : plan.planTypes && plan.planTypes.length > 0 ? (
                             <>
                               <span className={styles.paramLabel}>Types:</span>
                               <span className={styles.paramValue}>{plan.planTypes.join(", ")}</span>
@@ -419,18 +473,6 @@ export default function DashboardPage() {
                             <span className={styles.noParams}>No parameters</span>
                           )}
                         </div>
-                        {plan.duration && (
-                          <div className={styles.paramRow}>
-                            <span className={styles.paramLabel}>Duration:</span>
-                            <span className={styles.paramValue}>{plan.duration}</span>
-                          </div>
-                        )}
-                        {plan.intensity && (
-                          <div className={styles.paramRow}>
-                            <span className={styles.paramLabel}>Intensity:</span>
-                            <span className={styles.paramValue}>{plan.intensity}</span>
-                          </div>
-                        )}
                       </td>
                       <td className={styles.actionsCell}>
                         <div className={styles.actionButtons}>
@@ -442,7 +484,7 @@ export default function DashboardPage() {
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => downloadPlanAsPDF(plan.id)}
+                            onClick={() => downloadPlanAsPDF(plan.id, plan.planName)}
                             className={styles.actionBtn}
                           >
                             📄 PDF

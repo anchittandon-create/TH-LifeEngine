@@ -16,6 +16,8 @@ export async function GET(request: Request) {
     const formattedPlans = plans.map((plan) => ({
       id: plan.planId,
       profileId: plan.profileId,
+      planName: plan.planName || `Plan for User`, // ✅ Include plan name
+      inputSummary: plan.inputSummary || "No details", // ✅ Include input summary
       intakeId: plan.planJSON.intakeId,
       goals: Array.isArray(plan.planJSON.goals) ? plan.planJSON.goals : [],
       dayCount: plan.planJSON.days?.length ?? plan.days ?? 0,
