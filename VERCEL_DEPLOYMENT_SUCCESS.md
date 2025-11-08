@@ -21,7 +21,7 @@ For the Custom GPT feature to work in production, you MUST add the OpenAI API ke
 
 ```
 Name: OPENAI_API_KEY
-Value: ***OPENAI_KEY_REDACTED***
+Value: sk-proj-YOUR_OPENAI_KEY_HERE
 Environment: Production, Preview, Development (select all)
 ```
 
@@ -42,7 +42,7 @@ vercel --prod
 Make sure these are also set in Vercel (check your `.env` file):
 
 ```bash
-GOOGLE_API_KEY=***GOOGLE_KEY_REDACTED***
+GOOGLE_API_KEY=AIzaSy***-YOUR-GOOGLE-API-KEY-***
 GEMINI_MODEL=gemini-1.5-flash-8b
 NEXT_PUBLIC_LIFEENGINE_GPT_ID=gpt-4o-mini
 LIFEENGINE_CUSTOM_GPT_ID=g-690630c1dfe48191b63fc09f8f024ccb
