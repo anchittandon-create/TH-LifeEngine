@@ -34,7 +34,7 @@ export const defaultPlanFormData: PlanFormData = {
   preferredTime: "morning",
   ...defaultPlanFormState,
   planTypes: [],
-  duration: DURATION_OPTIONS[2].value,
+  duration: DURATION_OPTIONS[0].value, // Changed from [2] to [0] since we only have 2 duration options now
   intensity: INTENSITY_OPTIONS[1].value,
   focusAreas: [],
   goals: [],

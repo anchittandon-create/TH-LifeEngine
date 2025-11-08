@@ -202,6 +202,10 @@ export default function UseCustomGPTPage() {
         const parsedPlan = JSON.parse(planText) as LifeEnginePlan;
         setGeneratedPlan(parsedPlan);
         
+        // Determine source from metadata
+        const provider = result.metadata?.provider || "custom-gpt";
+        const source: "custom-gpt" | "gemini" = provider === "google-gemini" ? "gemini" : "custom-gpt";
+        
         // Save plan
         const planId = `gpt_plan_${Date.now()}`;
         savePlanRecord({
@@ -210,7 +214,7 @@ export default function UseCustomGPTPage() {
           planName: `Plan for ${formData.fullName}`,
           planTypes: formData.planTypes,
           createdAt: new Date().toISOString(),
-          source: "custom-gpt",
+          source: source,
           plan: parsedPlan,
           rawPrompt: prompt,
         });

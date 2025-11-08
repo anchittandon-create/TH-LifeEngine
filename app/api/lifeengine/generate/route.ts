@@ -290,6 +290,7 @@ Return JSON format:
           model: 'gemini-2.5-flash',
         },
         createdAt: planData.createdAt,
+        source: "gemini", // ✅ Track AI provider
       });
       console.log('✅ [GENERATE] Plan persisted to database with name:', planName);
     } catch (dbError: any) {

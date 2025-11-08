@@ -18,6 +18,7 @@ type PlanSummary = {
   planTypes?: string[];
   duration?: string;
   intensity?: string;
+  source?: "gemini" | "custom-gpt" | "rule-engine"; // AI provider
 };
 
 type Profile = {
@@ -413,6 +414,7 @@ export default function DashboardPage() {
                     </th>
                     <th>Plan Name</th>
                     <th>Created</th>
+                    <th>Source</th>
                     <th>Input Parameters</th>
                     <th>Actions</th>
                   </tr>
@@ -452,6 +454,25 @@ export default function DashboardPage() {
                             hour: '2-digit',
                             minute: '2-digit'
                           })}
+                        </div>
+                      </td>
+                      <td className={styles.sourceCell}>
+                        <div className={styles.source}>
+                          {plan.source === "gemini" && (
+                            <span className={`${styles.sourceBadge} gemini`}>
+                              🤖 Gemini
+                            </span>
+                          )}
+                          {plan.source === "custom-gpt" && (
+                            <span className={`${styles.sourceBadge} customgpt`}>
+                              ✨ Custom GPT
+                            </span>
+                          )}
+                          {(!plan.source || plan.source === "rule-engine") && (
+                            <span className={`${styles.sourceBadge} ruleengine`}>
+                              ⚙️ Rule Engine
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className={styles.paramsCell}>

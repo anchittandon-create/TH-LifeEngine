@@ -123,6 +123,7 @@ type PlanRow = {
   costMetrics?: Record<string, any>;
   createdAt?: string;
   inputSummary?: string; // Summary of input parameters
+  source?: "gemini" | "custom-gpt" | "rule-engine"; // AI provider used
 };
 
 type MemoryState = {

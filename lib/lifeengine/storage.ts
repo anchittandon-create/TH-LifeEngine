@@ -8,7 +8,7 @@ export type SavedPlanRecord = {
   planName: string;
   planTypes: string[];
   createdAt: string;
-  source: "custom-gpt" | "rule-engine";
+  source: "custom-gpt" | "gemini" | "rule-engine";
   plan: LifeEnginePlan;
   rawPrompt?: string;
 };

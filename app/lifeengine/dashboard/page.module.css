@@ -424,6 +424,41 @@
   white-space: nowrap;
 }
 
+.sourceCell {
+  min-width: 140px;
+}
+
+.source {
+  display: flex;
+  align-items: center;
+}
+
+.sourceBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sourceBadge:global(.gemini) {
+  background-color: #4285F4;
+  color: white;
+}
+
+.sourceBadge:global(.customgpt) {
+  background-color: #10A37F;
+  color: white;
+}
+
+.sourceBadge:global(.ruleengine) {
+  background-color: #6B7280;
+  color: white;
+}
+
 .selectedCard {
   border-color: var(--brand);
   background: rgba(99, 102, 241, 0.05);

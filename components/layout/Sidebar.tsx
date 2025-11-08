@@ -4,10 +4,10 @@ import NavLink from "./NavLink";
 
 const NAV:[string,string][]= [
   ["/lifeengine","Home"],
-  ["/lifeengine/dashboard","Dashboard"],
   ["/lifeengine/profiles","Profiles"],
-  ["/lifeengine/create","Create Plan"],
-  ["/lifeengine/chat","AI Plan Generator"],
+  ["/lifeengine/create","Create Plan using Gemini"],
+  ["/lifeengine/chat","Create Plan using Custom GPT"],
+  ["/lifeengine/dashboard","Plans Created"],
   ["/lifeengine/settings","Settings"]
 ];
 
