@@ -52,7 +52,7 @@
 
 **Revoke Old Key:**
 1. Visit: https://platform.openai.com/api-keys
-2. Find key starting with `sk-proj-UepP92Uw...`
+2. Find the compromised key (starts with `sk-proj-***`)
 3. Click "Revoke" or Delete
 4. Confirm revocation
 

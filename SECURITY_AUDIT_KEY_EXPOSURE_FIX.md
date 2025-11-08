@@ -12,7 +12,7 @@
 
 **What was exposed:**
 ```
-Value: sk-proj-UepP92Uw-vYOuB-59vfLvDOTIDHRgZaH-...
+Value: sk-proj-***[REDACTED]***
 ```
 
 **Action taken:**
@@ -41,7 +41,7 @@ GOOGLE_API_KEY=***GOOGLE_KEY_REDACTED***
 
 1. **Revoke compromised key**:
    - Go to: https://platform.openai.com/api-keys
-   - Find key starting with `sk-proj-UepP92Uw...`
+   - Find the compromised key (starts with `sk-proj-***`)
    - Click "Revoke" immediately
 
 2. **Generate new key**:

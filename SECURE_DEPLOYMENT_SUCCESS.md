@@ -70,7 +70,7 @@ Even though keys are removed from history, they were exposed and must be conside
 
 #### OpenAI API Key
 1. Visit: https://platform.openai.com/api-keys
-2. Revoke the current key (starts with `sk-proj-UepP92Uw...`)
+2. Revoke the current compromised key (starts with `sk-proj-***`)
 3. Generate a new secret key
 4. Update local `.env` file: `OPENAI_API_KEY=new_key_here`
 5. Update Vercel: `vercel env add OPENAI_API_KEY production`

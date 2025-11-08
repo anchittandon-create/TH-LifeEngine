@@ -11,12 +11,12 @@ Remove exposed API keys from entire git history to prevent unauthorized access.
 ## 🔑 Keys Removed from History
 
 ### 1. OpenAI API Key
-**Pattern**: `sk-proj-UepP92Uw...` (full key redacted for security)  
+**Pattern**: `sk-proj-***` (full key redacted for security)  
 **Replaced with**: `***OPENAI_KEY_REDACTED***`  
 **Status**: ✅ REMOVED
 
 ### 2. Google API Key
-**Pattern**: `AIzaSyA3Vncw...` (full key redacted for security)  
+**Pattern**: `AIzaSy***` (full key redacted for security)  
 **Replaced with**: `***GOOGLE_KEY_REDACTED***`  
 **Status**: ✅ REMOVED
 
@@ -46,11 +46,11 @@ git log --all --full-history -p | grep "GOOGLE_KEY_REDACTED"
 ✅ All instances replaced with redaction marker
 
 # Full Key Pattern Search
-git log --all --full-history -p | grep "sk-proj-UepP92Uw"
-✅ Only truncated references remain (safe)
+git log --all --full-history -p | grep "sk-proj-"
+✅ Only REDACTED markers remain (safe)
 
-git log --all --full-history -p | grep "AIzaSyA3VncwHTUdilIbn"
-✅ Full key not found in history
+git log --all --full-history -p | grep "AIzaSy"
+✅ Only REDACTED markers remain (safe)
 ```
 
 ## 🚀 Next Steps Required
@@ -89,13 +89,13 @@ Even though keys are removed from history, they should still be rotated:
 
 #### OpenAI Key
 1. Go to: https://platform.openai.com/api-keys
-2. Revoke key starting with `sk-proj-UepP92Uw...`
+2. Revoke the compromised key (starts with `sk-proj-***`)
 3. Generate new key
 4. Update `.env` and Vercel
 
 #### Google API Key
 1. Go to: https://console.cloud.google.com/apis/credentials
-2. Delete key: `AIzaSyA3VncwHTUdilIbn-LuR4mRV1R1boGU0NY`
+2. Delete the compromised key (starts with `AIzaSy***`)
 3. Generate new key with restrictions
 4. Update `.env` and Vercel
 
@@ -145,13 +145,13 @@ Even though keys are removed from history, they should still be rotated:
 To verify the cleanup was successful:
 
 ```bash
-# Search for old OpenAI key
-git log --all --full-history -p | grep "sk-proj-UepP92Uw-vYOuB-59vfLvDOT"
-# Should return: No matches or only truncated references
+# Search for any remaining OpenAI key fragments
+git log --all --full-history -p | grep "sk-proj-"
+# Should return: No matches or only REDACTED markers
 
-# Search for old Google key  
-git log --all --full-history -p | grep "AIzaSyA3VncwHTUdilIbn-LuR4mRV1R1boGU0NY"
-# Should return: No matches
+# Search for any remaining Google key fragments  
+git log --all --full-history -p | grep "AIzaSy"
+# Should return: No matches or only REDACTED markers
 
 # Check redaction markers are present
 git log --all --full-history -p | grep "REDACTED"

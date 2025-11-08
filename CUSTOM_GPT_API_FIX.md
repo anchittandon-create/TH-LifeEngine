@@ -22,7 +22,7 @@ The Custom GPT feature was failing with two critical errors:
 [403 Forbidden] Your API key was reported as leaked. Please use another API key.
 ```
 
-**Root Cause**: The Google API key `AIzaSyA3VncwHTUdilIbn-LuR4mRV1R1boGU0NY` was exposed in git history and reported as compromised by Google.
+**Root Cause**: The Google API key `AIzaSy***[REDACTED]***` was exposed in git history and reported as compromised by Google.
 
 ---
 
@@ -81,7 +81,7 @@ Your current Google API key is **compromised and blocked by Google**.
 1. **Visit**: https://aistudio.google.com/app/apikey (or https://makersuite.google.com/app/apikey)
 
 2. **Delete the old key**:
-   - Find key: `AIzaSyA3VncwHTUdilIbn-LuR4mRV1R1boGU0NY`
+   - Find the compromised key (starts with `AIzaSy...`)
    - Click the trash icon to delete it
 
 3. **Create a new key**:
@@ -111,8 +111,8 @@ Your current Google API key is **compromised and blocked by Google**.
 Your `.env` file should have:
 
 ```bash
-# OpenAI API Key (already set - no change needed)
-OPENAI_API_KEY=sk-proj-UepP92Uw...
+# OpenAI API Key (rotate to new key for security)
+OPENAI_API_KEY=sk-proj-***YOUR_NEW_KEY***
 
 # OpenAI Model - Standard model, NOT Custom GPT ID
 NEXT_PUBLIC_LIFEENGINE_GPT_ID=gpt-4o-mini  # ✅ Correct
