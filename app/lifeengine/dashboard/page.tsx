@@ -46,6 +46,12 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedPlans, setSelectedPlans] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<"cards" | "table">("table");
+  
+  // Filter states
+  const [filterProfile, setFilterProfile] = useState<string>("all");
+  const [filterSource, setFilterSource] = useState<string>("all");
+  const [filterDateFrom, setFilterDateFrom] = useState<string>("");
+  const [filterDateTo, setFilterDateTo] = useState<string>("");
 
   useEffect(() => {
     loadDashboardData();
@@ -220,6 +226,51 @@ export default function DashboardPage() {
     }
   };
 
+  // Filter plans based on selected filters
+  const getFilteredPlans = () => {
+    return plans.filter(plan => {
+      // Filter by profile
+      if (filterProfile !== "all" && plan.profileId !== filterProfile) {
+        return false;
+      }
+      
+      // Filter by source
+      if (filterSource !== "all" && plan.source !== filterSource) {
+        return false;
+      }
+      
+      // Filter by date range
+      if (filterDateFrom) {
+        const planDate = new Date(plan.createdAt);
+        const fromDate = new Date(filterDateFrom);
+        if (planDate < fromDate) {
+          return false;
+        }
+      }
+      
+      if (filterDateTo) {
+        const planDate = new Date(plan.createdAt);
+        const toDate = new Date(filterDateTo);
+        toDate.setHours(23, 59, 59, 999); // Include the entire day
+        if (planDate > toDate) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+  };
+
+  const filteredPlans = getFilteredPlans();
+  const hasActiveFilters = filterProfile !== "all" || filterSource !== "all" || filterDateFrom !== "" || filterDateTo !== "";
+
+  const clearFilters = () => {
+    setFilterProfile("all");
+    setFilterSource("all");
+    setFilterDateFrom("");
+    setFilterDateTo("");
+  };
+
   // Calculate metrics
   const totalProfiles = profiles.length;
   const totalPlans = plans.length;
@@ -385,16 +436,97 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {plans.length === 0 ? (
+          {/* Filter Section */}
+          <div className={styles.filterSection}>
+            <div className={styles.filterRow}>
+              <div className={styles.filterGroup}>
+                <label htmlFor="filterProfile" className={styles.filterLabel}>Filter by Profile:</label>
+                <select 
+                  id="filterProfile"
+                  value={filterProfile} 
+                  onChange={(e) => setFilterProfile(e.target.value)}
+                  className={styles.filterSelect}
+                >
+                  <option value="all">All Profiles</option>
+                  {profiles.map(profile => (
+                    <option key={profile.id} value={profile.id}>{profile.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.filterGroup}>
+                <label htmlFor="filterSource" className={styles.filterLabel}>Filter by Source:</label>
+                <select 
+                  id="filterSource"
+                  value={filterSource} 
+                  onChange={(e) => setFilterSource(e.target.value)}
+                  className={styles.filterSelect}
+                >
+                  <option value="all">All Sources</option>
+                  <option value="gemini">🤖 Gemini</option>
+                  <option value="custom-gpt">✨ Custom GPT</option>
+                  <option value="rule-engine">⚙️ Rule Engine</option>
+                </select>
+              </div>
+
+              <div className={styles.filterGroup}>
+                <label htmlFor="filterDateFrom" className={styles.filterLabel}>From Date:</label>
+                <input 
+                  type="date" 
+                  id="filterDateFrom"
+                  value={filterDateFrom}
+                  onChange={(e) => setFilterDateFrom(e.target.value)}
+                  className={styles.filterInput}
+                />
+              </div>
+
+              <div className={styles.filterGroup}>
+                <label htmlFor="filterDateTo" className={styles.filterLabel}>To Date:</label>
+                <input 
+                  type="date" 
+                  id="filterDateTo"
+                  value={filterDateTo}
+                  onChange={(e) => setFilterDateTo(e.target.value)}
+                  className={styles.filterInput}
+                />
+              </div>
+
+              {hasActiveFilters && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={clearFilters}
+                  className={styles.clearFiltersBtn}
+                >
+                  ✖️ Clear Filters
+                </Button>
+              )}
+            </div>
+
+            {hasActiveFilters && (
+              <div className={styles.filterStatus}>
+                Showing {filteredPlans.length} of {plans.length} plans
+              </div>
+            )}
+          </div>
+
+          {filteredPlans.length === 0 ? (
             <div className={styles.empty}>
               <div className={styles.emptyContent}>
-                <h2 className={styles.emptyTitle}>No plans yet</h2>
+                <h2 className={styles.emptyTitle}>
+                  {hasActiveFilters ? "No plans match your filters" : "No plans yet"}
+                </h2>
                 <p className={styles.emptyText}>
-                  Create your first personalized health plan to get started on your wellness journey.
+                  {hasActiveFilters 
+                    ? "Try adjusting your filters to see more plans." 
+                    : "Create your first personalized health plan to get started on your wellness journey."
+                  }
                 </p>
-                <Link href="/lifeengine/create">
-                  <Button>Get Started</Button>
-                </Link>
+                {!hasActiveFilters && (
+                  <Link href="/lifeengine/create">
+                    <Button>Get Started</Button>
+                  </Link>
+                )}
               </div>
             </div>
           ) : viewMode === "table" ? (
@@ -405,7 +537,7 @@ export default function DashboardPage() {
                     <th className={styles.checkboxCell}>
                       <input
                         type="checkbox"
-                        checked={selectedPlans.size === plans.length && plans.length > 0}
+                        checked={selectedPlans.size === filteredPlans.length && filteredPlans.length > 0}
                         onChange={selectAllPlans}
                         className={styles.checkbox}
                         aria-label="Select all plans"
@@ -420,7 +552,7 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {plans.map((plan) => (
+                  {filteredPlans.map((plan) => (
                     <tr key={plan.id} className={selectedPlans.has(plan.id) ? styles.selectedRow : ""}>
                       <td className={styles.checkboxCell}>
                         <input
@@ -519,7 +651,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className={styles.grid}>
-              {plans.map((plan) => (
+              {filteredPlans.map((plan) => (
                 <div key={plan.id} className={`${styles.card} ${selectedPlans.has(plan.id) ? styles.selectedCard : ""}`}>
                   <div className={styles.cardCheckbox}>
                     <input
