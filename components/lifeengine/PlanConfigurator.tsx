@@ -13,6 +13,7 @@ import {
   ACTIVITY_LEVEL_OPTIONS,
   CHRONIC_CONDITION_OPTIONS,
   PlanFormState,
+  getDietLabel,
 } from "@/lib/lifeengine/planConfig";
 
 type Props = {
@@ -119,7 +120,7 @@ export function PlanConfigurator({ form, setForm }: Props) {
           <SelectField
             label="🥗 Diet Preference"
             value={form.dietType}
-            options={DIET_OPTIONS.map((value) => ({ label: value.replace("_", " "), value }))}
+            options={DIET_OPTIONS.map((value) => ({ label: getDietLabel(value), value }))}
             onChange={(value) => setForm((prev) => ({ ...prev, dietType: value }))}
           />
 

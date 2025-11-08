@@ -40,7 +40,7 @@ export const defaultPlanFormData: PlanFormData = {
   goals: [],
   chronicConditions: [],
   dietType: DIET_OPTIONS[0],
-  activityLevel: ACTIVITY_LEVEL_OPTIONS[1],
+  activityLevel: ACTIVITY_LEVEL_OPTIONS[2],
   sleepHours: "7",
   stressLevel: "medium",
 };
@@ -252,7 +252,7 @@ export function PlanForm({ formData, setFormData, errors = {} }: Props) {
             >
               {DIET_OPTIONS.map((diet) => (
                 <option key={diet} value={diet}>
-                  {diet.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                  {getDietLabel(diet)}
                 </option>
               ))}
             </select>
