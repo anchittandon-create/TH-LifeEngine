@@ -208,6 +208,11 @@ html, body {
   overflow-y: auto;
 }
 
+/* Page break for PDF printing */
+.page-break-after {
+  page-break-after: always;
+}
+
 /* Hide sidebar on mobile, show via drawer */
 @media (max-width: 767px) {
   .sidebar {
