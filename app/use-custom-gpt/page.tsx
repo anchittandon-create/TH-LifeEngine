@@ -195,31 +195,14 @@ export default function UseCustomGPTPage() {
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <span className="text-2xl">📋</span> How It Works
-          </h2>
-          <ol className="space-y-3 text-gray-700">
-            <li className="flex gap-3">
-              <span className="flex-shrink-0 w-6 h-6 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center text-sm font-bold">
-                1
-              </span>
-              Configure your plan below and click “Generate with Custom GPT”.
-            </li>
-            <li className="flex gap-3">
-              <span className="flex-shrink-0 w-6 h-6 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center text-sm font-bold">
-                2
-              </span>
-              Optionally open the Custom GPT tab to refine via chat—the prompt is copied for you automatically.
-            </li>
-            <li className="flex gap-3">
-              <span className="flex-shrink-0 w-6 h-6 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center text-sm font-bold">
-                3
-              </span>
-              Download the plan, view JSON, or export it once generation completes.
-            </li>
-          </ol>
+                  </p>
         </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm text-red-800">
+            {error}
+          </div>
+        )}
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm text-red-800">

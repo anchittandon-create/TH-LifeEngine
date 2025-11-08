@@ -1,261 +1,159 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
-import { PlanForm, PlanFormData, defaultPlanFormData, validatePlanFormData } from "@/components/lifeengine/PlanForm";
-import { buildDetailedGPTPrompt, buildPromptSummary } from "@/lib/lifeengine/gptPromptBuilder";
-import { savePlanRecord } from "@/lib/lifeengine/storage";
-import { canGeneratePlan, recordPlanGeneration, estimatePlanCost } from "@/lib/utils/costControl";
-import PlanPreview from "@/app/components/PlanPreview";
-import type { LifeEnginePlan } from "@/app/types/lifeengine";
+import { useEffect, useState, useRef } from "react";
+import Link from "next/link";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { Button } from "@/components/ui/Button";
+import PlanPreview from "@/app/components/PlanPreview";
+import { CustomGPTForm } from "@/components/lifeengine/CustomGPTForm";
+import type { Profile } from "@/lib/ai/schemas";
+import type { LifeEnginePlan } from "@/app/types/lifeengine";
+import {
+  defaultPlanFormState,
+  describePlanBrief,
+} from "@/lib/lifeengine/planConfig";
+import { requestPlanFromCustomGPT, fallbackToRuleEngine } from "@/lib/lifeengine/customGptService";
+import { savePlanRecord } from "@/lib/lifeengine/storage";
+import { formatErrorMessage } from "@/lib/lifeengine/api";
 
-interface Profile {
-  id: string;
-  name: string;
-  age: number;
-  gender: "male" | "female" | "other";
-  goals: string[];
-  healthConcerns: string;
-  experience: "beginner" | "intermediate" | "advanced";
-  preferredTime: "morning" | "evening" | "flexible";
-  subscriptionType?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+const GPT_URL =
+  process.env.NEXT_PUBLIC_LIFEENGINE_GPT_URL ||
+  "https://chatgpt.com/g/g-690630c1dfe48191b63fc09f8f024ccb-th-lifeengine-companion?ref=mini";
 
 export default function UseCustomGPTPage() {
-  const router = useRouter();
   const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [selectedProfileId, setSelectedProfileId] = useState<string>("");
-  const [loadingProfiles, setLoadingProfiles] = useState(true);
-  const [formData, setFormData] = useState<PlanFormData>(defaultPlanFormData);
+  const [selectedProfileId, setSelectedProfileId] = useState("");
+  const [form, setForm] = useState(defaultPlanFormState);
   const [loading, setLoading] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState<string>("Connecting to AI...");
-  const [error, setError] = useState<string>("");
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [generatedPlan, setGeneratedPlan] = useState<LifeEnginePlan | null>(null);
+  const [plan, setPlan] = useState<LifeEnginePlan | null>(null);
+  const [rawPlan, setRawPlan] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [showJson, setShowJson] = useState(false);
-  const [rawPlanText, setRawPlanText] = useState("");
   const planRef = useRef<HTMLDivElement>(null);
-  const customGptUrl = process.env.NEXT_PUBLIC_LIFEENGINE_GPT_URL;
-  const customGptModel = process.env.NEXT_PUBLIC_LIFEENGINE_GPT_ID;
 
-  // Fetch profiles on mount
   useEffect(() => {
-    async function fetchProfiles() {
+    const loadProfiles = async () => {
       try {
         const response = await fetch("/api/lifeengine/profiles");
-        if (response.ok) {
-          const data = await response.json();
-          setProfiles(data.profiles || []);
-        }
+        const data = await response.json();
+        setProfiles(data.profiles || []);
       } catch (err) {
-        console.error("Failed to fetch profiles:", err);
-      } finally {
-        setLoadingProfiles(false);
+        console.error("Failed to load profiles", err);
       }
-    }
-    fetchProfiles();
+    };
+    loadProfiles();
   }, []);
 
-  // Update form when profile is selected
-  useEffect(() => {
-    if (selectedProfileId && selectedProfileId !== "new") {
-      const profile = profiles.find(p => p.id === selectedProfileId);
-      if (profile) {
-        setFormData({
-          ...formData,
-          fullName: profile.name,
-          age: profile.age,
-          gender: profile.gender,
-          goals: profile.goals || [],
-          preferredTime: profile.preferredTime || "flexible",
-          // Map experience to intensity
-          intensity: profile.experience === "beginner" ? "low" : 
-                     profile.experience === "advanced" ? "high" : "medium",
-        });
-      }
-    }
-  }, [selectedProfileId, profiles]);
+  const selectedProfile = profiles.find((p) => p.id === selectedProfileId);
+  const planBrief = describePlanBrief(selectedProfileId || "unknown", form);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setFormErrors({});
-    setGeneratedPlan(null);
-    
-    // Validate form
-    const validation = validatePlanFormData(formData);
-    if (!validation.valid) {
-      setFormErrors(validation.errors);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+  const openGPT = async () => {
+    try {
+      await navigator.clipboard.writeText(planBrief);
+    } catch (err) {
+      console.warn("Failed to copy prompt", err);
+    }
+    window.open(GPT_URL, "_blank", "noopener,noreferrer");
+  };
+
+  const handleGenerate = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!selectedProfileId) {
+      setError("Please select a profile before generating a plan.");
       return;
     }
-
-    // Check rate limits and cost controls
-    const rateLimitCheck = canGeneratePlan();
-    if (!rateLimitCheck.allowed) {
-      setError(rateLimitCheck.reason || "Rate limit exceeded");
-      return;
-    }
-
-    // Show cost estimate
-    const durationDays = parseInt(formData.duration.split('_')[0]) || 7;
-    const costEstimate = estimatePlanCost(durationDays, formData.planTypes.length);
-    
-    console.log(`[COST ESTIMATE] Duration: ${durationDays} days, Plan types: ${formData.planTypes.length}`);
-    console.log(`[COST ESTIMATE] Estimated cost: $${costEstimate.estimatedCost.toFixed(6)}`);
-    
-    if (costEstimate.warning) {
-      const proceed = confirm(`⚠️ ${costEstimate.warning}\n\nEstimated cost: $${costEstimate.estimatedCost.toFixed(4)}\n\nDo you want to proceed?`);
-      if (!proceed) {
-        return;
-      }
-    }
-    
     setLoading(true);
-    setLoadingMessage("🤖 Building comprehensive prompt for AI...");
+    setError(null);
+    setShowJson(false);
 
     try {
-      // Build detailed GPT prompt
-      const prompt = buildDetailedGPTPrompt(formData);
-      
-      console.log('📝 [CustomGPT] Generated prompt for profile:', {
+      const result = await requestPlanFromCustomGPT({
+        form,
         profileId: selectedProfileId,
-        name: formData.fullName,
-        summary: buildPromptSummary(formData)
-      });
-      
-      setTimeout(() => {
-        setLoadingMessage("🧠 AI is analyzing your requirements...");
-      }, 2000);
-
-      setTimeout(() => {
-        setLoadingMessage("✨ Generating personalized wellness plan...");
-      }, 5000);
-
-      setTimeout(() => {
-        setLoadingMessage("📋 Creating step-by-step instructions...");
-      }, 15000);
-      
-      // Use selected profile ID or create inline profile
-      const gptProfileId = selectedProfileId && selectedProfileId !== "new"
-        ? selectedProfileId
-        : `gpt_${Date.now()}`;
-
-      // Call API to generate plan via Custom GPT
-      const response = await fetch("/api/lifeengine/custom-gpt-generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt,
-          profileId: gptProfileId,
-          model: customGptModel,
-        }),
+        profile: selectedProfile,
+        model: process.env.NEXT_PUBLIC_LIFEENGINE_GPT_ID,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `API error: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const planId = result.metadata?.planId || `local-${crypto.randomUUID()}`;
       
-      console.log('✅ [CustomGPT] Plan generated successfully for profile:', gptProfileId);
+      // Ensure metadata includes profile_id for /api/v1/plans/latest
+      if (!result.plan.metadata) {
+        result.plan.metadata = {} as any;
+      }
+      result.plan.metadata.profile_id = selectedProfileId;
+      (result.plan.metadata as any).generated_by = "custom-gpt-page";
+      (result.plan.metadata as any).plan_type = form.planTypes;
+      result.plan.metadata.language = "English";
+      (result.plan.metadata as any).timestamp = result.metadata?.generatedAt || new Date().toISOString();
       
-      // Record cost for tracking (if metadata available)
-      if (result.metadata?.tokens && result.metadata?.cost) {
-        recordPlanGeneration(
-          result.metadata.tokens,
-          result.metadata.cost.total_usd
-        );
-        console.log(`[COST TRACKING] Recorded generation cost: $${result.metadata.cost.total_usd.toFixed(6)}`);
-      }
-      
-      // Parse the plan
-      let planText = result.plan?.trim();
-      if (!planText) {
-        throw new Error("AI returned an empty response");
-      }
+      setPlan(result.plan);
+      setRawPlan(JSON.stringify(result.plan, null, 2));
 
-      // Extract JSON from markdown code blocks if present
-      const jsonMatch = planText.match(/```(?:json)?\s*([\s\S]*?)```/);
-      if (jsonMatch) {
-        planText = jsonMatch[1].trim();
-      }
+      // Save to localStorage for immediate UI access
+      savePlanRecord({
+        id: planId,
+        profileId: selectedProfileId,
+        planName: `Plan for ${selectedProfile?.name ?? "Member"}`,
+        planTypes: form.planTypes,
+        createdAt: result.metadata?.generatedAt ?? new Date().toISOString(),
+        source: "custom-gpt",
+        plan: result.plan,
+        rawPrompt: result.prompt,
+      });
 
-      setRawPlanText(planText);
-
+      // Also POST to /api/v1/plans for persistence and dashboard integration
       try {
-        const parsedPlan = JSON.parse(planText) as LifeEnginePlan;
-        setGeneratedPlan(parsedPlan);
-        
-        // Determine source from metadata
-        const provider = result.metadata?.provider || "custom-gpt";
-        const source: "custom-gpt" | "gemini" = provider === "google-gemini" ? "gemini" : "custom-gpt";
-        
-        // Save plan
-        const planId = `gpt_plan_${Date.now()}`;
-        savePlanRecord({
-          id: planId,
-          profileId: gptProfileId,
-          planName: `Plan for ${formData.fullName}`,
-          planTypes: formData.planTypes,
-          createdAt: new Date().toISOString(),
-          source: source,
-          plan: parsedPlan,
-          rawPrompt: prompt,
+        const postResponse = await fetch('/api/v1/plans', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(result.plan),
         });
 
-        // Scroll to plan
-        setTimeout(() => {
-          document.getElementById('generated-plan')?.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'start' 
-          });
-        }, 500);
-
-      } catch (parseError) {
-        console.error('Failed to parse plan JSON:', parseError);
-        throw new Error(`AI generated invalid JSON format. Raw response saved for debugging.`);
+        if (postResponse.ok) {
+          const postData = await postResponse.json();
+          console.log(`✅ [CustomGPT] Plan saved to backend with ID: ${postData.plan_id}`);
+        } else {
+          console.warn(`⚠️ [CustomGPT] Failed to save plan to backend:`, await postResponse.text());
+        }
+      } catch (backendError) {
+        console.warn(`⚠️ [CustomGPT] Could not save to backend:`, backendError);
       }
-      
     } catch (err: any) {
-      console.error('❌ [CustomGPT] Generation failed:', err);
-      
-      const errorMessage = err.message || "Unknown error occurred";
-      setError(`AI plan generation failed: ${errorMessage}`);
-      
-      // Detailed error logging
-      console.error('Detailed error:', {
-        message: err.message,
-        stack: err.stack,
-        name: err.name
-      });
+      const message = formatErrorMessage(err);
+      setError(message);
+      try {
+        const fallbackPlanId = await fallbackToRuleEngine(form, selectedProfileId);
+        alert(
+          `Custom GPT failed (${message}). A rule-based plan was generated instead. Redirecting you now.`
+        );
+        window.location.href = `/lifeengine/plan/${fallbackPlanId}`;
+      } catch (fallbackError) {
+        setError(
+          `Custom GPT failed (${message}) and fallback generation also failed: ${formatErrorMessage(
+            fallbackError
+          )}`
+        );
+      }
     } finally {
       setLoading(false);
-      setLoadingMessage("Connecting to AI...");
     }
   };
 
   const downloadJson = () => {
-    if (!rawPlanText) return;
-    const blob = new Blob([rawPlanText], { type: "application/json" });
+    if (!rawPlan) return;
+    const blob = new Blob([rawPlan], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${formData.fullName.replace(/\s+/g, "_")}_WellnessPlan_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `TH_LifeEngine_CustomGPT_${new Date().toISOString()}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
   const downloadPdf = async () => {
-    if (!planRef.current || !generatedPlan) return;
+    if (!planRef.current || !plan) return;
     try {
-      setLoadingMessage("📄 Generating PDF...");
       const canvas = await html2canvas(planRef.current, {
         scale: 2,
         useCORS: true,
@@ -280,7 +178,7 @@ export default function UseCustomGPTPage() {
         heightLeft -= pageHeight;
       }
 
-      pdf.save(`${formData.fullName.replace(/\s+/g, "_")}_WellnessPlan.pdf`);
+      pdf.save(`TH_LifeEngine_CustomGPT_${selectedProfile?.name ?? "plan"}.pdf`);
     } catch (err) {
       console.error("PDF generation failed", err);
       alert("Failed to generate PDF. Please try again.");
@@ -288,292 +186,127 @@ export default function UseCustomGPTPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-10 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <header className="text-center mb-10">
-          <div className="text-7xl mb-4">�</div>
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            AI Plan Generator
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Powered by Google Gemini AI to create comprehensive, personalized wellness plans with real exercises, detailed recipes, and step-by-step guidance
+    <main className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-10">
+      <div className="max-w-5xl mx-auto px-6 space-y-10">
+        <div className="text-center space-y-3">
+          <h1 className="text-4xl font-bold text-gray-900">🤖 Use Custom GPT</h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Generate personalized wellness plans using TH_LifeEngine Companion GPT
           </p>
-        </header>
+        </div>
 
-        {/* How It Works */}
-        <section className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 mb-8 border-2 border-blue-200 shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-            <span className="text-3xl">💡</span> How It Works
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4">1</div>
-              <h3 className="font-semibold text-gray-800 mb-2">Fill the Form</h3>
-              <p className="text-sm text-gray-600">Provide your personal info, health profile, and wellness goals</p>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 bg-purple-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4">2</div>
-              <h3 className="font-semibold text-gray-800 mb-2">AI Generation</h3>
-              <p className="text-sm text-gray-600">Our AI analyzes and creates a comprehensive plan just for you</p>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 bg-pink-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4">3</div>
-              <h3 className="font-semibold text-gray-800 mb-2">Review Plan</h3>
-              <p className="text-sm text-gray-600">Get detailed day-by-day instructions for yoga, exercises, and meals</p>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 bg-green-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4">4</div>
-              <h3 className="font-semibold text-gray-800 mb-2">Download & Track</h3>
-              <p className="text-sm text-gray-600">Save as PDF or JSON and track your wellness journey</p>
-            </div>
-          </div>
-        </section>
-
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Profile Selector */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-blue-200">
-            <div className="flex items-center gap-3 mb-6">
-              <span className="text-4xl">👤</span>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800">Select Profile</h2>
-                <p className="text-gray-600">Use an existing profile or create a new one</p>
-              </div>
-            </div>
-
-            {loadingProfiles ? (
-              <div className="flex items-center justify-center py-8 text-gray-500">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
-                <span>Loading profiles...</span>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="profile-select" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Choose Profile
-                  </label>
-                  <select
-                    id="profile-select"
-                    value={selectedProfileId}
-                    onChange={(e) => setSelectedProfileId(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                    aria-label="Select a profile"
-                  >
-                    <option value="">-- Select a Profile --</option>
-                    {profiles.map((profile) => (
-                      <option key={profile.id} value={profile.id}>
-                        {profile.name} (Age: {profile.age}, {profile.gender})
-                      </option>
-                    ))}
-                    <option value="new">➕ Create New Profile</option>
-                  </select>
-                </div>
-
-                {/* Feedback message */}
-                {selectedProfileId && selectedProfileId !== "new" && (
-                  <div className="bg-blue-50 border-2 border-blue-300 rounded-xl p-4">
-                    <p className="text-blue-800 font-medium flex items-center gap-2">
-                      <span>✓</span>
-                      Profile loaded! Form fields have been pre-filled with your profile data.
-                    </p>
-                  </div>
-                )}
-
-                {selectedProfileId === "new" && (
-                  <div className="bg-green-50 border-2 border-green-300 rounded-xl p-4">
-                    <p className="text-green-800 font-medium flex items-center gap-2">
-                      <span>✨</span>
-                      Creating a new profile. Fill out the form below to get started.
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Error Messages */}
-          {Object.keys(formErrors).length > 0 && (
-            <div className="bg-red-50 border-2 border-red-400 rounded-2xl p-6 shadow-lg animate-pulse">
-              <div className="flex items-start gap-4">
-                <span className="text-4xl flex-shrink-0">⚠️</span>
-                <div className="flex-1">
-                  <p className="font-bold text-red-800 text-xl mb-3">
-                    Please fix the following errors:
                   </p>
-                  <ul className="space-y-2 text-red-700">
-                    {Object.entries(formErrors).map(([field, error]) => (
-                      <li key={field} className="flex items-start gap-2">
-                        <span className="text-red-500 font-bold">•</span>
-                        <span className="font-medium">{error}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
+        </div>
 
-          {/* API Error */}
-          {error && !loading && (
-            <div className="bg-red-50 border-2 border-red-400 rounded-2xl p-6 shadow-lg">
-              <div className="flex items-start gap-4">
-                <span className="text-4xl flex-shrink-0">❌</span>
-                <div className="flex-1">
-                  <p className="font-bold text-red-800 text-xl mb-2">AI Generation Failed</p>
-                  <p className="text-red-700 leading-relaxed">{error}</p>
-                  <div className="mt-4 p-4 bg-red-100 rounded-lg">
-                    <p className="text-sm text-red-800 font-semibold mb-2">💡 Troubleshooting:</p>
-                    <ul className="text-sm text-red-700 space-y-1">
-                      <li>• Ensure your Google AI API key is valid and has quota</li>
-                      <li>• Check browser console for detailed error logs</li>
-                      <li>• Try simplifying your requirements (fewer plan types)</li>
-                      <li>• Verify your internet connection</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm text-red-800">
+            {error}
+          </div>
+        )}
 
-          {/* Loading State */}
-          {loading && (
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-purple-400 rounded-2xl p-8 shadow-lg">
-              <div className="flex flex-col items-center gap-6">
-                <div className="relative">
-                  <div className="w-24 h-24 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
-                  <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl">
-                    🧠
-                  </span>
-                </div>
-                <div className="text-center">
-                  <p className="text-purple-800 text-2xl font-bold mb-2">{loadingMessage}</p>
-                  <p className="text-purple-600">
-                    AI is crafting your personalized plan... This may take 30-60 seconds.
-                  </p>
-                  <div className="mt-6 flex justify-center gap-2">
-                    <div className="w-3 h-3 bg-purple-600 rounded-full animate-bounce"></div>
-                    <div className="w-3 h-3 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                    <div className="w-3 h-3 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm text-red-800">
+            {error}
+          </div>
+        )}
 
-          {/* Unified Plan Form */}
-          <PlanForm formData={formData} setFormData={setFormData} errors={formErrors} />
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6 pb-10">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => router.push('/lifeengine')}
-              disabled={loading}
-              className="w-full sm:w-auto px-8 py-4 text-lg"
-            >
-              ← Back to Dashboard
+        <form onSubmit={handleGenerate} className="space-y-6">
+          <CustomGPTForm
+            profiles={profiles}
+            selectedProfileId={selectedProfileId}
+            onProfileChange={setSelectedProfileId}
+            form={form}
+            setForm={setForm}
+          />
+          <div className="flex flex-wrap gap-4">
+            <Button type="submit" disabled={loading || !selectedProfileId}>
+              {loading ? "Generating..." : "Generate with Custom GPT"}
             </Button>
-            <Button
-              type="submit"
-              disabled={loading || !formData.fullName || formData.planTypes.length === 0}
-              className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-12 py-4 text-lg rounded-2xl shadow-xl disabled:opacity-50 disabled:cursor-not-started transition-all duration-200 transform hover:scale-105"
-            >
-              {loading ? (
-                <span className="flex items-center gap-3">
-                  <svg className="animate-spin h-6 w-6" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span>Generating...</span>
-                </span>
-              ) : (
-                "🤖 Generate with AI"
-              )}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => {
-                setFormData(defaultPlanFormData);
-                setGeneratedPlan(null);
-                setError("");
-              }}
-              disabled={loading}
-              className="w-full sm:w-auto px-8 py-4 text-lg"
-            >
-              🔄 Reset Form
+            <Button type="button" variant="ghost" onClick={openGPT}>
+              Open GPT in Chat
             </Button>
           </div>
         </form>
 
-        {/* Generated Plan Display */}
-        {generatedPlan && (
-          <div id="generated-plan" className="mt-12 bg-white rounded-2xl p-8 border-2 border-green-300 shadow-xl">
-            <div className="flex flex-wrap gap-4 items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <span className="text-4xl">🎉</span>
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-800">
-                    Your Personalized Wellness Plan is Ready!
-                  </h2>
-                  <p className="text-gray-600">
-                    Generated for {formData.fullName} • {new Date().toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
+        <PlanBrief block={planBrief} copyBrief={() => navigator.clipboard.writeText(planBrief)} />
+
+        {plan && (
+          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 space-y-4">
+            <div className="flex flex-wrap gap-3 items-center justify-between">
+              <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
+                <span className="text-2xl">📖</span> Custom GPT Plan
+              </h2>
               <div className="flex flex-wrap gap-3">
-                <Button variant="ghost" onClick={() => setShowJson(!showJson)}>
-                  {showJson ? "📋 Hide JSON" : "📋 View JSON"}
+                <Button variant="ghost" type="button" onClick={() => setShowJson(!showJson)}>
+                  {showJson ? "Hide JSON" : "View Full JSON"}
                 </Button>
-                <Button variant="ghost" onClick={downloadJson}>
-                  💾 Download JSON
+                <Button variant="ghost" type="button" onClick={downloadJson}>
+                  Download JSON
                 </Button>
-                <Button onClick={downloadPdf} className="bg-green-600 hover:bg-green-700 text-white">
-                  📄 Download PDF
+                <Button type="button" onClick={downloadPdf}>
+                  Download PDF
                 </Button>
               </div>
+            </div>
+
+            <div ref={planRef}>
+              <PlanPreview plan={plan} />
             </div>
 
             {showJson && (
-              <div className="mb-6 bg-gray-900 text-green-300 rounded-xl p-6 overflow-auto max-h-96">
-                <pre className="text-xs font-mono">{rawPlanText}</pre>
-              </div>
+              <pre className="bg-gray-900 text-green-200 text-xs rounded-xl p-4 overflow-auto max-h-96">
+                {rawPlan}
+              </pre>
             )}
-
-            <div ref={planRef}>
-              <PlanPreview plan={generatedPlan} />
-            </div>
-
-            <div className="flex flex-wrap gap-4 mt-8 pt-6 border-t border-gray-200">
-              <Button onClick={() => router.push('/lifeengine/dashboard')} className="bg-blue-600 hover:bg-blue-700 text-white">
-                📊 View All Plans
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setGeneratedPlan(null);
-                  setFormData(defaultPlanFormData);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-              >
-                ✨ Create Another Plan
-              </Button>
-            </div>
           </div>
         )}
 
-        {/* Empty State */}
-        {!generatedPlan && !loading && !error && (
-          <div className="mt-12 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-12 text-center border-2 border-dashed border-gray-300">
+        {!plan && !error && !loading && (
+          <div className="bg-gray-50 rounded-2xl p-12 text-center border border-dashed border-gray-200">
             <div className="text-6xl mb-4">🌟</div>
-            <h3 className="text-2xl font-bold text-gray-700 mb-3">No Plan Generated Yet</h3>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Fill out the form above and click "Generate with AI" to create your personalized wellness plan with detailed step-by-step instructions.
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              No plan yet
+            </h3>
+            <p className="text-gray-600">
+              Configure your profile and click “Generate with Custom GPT” to get started.
             </p>
           </div>
         )}
       </div>
     </main>
+  );
+}
+
+type PlanBriefProps = {
+  block: string;
+  copyBrief: () => Promise<void> | void;
+};
+
+function PlanBrief({ block, copyBrief }: PlanBriefProps) {
+  return (
+    <div className="bg-purple-50 border border-purple-100 rounded-xl p-4 space-y-3">
+      <div className="flex items-center gap-2 justify-between">
+        <div className="font-semibold text-purple-800 flex items-center gap-2">
+          <span className="text-xl">📝</span> GPT Prompt Snapshot
+        </div>
+        <button
+          onClick={copyBrief}
+          className="text-sm text-purple-600 hover:text-purple-800 font-semibold"
+        >
+          Copy Brief
+        </button>
+      </div>
+      <textarea
+        readOnly
+        aria-label="GPT Prompt Brief"
+        title="GPT Prompt Brief"
+        className="w-full border border-purple-200 rounded-lg bg-white/80 text-sm p-3 text-gray-700"
+        rows={6}
+        value={block}
+      />
+      <p className="text-xs text-purple-600">
+        The brief is automatically copied when you open the Custom GPT tab.
+      </p>
+    </div>
   );
 }
