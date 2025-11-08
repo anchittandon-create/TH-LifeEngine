@@ -3,11 +3,18 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function POST(req: Request) {
   try {
-    const { prompt } = await req.json();
+    const { prompt, profileId, model } = await req.json();
 
     if (!prompt || typeof prompt !== "string") {
       return NextResponse.json(
         { error: "Prompt is required and must be a string" },
+        { status: 400 }
+      );
+    }
+
+    if (!profileId) {
+      return NextResponse.json(
+        { error: "Profile ID is required" },
         { status: 400 }
       );
     }
@@ -19,25 +26,31 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log("🤖 [CustomGPT] Generating plan with AI...");
-    console.log("📝 [CustomGPT] Prompt length:", prompt.length);
+    console.log("🤖 [CustomGPT API] Generating plan with AI...");
+    console.log("📝 [CustomGPT API] Prompt length:", prompt.length);
+    console.log("👤 [CustomGPT API] Profile ID:", profileId);
+    console.log("🎯 [CustomGPT API] Model:", model || "gemini-2.0-flash-exp");
 
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
+    const modelToUse = model && model.startsWith("gemini-") 
+      ? model 
+      : "gemini-2.0-flash-exp"; // Use latest model
+    
+    const aiModel = genAI.getGenerativeModel({
+      model: modelToUse,
       generationConfig: {
         temperature: 0.7,
         topP: 0.9,
         topK: 40,
-        maxOutputTokens: 4096,
+        maxOutputTokens: 8192, // Increased for longer plans
       },
     });
 
-    const result = await model.generateContent(prompt);
+    const result = await aiModel.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
 
-    console.log("✅ [CustomGPT] Generated response length:", text.length);
+    console.log("✅ [CustomGPT API] Generated response length:", text.length);
 
     // Track token usage
     const usageMetadata = response.usageMetadata;
@@ -45,7 +58,7 @@ export async function POST(req: Request) {
     const outputTokens = usageMetadata?.candidatesTokenCount || 0;
     const totalTokens = usageMetadata?.totalTokenCount || 0;
 
-    console.log("📊 [CustomGPT] Token usage:", {
+    console.log("📊 [CustomGPT API] Token usage:", {
       inputTokens,
       outputTokens,
       totalTokens,
@@ -55,7 +68,8 @@ export async function POST(req: Request) {
       plan: text,
       formatted: true,
       metadata: {
-        model: "gemini-2.5-flash",
+        model: modelToUse,
+        profileId,
         tokens: {
           input: inputTokens,
           output: outputTokens,
@@ -65,11 +79,11 @@ export async function POST(req: Request) {
       },
     });
   } catch (error: any) {
-    console.error("❌ [CustomGPT] Error:", error);
+    console.error("❌ [CustomGPT API] Error:", error);
 
     return NextResponse.json(
       {
-        error: "Failed to generate plan with AI",
+        error: "Failed to generate plan with CustomGPT",
         details: error.message || "Unknown error occurred",
       },
       { status: 500 }

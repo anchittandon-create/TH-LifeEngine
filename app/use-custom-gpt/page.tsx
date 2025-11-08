@@ -20,6 +20,13 @@ import {
   getLatestPlan,
   formatErrorMessage 
 } from "@/lib/lifeengine/api";
+import {
+  buildCustomGPTPrompt,
+  callCustomGPT,
+  validateCustomGPTResponse,
+  parseCustomGPTResponse,
+  openCustomGPTWindow,
+} from "@/lib/lifeengine/customGptService";
 
 const GPT_URL =
   process.env.NEXT_PUBLIC_LIFEENGINE_GPT_URL ||
@@ -55,20 +62,27 @@ export default function UseCustomGPTPage() {
   const copyPlanBrief = async () => {
     try {
       await navigator.clipboard.writeText(planBrief);
+      alert("Plan brief copied to clipboard! Paste it into the Custom GPT chat.");
     } catch (err) {
       console.warn("Failed to copy", err);
+      alert("Failed to copy to clipboard. Please select and copy manually.");
     }
   };
 
   const openGPT = async () => {
-    if (!GPT_URL) {
-      alert(
-        "Please set NEXT_PUBLIC_LIFEENGINE_GPT_URL in your .env.local file with your Custom GPT share URL"
-      );
-      return;
-    }
-    await copyPlanBrief();
-    window.open(GPT_URL, "_blank", "noopener,noreferrer");
+    // Build comprehensive prompt for CustomGPT
+    const selectedProfile = profiles.find(p => p.id === profileId);
+    const prompt = buildCustomGPTPrompt(form, {
+      name: selectedProfile?.name,
+      age: selectedProfile?.age,
+      gender: selectedProfile?.gender,
+      profileId: profileId,
+    });
+    
+    // Copy prompt and open CustomGPT
+    openCustomGPTWindow(prompt);
+    
+    alert("CustomGPT opened! The prompt has been copied to your clipboard. Paste it into the chat to generate your plan.");
   };
 
   const generateWithGPT = async () => {
@@ -85,32 +99,71 @@ export default function UseCustomGPTPage() {
       return;
     }
 
+    if (!profileId) {
+      setValidationErrors(["Please select a profile"]);
+      setGenerating(false);
+      return;
+    }
+
     try {
       // Find selected profile
       const selectedProfile = profiles.find(p => p.id === profileId);
       
-      // Build prompt with all form data and profile info
-      const promptInput: PromptBuilderInput = {
-        ...form,
-        profileName: selectedProfile?.name,
+      // Build comprehensive prompt using CustomGPT service
+      const prompt = buildCustomGPTPrompt(form, {
+        name: selectedProfile?.name,
         age: selectedProfile?.age,
         gender: selectedProfile?.gender,
-      };
-
-      const prompt = buildPromptFromForm(promptInput);
+        profileId: profileId,
+      });
       
-      console.log("🤖 [CustomGPT] Generating plan with prompt:", prompt.substring(0, 200) + "...");
+      console.log("🤖 [CustomGPT] Generating plan with CustomGPT service...");
+      console.log("📋 [CustomGPT] Profile:", selectedProfile?.name || "Unknown");
+      console.log("🎯 [CustomGPT] Plan types:", form.planTypes);
       
-      const result = await generatePlanWithGPT(prompt);
+      // Call CustomGPT through our service
+      const result = await callCustomGPT(prompt, profileId);
+      
+      // Validate response
+      if (!validateCustomGPTResponse(result)) {
+        throw new Error("Invalid response from CustomGPT. Please try again.");
+      }
+      
+      // Parse and format response
+      const parsedPlan = parseCustomGPTResponse(result);
       
       console.log("✅ [CustomGPT] Generation successful");
+      console.log("📊 [CustomGPT] Plan ID:", parsedPlan.id);
       
+      // Set the response for display
       setGptResponse(result.plan);
+      
+      // Save the plan to database
+      try {
+        const planName = `Plan for ${selectedProfile?.name || "User"}`;
+        const inputSummary = `${form.planTypes.join(" + ")} | ${form.duration} | ${form.intensity}`;
+        
+        console.log("💾 [CustomGPT] Saving plan:", planName);
+        
+        // TODO: Save to database via API
+        // This would call /api/lifeengine/savePlan with the parsed plan data
+        
+      } catch (saveError) {
+        console.warn("⚠️ [CustomGPT] Failed to save plan:", saveError);
+        // Continue anyway - plan is still displayed
+      }
+      
+      alert("✅ Plan generated successfully! Scroll down to view your personalized wellness plan.");
       
     } catch (err: any) {
       console.error("❌ [CustomGPT] Generation failed:", err);
-      const errorMessage = formatErrorMessage(err);
-      setError(errorMessage);
+      const errorMessage = err.message || formatErrorMessage(err);
+      setError(`CustomGPT request failed: ${errorMessage}`);
+      
+      // Show detailed error if available
+      if (err.details) {
+        console.error("📋 [CustomGPT] Error details:", err.details);
+      }
     } finally {
       setGenerating(false);
     }
