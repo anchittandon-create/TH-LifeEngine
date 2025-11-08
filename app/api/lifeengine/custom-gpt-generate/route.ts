@@ -137,12 +137,17 @@ async function generateWithGemini({
   const model = modelOverride || process.env.GEMINI_MODEL || "gemini-1.5-flash-8b";
   const geminiModel = genAI.getGenerativeModel({ model });
 
+  // ULTRA COST OPTIMIZATION for hobby project
+  const maxTokens = parseInt(process.env.MAX_OUTPUT_TOKENS || "3000");
+  
   const generationConfig = {
-    temperature: 0.7,
-    topP: 0.95,
-    topK: 40,
-    maxOutputTokens: 6000,
+    temperature: 0.5, // Reduced from 0.7 for more focused output
+    topP: 0.8,         // Reduced from 0.95 for less randomness
+    topK: 20,          // Reduced from 40 to limit token exploration
+    maxOutputTokens: maxTokens, // Configurable limit (default 3000)
   };
+
+  console.log(`[COST CONTROL] Using model: ${model}, max tokens: ${maxTokens}`);
 
   const result = await geminiModel.generateContent({
     contents: [{ role: "user", parts: [{ text: prompt }] }],
@@ -158,6 +163,20 @@ async function generateWithGemini({
 
   const cleanedText = stripCodeFences(text);
 
+  // Log token usage for cost tracking
+  const usageMetadata = (response as any).usageMetadata || {};
+  const inputTokens = usageMetadata.promptTokenCount || 0;
+  const outputTokens = usageMetadata.candidatesTokenCount || 0;
+  const totalTokens = usageMetadata.totalTokenCount || 0;
+  
+  // Calculate approximate cost (gemini-1.5-flash-8b pricing)
+  const inputCost = (inputTokens / 1000000) * 0.0375;
+  const outputCost = (outputTokens / 1000000) * 0.15;
+  const totalCost = inputCost + outputCost;
+
+  console.log(`[COST TRACKING] Tokens - Input: ${inputTokens}, Output: ${outputTokens}, Total: ${totalTokens}`);
+  console.log(`[COST TRACKING] Estimated cost: $${totalCost.toFixed(6)} (Input: $${inputCost.toFixed(6)}, Output: $${outputCost.toFixed(6)})`);
+
   return {
     plan: cleanedText,
     formatted: true,
@@ -166,9 +185,14 @@ async function generateWithGemini({
       model,
       profileId,
       tokens: {
-        input: 0,
-        output: 0,
-        total: 0,
+        input: inputTokens,
+        output: outputTokens,
+        total: totalTokens,
+      },
+      cost: {
+        input_usd: inputCost,
+        output_usd: outputCost,
+        total_usd: totalCost,
       },
       generatedAt: new Date().toISOString(),
     },

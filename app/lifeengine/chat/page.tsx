@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { PlanForm, PlanFormData, defaultPlanFormData, validatePlanFormData } from "@/components/lifeengine/PlanForm";
 import { buildDetailedGPTPrompt, buildPromptSummary } from "@/lib/lifeengine/gptPromptBuilder";
 import { savePlanRecord } from "@/lib/lifeengine/storage";
+import { canGeneratePlan, recordPlanGeneration, getUsageStats, estimatePlanCost } from "@/lib/utils/costControl";
 import PlanPreview from "@/app/components/PlanPreview";
 import type { LifeEnginePlan } from "@/app/types/lifeengine";
 import html2canvas from "html2canvas";
@@ -38,9 +39,18 @@ export default function UseCustomGPTPage() {
   const [generatedPlan, setGeneratedPlan] = useState<LifeEnginePlan | null>(null);
   const [showJson, setShowJson] = useState(false);
   const [rawPlanText, setRawPlanText] = useState("");
+  const [usageStats, setUsageStats] = useState(getUsageStats());
   const planRef = useRef<HTMLDivElement>(null);
   const customGptUrl = process.env.NEXT_PUBLIC_LIFEENGINE_GPT_URL;
   const customGptModel = process.env.NEXT_PUBLIC_LIFEENGINE_GPT_ID;
+
+  // Update usage stats periodically
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setUsageStats(getUsageStats());
+    }, 5000); // Update every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   // Fetch profiles on mount
   useEffect(() => {
@@ -93,6 +103,27 @@ export default function UseCustomGPTPage() {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
+
+    // Check rate limits and cost controls
+    const rateLimitCheck = canGeneratePlan();
+    if (!rateLimitCheck.allowed) {
+      setError(rateLimitCheck.reason || "Rate limit exceeded");
+      return;
+    }
+
+    // Show cost estimate
+    const durationDays = parseInt(formData.duration.split('_')[0]) || 7;
+    const costEstimate = estimatePlanCost(durationDays, formData.planTypes.length);
+    
+    console.log(`[COST ESTIMATE] Duration: ${durationDays} days, Plan types: ${formData.planTypes.length}`);
+    console.log(`[COST ESTIMATE] Estimated cost: $${costEstimate.estimatedCost.toFixed(6)}`);
+    
+    if (costEstimate.warning) {
+      const proceed = confirm(`⚠️ ${costEstimate.warning}\n\nEstimated cost: $${costEstimate.estimatedCost.toFixed(4)}\n\nDo you want to proceed?`);
+      if (!proceed) {
+        return;
+      }
+    }
     
     setLoading(true);
     setLoadingMessage("🤖 Building comprehensive prompt for AI...");
@@ -143,6 +174,15 @@ export default function UseCustomGPTPage() {
       const result = await response.json();
       
       console.log('✅ [CustomGPT] Plan generated successfully for profile:', gptProfileId);
+      
+      // Record cost for tracking (if metadata available)
+      if (result.metadata?.tokens && result.metadata?.cost) {
+        recordPlanGeneration(
+          result.metadata.tokens,
+          result.metadata.cost.total_usd
+        );
+        console.log(`[COST TRACKING] Recorded generation cost: $${result.metadata.cost.total_usd.toFixed(6)}`);
+      }
       
       // Parse the plan
       let planText = result.plan?.trim();
@@ -265,6 +305,46 @@ export default function UseCustomGPTPage() {
             Powered by Google Gemini AI to create comprehensive, personalized wellness plans with real exercises, detailed recipes, and step-by-step guidance
           </p>
         </header>
+
+        {/* Cost Control & Usage Stats */}
+        <section className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 mb-8 border-2 border-green-300">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+              💰 API Usage & Cost Control (Hobby Project)
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div className="bg-white rounded-xl p-4 border border-green-200">
+              <div className="text-xs text-gray-500 uppercase font-semibold mb-1">Hourly Limit</div>
+              <div className="text-2xl font-bold text-gray-900">
+                {usageStats.hourly.remainingRequests} / {usageStats.hourly.maxRequests}
+              </div>
+              <div className="text-xs text-gray-600 mt-1">Plans remaining this hour</div>
+            </div>
+            <div className="bg-white rounded-xl p-4 border border-green-200">
+              <div className="text-xs text-gray-500 uppercase font-semibold mb-1">Daily Budget</div>
+              <div className="text-2xl font-bold text-gray-900">
+                ${usageStats.daily.remainingBudget.toFixed(4)}
+              </div>
+              <div className="text-xs text-gray-600 mt-1">
+                of ${usageStats.daily.maxCost} remaining today
+              </div>
+            </div>
+            <div className="bg-white rounded-xl p-4 border border-green-200">
+              <div className="text-xs text-gray-500 uppercase font-semibold mb-1">Weekly Stats</div>
+              <div className="text-2xl font-bold text-gray-900">
+                ${usageStats.weekly.cost.toFixed(4)}
+              </div>
+              <div className="text-xs text-gray-600 mt-1">
+                {usageStats.weekly.requests} plans generated
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 text-xs text-gray-600 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            ⚡ <strong>Cost Optimization Active:</strong> Using gemini-1.5-flash-8b (cheapest model), 
+            max 3000 output tokens, limited to 14-day plans, 10 generations/hour, $0.50/day budget
+          </div>
+        </section>
 
         {/* How It Works */}
         <section className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 mb-8 border-2 border-blue-200 shadow-lg">

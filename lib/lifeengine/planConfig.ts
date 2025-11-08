@@ -29,9 +29,10 @@ export const PLAN_TYPE_OPTIONS = [
 export const DURATION_OPTIONS = [
   { label: "7 Days (Jumpstart)", value: "7_days" },
   { label: "14 Days (Quick Reset)", value: "14_days" },
-  { label: "28 Days (4 Weeks)", value: "28_days" },
-  { label: "60 Days (8 Weeks)", value: "60_days" },
-  { label: "90 Days (12 Weeks)", value: "90_days" },
+  // Longer durations disabled for cost control (hobby project)
+  // { label: "28 Days (4 Weeks)", value: "28_days" },
+  // { label: "60 Days (8 Weeks)", value: "60_days" },
+  // { label: "90 Days (12 Weeks)", value: "90_days" },
 ] as const;
 
 export const INTENSITY_OPTIONS = [
