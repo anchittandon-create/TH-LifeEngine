@@ -180,22 +180,39 @@ html, body {
 
 /* Responsive */
 @media (min-width: 768px) {
-  .layout { grid-template-columns: 260px 1fr; }
+  .layout { 
+    display: grid;
+    grid-template-columns: 260px 1fr; 
+  }
   .hide-md { display: none !important; }
   .show-md { display: block !important; }
 }
 @media (max-width: 767px) {
+  .layout {
+    display: block;
+  }
   .hide-md { display: block !important; }
   .show-md { display: none !important; }
 }
 
-/* Sidebar */
+/* Sidebar - Always Present */
 .sidebar {
   background: var(--panel);
   border-right: 1px solid var(--border);
   width: 260px;
   min-height: 100vh;
   padding-top: var(--space-3);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Hide sidebar on mobile, show via drawer */
+@media (max-width: 767px) {
+  .sidebar {
+    display: none;
+  }
 }
 .sidebar a {
   display: flex;
