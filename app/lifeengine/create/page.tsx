@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { PlanForm, PlanFormData, defaultPlanFormData, validatePlanFormData } from "@/components/lifeengine/PlanForm";
 import { generatePlan, formatErrorMessage } from "@/lib/lifeengine/api";
 import { PLAN_TYPE_OPTIONS, DURATION_OPTIONS, getDietLabel } from "@/lib/lifeengine/planConfig";
+import { GenerationProgress } from "@/components/lifeengine/GenerationProgress";
 
 const GENDER_MAP: Record<string, "M" | "F" | "Other"> = {
   male: "M",
@@ -379,24 +380,11 @@ export default function CreatePlan() {
             </div>
           )}
 
-          {/* Loading State */}
+          {/* Loading State with Real Progress */}
           {loading && (
-            <div className="bg-blue-50 border-2 border-blue-400 rounded-2xl p-8 shadow-lg">
-              <div className="flex flex-col items-center gap-6">
-                <div className="relative">
-                  <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-                  <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-3xl">
-                    🧠
-                  </span>
-                </div>
-                <div className="text-center">
-                  <p className="text-blue-800 text-xl font-bold mb-2">{loadingMessage}</p>
-                  <p className="text-blue-600 text-sm">
-                    This may take 30-90 seconds. Please don't close this window.
-                  </p>
-                </div>
-              </div>
-            </div>
+            <GenerationProgress onComplete={() => {
+              console.log('Progress complete - generation should be finishing soon');
+            }} />
           )}
 
           {/* Unified Plan Form */}

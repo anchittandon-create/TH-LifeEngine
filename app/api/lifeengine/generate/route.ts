@@ -402,7 +402,25 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       version: 'TH-LifeEngine v2.0'
     });
 
-    const result = await model.generateContent(fullPrompt);
+    // Add timeout to prevent hanging
+    const timeoutMs = 120000; // 2 minutes
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Generation timeout: Request took longer than 2 minutes')), timeoutMs);
+    });
+
+    let result: any;
+    try {
+      console.log('🚀 [GENERATE] Starting Gemini API call...');
+      result = await Promise.race([
+        model.generateContent(fullPrompt),
+        timeoutPromise
+      ]);
+      console.log('✅ [GENERATE] Gemini API call completed');
+    } catch (timeoutError: any) {
+      console.error('⏰ [GENERATE] Gemini API timeout:', timeoutError.message);
+      throw new Error('Generation timed out. The AI took too long to respond. Please try again with a shorter plan duration.');
+    }
+    
     const response = await result.response;
     
     // Track token usage for cost monitoring

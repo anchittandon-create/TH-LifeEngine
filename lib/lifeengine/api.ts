@@ -96,6 +96,10 @@ async function withRetry<T>(
 export async function generatePlan(payload: any): Promise<PlanGenerationResponse> {
   return withRetry(async () => {
     try {
+      console.log('📡 [API] Starting plan generation request...');
+      console.log('📡 [API] Payload:', JSON.stringify(payload, null, 2).substring(0, 500));
+      
+      const startTime = Date.now();
       const response = await fetchWithTimeout("/api/lifeengine/generate", {
         method: "POST",
         headers: {
@@ -103,9 +107,14 @@ export async function generatePlan(payload: any): Promise<PlanGenerationResponse
         },
         body: JSON.stringify(payload),
       }, 90000); // 90 second timeout for plan generation
+      
+      const duration = Date.now() - startTime;
+      console.log(`⏱️ [API] Request completed in ${duration}ms`);
 
       if (!response.ok) {
+        console.error('❌ [API] Request failed with status:', response.status);
         const errorData = await response.json().catch(() => ({}));
+        console.error('❌ [API] Error data:', errorData);
         throw {
           message: errorData.error || errorData.message || "Plan generation failed",
           details: errorData.details || response.statusText,
@@ -113,8 +122,11 @@ export async function generatePlan(payload: any): Promise<PlanGenerationResponse
         } as ApiError;
       }
 
-      return await response.json();
+      const result = await response.json();
+      console.log('✅ [API] Plan generated successfully:', result.planId);
+      return result;
     } catch (error: any) {
+      console.error('❌ [API] Exception during generation:', error);
       if (error.message && error.statusCode) {
         throw error; // Already formatted
       }
