@@ -2,7 +2,16 @@
 import { useEffect, useState } from "react";
 import NavLink from "./NavLink";
 
-const NAV:[string,string][]= [["/lifeengine","Home"],["/lifeengine/profiles","Profiles"],["/lifeengine/create","Create Plan"],["/lifeengine/chat","Use Our CustomGPT"],["/lifeengine/dashboard","Dashboard"],["/lifeengine/settings","Settings"]];
+const NAV:[string,string][]= [
+  ["/lifeengine","Home"],
+  ["/lifeengine/dashboard","Dashboard"],
+  ["/lifeengine/profiles","Profiles"],
+  ["/lifeengine/create-v2","Create Plan"],
+  ["/lifeengine/chat-v2","Use Custom GPT"],
+  ["/lifeengine/plan","My Plans"],
+  ["/lifeengine/plan-demo","📔 Plan Demo"],
+  ["/lifeengine/settings","Settings"]
+];
 
 export default function Sidebar() {
   const [rootUser, setRootUser] = useState<any>(null);

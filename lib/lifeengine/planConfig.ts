@@ -7,20 +7,22 @@ export const PLAN_TYPE_OPTIONS = [
   { label: "Mobility & Recovery", value: "mobility" },
   { label: "Stress & Sleep Reset", value: "stress_relief" },
   { label: "Prenatal / Postnatal Care", value: "prenatal" },
+  { label: "Mindfulness & Breathwork", value: "mindfulness" },
+  { label: "Metabolic Reboot", value: "metabolic" },
 ] as const;
 
 export const DURATION_OPTIONS = [
-  { label: "1 Month (4 Weeks)", value: "1" },
-  { label: "2 Months (8 Weeks)", value: "2" },
-  { label: "3 Months (12 Weeks)", value: "3" },
-  { label: "6 Months (24 Weeks)", value: "6" },
-  { label: "12 Months (1 Year)", value: "12" },
+  { label: "7 Days (Jumpstart)", value: "7_days" },
+  { label: "14 Days (Quick Reset)", value: "14_days" },
+  { label: "28 Days (4 Weeks)", value: "28_days" },
+  { label: "60 Days (8 Weeks)", value: "60_days" },
+  { label: "90 Days (12 Weeks)", value: "90_days" },
 ] as const;
 
 export const INTENSITY_OPTIONS = [
-  { label: "Regenerative (Low)", value: "Low" },
-  { label: "Balanced (Medium)", value: "Medium" },
-  { label: "Athletic (High)", value: "High" },
+  { label: "Regenerative (Low)", value: "low" },
+  { label: "Balanced (Moderate)", value: "moderate" },
+  { label: "Athletic (High)", value: "high" },
 ] as const;
 
 export const FORMAT_OPTIONS = [
@@ -44,6 +46,9 @@ export const FOCUS_AREA_OPTIONS = [
   "Mindfulness & breath",
   "Immune resilience",
   "Bone density",
+  "Hormonal balance",
+  "Gut & digestion",
+  "Joint longevity",
 ] as const;
 
 export const ROUTINE_OPTIONS = [
@@ -60,10 +65,13 @@ export const GOAL_OPTIONS = [
   "Hormone balance",
   "Endurance boost",
   "Posture correction",
+  "Flexibility & mobility",
+  "Energy boost",
+  "Anxiety management",
 ] as const;
 
 export const DIET_OPTIONS = [
-  "vegetarian",
+  "veg",
   "vegan",
   "eggetarian",
   "non_veg",
@@ -71,6 +79,16 @@ export const DIET_OPTIONS = [
   "gluten_free",
   "lactose_free",
 ] as const;
+
+const DIET_LABELS: Record<string, string> = {
+  veg: "Vegetarian",
+  vegan: "Vegan",
+  eggetarian: "Eggetarian",
+  non_veg: "Non-Vegetarian",
+  jain: "Jain",
+  gluten_free: "Gluten Free",
+  lactose_free: "Lactose Free",
+};
 
 export const ACTIVITY_LEVEL_OPTIONS = [
   "sedentary",
@@ -86,6 +104,10 @@ export const CHRONIC_CONDITION_OPTIONS = [
   "Thyroid",
   "Anxiety",
   "Back pain",
+  "Asthma",
+  "Arthritis",
+  "Autoimmune",
+  "IBS / Gut issues",
   "None",
 ] as const;
 
@@ -156,4 +178,8 @@ export function describePlanBrief(profileId: string, form: PlanFormState) {
     `sleep_hours: ${form.sleepHours}`,
     `stress_level: ${form.stressLevel}`,
   ].join("\n");
+}
+
+export function getDietLabel(value: string) {
+  return DIET_LABELS[value] ?? value.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }

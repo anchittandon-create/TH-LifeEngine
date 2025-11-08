@@ -541,6 +541,8 @@ const ALLOWED_PLAN_TYPES = new Set([
   "mobility",
   "stress_relief",
   "prenatal",
+  "mindfulness",
+  "metabolic",
 ]);
 
 function buildProfileSnapshot(profile: ProfileRow) {
