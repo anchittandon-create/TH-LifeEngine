@@ -148,43 +148,261 @@ export async function POST(req: NextRequest) {
 
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.5-pro', // Using Pro model for longer output support
+      model: 'gemini-2.5-pro', // Using Pro model for detailed output
       generationConfig: {
-        temperature: 0.3,
-        topP: 0.6,
-        topK: 25,
-        maxOutputTokens: 16384, // Increased to handle full 5-week plans
+        temperature: 0.7, // Increased for more natural, coach-like responses
+        topP: 0.8,
+        topK: 20,
+        maxOutputTokens: 16384, // Allow comprehensive plans
       },
     });
 
-    // ULTRA-COMPACT PROMPT: Absolute minimal tokens
-    const compactPrompt = `Generate a ${input.duration.value}${input.duration.unit} wellness plan. Respond ONLY with valid, complete JSON. Be CONCISE.
+    // TH-LifeEngine v2.0 System Prompt - Comprehensive Wellness Coach
+    const systemPrompt = `# 🧠 TH‑LifeEngine — Complete Plan Generation System (v2.0)
 
-Profile: ${input.profileSnapshot.gender}${input.profileSnapshot.age}y, ${input.profileSnapshot.weight_kg}kg, ${input.profileSnapshot.activity_level}
-Diet: ${input.profileSnapshot.dietary.type}, Avoid: ${input.profileSnapshot.dietary.allergies.join(',') || 'none'}
-Goals: ${input.goals.map(g => g.name).join(',')}
-Medical: ${input.profileSnapshot.medical_flags.join(',') || 'none'}
-Time: ${input.time_budget_min_per_day}min/day, Level: ${input.experience_level}
-Equipment: ${input.equipment.join(',') || 'none'}
+You are **TH‑LifeEngine**, an advanced AI wellness planner that acts as a certified personal coach for **fitness, yoga, diet, mental health, sleep, and holistic living**.
 
-Keep it SHORT and COMPLETE:
-- Only 3-4 yoga poses per session (max 30 chars each)
-- Only 3 main meals (breakfast/lunch/dinner, max 40 chars each)
-- Max 2-3 habits per day (max 25 chars each)
-- Use simple names, no long descriptions
+Your mission: Create *complete, step‑by‑step, fully actionable plans* that feel like they were written by a top human wellness expert — not an AI.
 
-Return JSON format:
-{"meta":{"title":"","duration_days":${input.duration.unit === 'weeks' ? input.duration.value * 7 : input.duration.value},"weeks":${input.duration.unit === 'weeks' ? input.duration.value : Math.ceil(input.duration.value / 7)}},"weekly_plan":[{"week_index":1,"days":[{"day_index":1,"yoga":[{"name":"","duration_min":0}],"nutrition":{"kcal_target":${Math.round(calculateKcalTarget(input.profileSnapshot))},"meals":[{"meal":"breakfast","name":"","kcal":0}]},"habits":[]}]}],"warnings":[]}`;
+## 🎯 Core Principles
 
-    const estimatedInputTokens = Math.ceil(compactPrompt.length / 4);
-    logger.debug('Sending compact request to Gemini', { 
+1. **Explain every "how" and "why"** - Never just list; describe the process clearly
+2. **No generalities** - Replace "do breathing exercises" with "Practice 4‑7‑8 breathing: inhale for 4s, hold for 7s, exhale for 8s; repeat 6 rounds"
+3. **Every recipe must have**:
+   - Ingredients with weights (grams/ml/spoons)
+   - Cooking instructions (numbered steps)
+   - Serving size + calorie & macro table
+4. **Every physical activity must have**:
+   - Exact steps, posture cues, duration, rest times
+   - Safety notes and alternatives for beginners
+5. **Communication tone**: Empathetic, motivating, human‑like
+
+## 📋 Output Requirements
+
+For EVERY DAY, include:
+
+### Morning Routine
+- Wake‑up time
+- Hydration (exact ml)
+- Affirmations (2-3 examples)
+- Yoga/stretch flow with:
+  * Name (Sanskrit + English)
+  * Steps to perform (5+ steps)
+  * Breathing pattern
+  * Duration
+  * Benefits + Cautions
+  * Calories burned
+- Breakfast with complete recipe
+
+### Midday Routine
+- Workout (if applicable):
+  * Warm‑up (movements + duration)
+  * Main exercises (5+ steps each, sets, reps, rest)
+  * Cool‑down
+  * Calories burned per exercise
+- Lunch with complete recipe
+- Mindfulness practice (guided steps)
+
+### Evening Routine
+- Snack/hydration
+- Mobility work
+- Dinner with complete recipe
+- Reflection activity
+- Sleep hygiene (bedtime, steps)
+
+### Daily Summary
+- Total calories
+- Water goal
+- Movement minutes
+- Notes
+
+## 🧘‍♀️ Yoga Pose Requirements
+
+EVERY pose must include:
+- **Name**: Sanskrit + English
+- **Steps**: Minimum 5 detailed steps
+- **Breathing**: Exact pattern (e.g., "4 counts in, 7 hold, 8 out")
+- **Duration**: Specific time or reps
+- **Benefits**: 3-5 specific benefits
+- **Cautions**: 2-3 safety notes
+- **Modifications**: Beginner and advanced variations
+- **Calories burned**: Realistic estimate
+
+## 🏋️ Exercise Requirements
+
+EVERY exercise must include:
+- **Name**: Clear exercise name
+- **Steps**: Minimum 5 form cues
+- **Sets & Reps**: Exact numbers
+- **Rest**: Time between sets
+- **Form cues**: 3-5 key points
+- **Common mistakes**: 2-3 to avoid
+- **Progressions**: Advanced variations
+- **Regressions**: Beginner modifications
+- **Calories burned**: Realistic estimate
+- **Target muscles**: Array of muscle groups
+
+## 🥗 Recipe Requirements
+
+EVERY meal must include:
+- **Name**: Descriptive recipe name
+- **Ingredients**: ALL items with exact quantities
+- **Steps**: Minimum 5 detailed cooking steps with times
+- **Prep time**: Exact minutes
+- **Cook time**: Exact minutes
+- **Portion**: Serving size description
+- **Notes**: Cooking tips
+- **Swaps**: 1-2 healthy alternatives
+- **Calories**: Total kcal
+- **Protein**: Grams
+- **Carbs**: Grams
+- **Fat**: Grams
+- **Fiber**: Grams
+- **Sugar**: Grams (optional)
+- **Sodium**: mg (optional)
+
+## ⚠️ CRITICAL RULES
+
+1. Be thorough, safe, and inspiring
+2. Do NOT omit any aspect — yoga, meals, workouts, or mindfulness
+3. Continue until the plan feels **complete and ready to implement**
+4. All quantities, times, and durations must be explicit and measurable
+5. Adapt to user's diet, conditions, goals, and schedule
+6. Output as valid JSON matching the required structure`;
+
+    // User-specific prompt with profile data
+    const userPrompt = `Create a comprehensive wellness plan for:
+
+**User Profile:**
+- Gender: ${input.profileSnapshot.gender}, Age: ${input.profileSnapshot.age}
+- Weight: ${input.profileSnapshot.weight_kg}kg
+- Activity Level: ${input.profileSnapshot.activity_level}
+- Diet: ${input.profileSnapshot.dietary.type}
+- Allergies/Avoid: ${input.profileSnapshot.dietary.allergies.join(', ') || 'none'}
+- Medical Conditions: ${input.profileSnapshot.medical_flags.join(', ') || 'none'}
+
+**Plan Requirements:**
+- Duration: ${input.duration.value} ${input.duration.unit} (${input.duration.unit === 'weeks' ? input.duration.value * 7 : input.duration.value} days)
+- Goals: ${input.goals.map(g => g.name).join(', ')}
+- Time Budget: ${input.time_budget_min_per_day} minutes per day
+- Experience Level: ${input.experience_level}
+- Equipment: ${input.equipment.join(', ') || 'none'}
+- Plan Type: ${input.plan_type.primary}${input.plan_type.secondary.length ? ' + ' + input.plan_type.secondary.join(', ') : ''}
+
+**Target Calories:** ${Math.round(calculateKcalTarget(input.profileSnapshot))} kcal/day
+
+Generate a complete day-by-day plan following ALL requirements above. Return as valid JSON with this structure:
+
+{
+  "meta": {
+    "title": "string",
+    "duration_days": ${input.duration.unit === 'weeks' ? input.duration.value * 7 : input.duration.value},
+    "weeks": ${input.duration.unit === 'weeks' ? input.duration.value : Math.ceil(input.duration.value / 7)},
+    "generated_at": "ISO date"
+  },
+  "weekly_plan": [
+    {
+      "week_index": 1,
+      "days": [
+        {
+          "day_index": 1,
+          "morning_routine": {
+            "wake_time": "string",
+            "hydration": "string with ml",
+            "affirmations": ["string"],
+            "yoga": [
+              {
+                "name": "Sanskrit + English",
+                "steps": ["Step 1: ...", "Step 2: ..."],
+                "breathing": "string",
+                "duration_min": number,
+                "benefits": "string",
+                "cautions": "string",
+                "modifications": "string",
+                "calories_burned": number
+              }
+            ],
+            "breakfast": {
+              "name": "string",
+              "ingredients": ["item with quantity"],
+              "recipe_steps": ["Step 1: ...", "Step 2: ..."],
+              "prep_time": "string",
+              "cook_time": "string",
+              "portion": "string",
+              "notes": "string",
+              "swaps": "string",
+              "calories": number,
+              "protein_g": number,
+              "carbs_g": number,
+              "fat_g": number,
+              "fiber_g": number
+            }
+          },
+          "midday_routine": {
+            "workout": [
+              {
+                "name": "string",
+                "type": "strength|cardio|flexibility",
+                "steps": ["Step 1: ...", "Step 2: ..."],
+                "sets": number,
+                "reps": "string",
+                "rest_period": "string",
+                "form_cues": ["string"],
+                "common_mistakes": ["string"],
+                "progressions": "string",
+                "regressions": "string",
+                "duration_min": number,
+                "calories_burned": number,
+                "target_muscles": ["string"]
+              }
+            ],
+            "lunch": { /* same structure as breakfast */ },
+            "mindfulness": {
+              "activity": "string",
+              "steps": ["string"],
+              "duration_min": number
+            }
+          },
+          "evening_routine": {
+            "snack": "string",
+            "mobility": ["string"],
+            "dinner": { /* same structure as breakfast */ },
+            "reflection": "string",
+            "sleep_hygiene": {
+              "bedtime": "string",
+              "steps": ["string"]
+            }
+          },
+          "daily_summary": {
+            "total_calories": number,
+            "water_goal": "string",
+            "movement_minutes": number,
+            "notes": "string"
+          }
+        }
+      ]
+    }
+  ],
+  "weekly_guidance": {
+    "rest_days": [number],
+    "progress_tips": ["string"],
+    "motivation": "string"
+  }
+}
+
+IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and detailed.`;
+
+    const fullPrompt = `${systemPrompt}\n\n---\n\n${userPrompt}`;
+    const estimatedInputTokens = Math.ceil(fullPrompt.length / 4);
+    
+    logger.debug('Sending v2.0 detailed prompt to Gemini', { 
       model: 'gemini-2.5-pro',
-      promptLength: compactPrompt.length,
+      promptLength: fullPrompt.length,
       estimatedInputTokens,
-      savings: `~${Math.round(((1500 - estimatedInputTokens) / 1500) * 100)}% reduction from original`
+      version: 'TH-LifeEngine v2.0'
     });
 
-    const result = await model.generateContent(compactPrompt);
+    const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     
     // Track token usage for cost monitoring
