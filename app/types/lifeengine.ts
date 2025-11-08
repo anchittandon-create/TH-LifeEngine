@@ -42,6 +42,7 @@ export interface YogaPose {
   breathing_instructions?: string; // Detailed breathing cues
   modifications?: string;
   common_mistakes?: string[]; // Common mistakes to avoid
+  calories_burned?: number; // Estimated calories burned
 }
 
 export interface Exercise {
@@ -57,6 +58,8 @@ export interface Exercise {
   regressions?: string; // How to make it easier
   duration_min?: number;
   description?: string;
+  calories_burned?: number; // Estimated calories burned
+  target_muscles?: string[]; // Muscles worked (e.g., ["chest", "triceps"])
 }
 
 export interface YogaSession {
@@ -77,6 +80,14 @@ export interface Meal {
   notes?: string;
   portion_guidance?: string;
   swap?: string; // Healthy alternatives
+  // Nutritional Information
+  calories?: number; // Total calories
+  protein_g?: number; // Protein in grams
+  carbs_g?: number; // Carbohydrates in grams
+  fat_g?: number; // Fat in grams
+  fiber_g?: number; // Fiber in grams
+  sugar_g?: number; // Sugar in grams
+  sodium_mg?: number; // Sodium in milligrams
 }
 
 export interface DietDay {

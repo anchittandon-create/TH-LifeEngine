@@ -76,9 +76,21 @@ export default function UseCustomGPTPage() {
       });
 
       const planId = result.metadata?.planId || `local-${crypto.randomUUID()}`;
+      
+      // Ensure metadata includes profile_id for /api/v1/plans/latest
+      if (!result.plan.metadata) {
+        result.plan.metadata = {} as any;
+      }
+      result.plan.metadata.profile_id = selectedProfileId;
+      (result.plan.metadata as any).generated_by = "custom-gpt-page";
+      (result.plan.metadata as any).plan_type = form.planTypes;
+      result.plan.metadata.language = "English";
+      (result.plan.metadata as any).timestamp = result.metadata?.generatedAt || new Date().toISOString();
+      
       setPlan(result.plan);
       setRawPlan(JSON.stringify(result.plan, null, 2));
 
+      // Save to localStorage for immediate UI access
       savePlanRecord({
         id: planId,
         profileId: selectedProfileId,
@@ -89,6 +101,24 @@ export default function UseCustomGPTPage() {
         plan: result.plan,
         rawPrompt: result.prompt,
       });
+
+      // Also POST to /api/v1/plans for persistence and dashboard integration
+      try {
+        const postResponse = await fetch('/api/v1/plans', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(result.plan),
+        });
+
+        if (postResponse.ok) {
+          const postData = await postResponse.json();
+          console.log(`✅ [CustomGPT] Plan saved to backend with ID: ${postData.plan_id}`);
+        } else {
+          console.warn(`⚠️ [CustomGPT] Failed to save plan to backend:`, await postResponse.text());
+        }
+      } catch (backendError) {
+        console.warn(`⚠️ [CustomGPT] Could not save to backend:`, backendError);
+      }
     } catch (err: any) {
       const message = formatErrorMessage(err);
       setError(message);

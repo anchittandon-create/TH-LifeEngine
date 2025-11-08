@@ -113,6 +113,334 @@
   ],
   "plans": [
     {
+      "planId": "plan_5a7a86c4ecac",
+      "profileId": "prof_anchit",
+      "planName": "Plan for Anchit",
+      "inputSummary": "sleep + weight_loss | 7 days | intermediate",
+      "days": 7,
+      "confidence": 0.9,
+      "warnings": [],
+      "planJSON": {
+        "id": "plan_5a7a86c4ecac",
+        "profileId": "prof_anchit",
+        "intakeId": "prof_anchit",
+        "goals": [],
+        "createdAt": "2025-11-08T06:21:31.275Z",
+        "days": [
+          {
+            "date": "2025-11-08",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Downward-Facing Dog",
+                "duration": 15,
+                "description": "Downward-Facing Dog yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Warrior II",
+                "duration": 15,
+                "description": "Warrior II yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Triangle Pose",
+                "duration": 15,
+                "description": "Triangle Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal with Berries and Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Chickpeas & Veggies",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Lentil Curry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-09",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Plank Pose",
+                "duration": 10,
+                "description": "Plank Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Cobra Pose",
+                "duration": 15,
+                "description": "Cobra Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Bridge Pose",
+                "duration": 20,
+                "description": "Bridge Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble with Spinach",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Black Bean Burrito Bowl",
+                "calories": 730,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Stir-fry with Tofu",
+                "calories": 800,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-10",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Chair Pose",
+                "duration": 15,
+                "description": "Chair Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Tree Pose",
+                "duration": 15,
+                "description": "Tree Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Warrior III",
+                "duration": 15,
+                "description": "Warrior III yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt with Granola",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup with Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom and Spinach Pasta",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-11",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 15,
+                "description": "Child's Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Cat-Cow Stretch",
+                "duration": 15,
+                "description": "Cat-Cow Stretch yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Seated Spinal Twist",
+                "duration": 15,
+                "description": "Seated Spinal Twist yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal with Berries and Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Chickpeas & Veggies",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Burger on Whole Wheat Bun",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-12",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Dolphin Pose",
+                "duration": 15,
+                "description": "Dolphin Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Boat Pose",
+                "duration": 15,
+                "description": "Boat Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Crow Pose (Preparation)",
+                "duration": 15,
+                "description": "Crow Pose (Preparation) yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble with Spinach",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Black Bean Burrito Bowl",
+                "calories": 730,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Lentil Curry with Brown Rice",
+                "calories": 800,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-13",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation A",
+                "duration": 20,
+                "description": "Sun Salutation A yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Sun Salutation B",
+                "duration": 25,
+                "description": "Sun Salutation B yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt with Granola",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup with Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Stir-fry with Tofu",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-14",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Pigeon Pose",
+                "duration": 15,
+                "description": "Pigeon Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Seated Forward Bend",
+                "duration": 15,
+                "description": "Seated Forward Bend yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Corpse Pose (Savasana)",
+                "duration": 15,
+                "description": "Corpse Pose (Savasana) yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal with Berries and Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Chickpeas & Veggies",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom and Spinach Pasta",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          }
+        ]
+      },
+      "analytics": {
+        "safety_score": 0.95,
+        "diet_match": 0.92,
+        "progression_score": 0.9,
+        "adherence_score": 0.88,
+        "overall": 0.91
+      },
+      "costMetrics": {
+        "inputTokens": 230,
+        "outputTokens": 2110,
+        "totalTokens": 3388,
+        "model": "gemini-2.5-flash"
+      },
+      "createdAt": "2025-11-08T06:21:31.275Z",
+      "source": "gemini"
+    },
+    {
       "planId": "plan_6b381fdf50ae",
       "profileId": "prof_anchit",
       "planName": "Plan for Anchit",

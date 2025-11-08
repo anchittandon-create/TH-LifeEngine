@@ -84,6 +84,7 @@ export function buildPromptFromForm(form: PromptBuilderInput): string {
   parts.push("- List specific benefits of each pose");
   parts.push("- Specify exact duration in minutes");
   parts.push("- Add modifications for beginners or those with limitations");
+  parts.push("- **MUST INCLUDE**: Estimated calories burned per pose");
   parts.push("");
   parts.push("🏋️ **For Exercises:**");
   parts.push("- Provide exact sets & reps (e.g., '3 sets of 12 reps')");
@@ -91,13 +92,21 @@ export function buildPromptFromForm(form: PromptBuilderInput): string {
   parts.push("- Add detailed form cues (e.g., 'Keep back straight, core engaged')");
   parts.push("- List common mistakes to avoid");
   parts.push("- Provide progressions/regressions");
+  parts.push("- **MUST INCLUDE**: Estimated calories burned");
+  parts.push("- **MUST INCLUDE**: Target muscles worked (e.g., ['chest', 'triceps', 'shoulders'])");
   parts.push("");
-  parts.push("🥗 **For Meals:**");
-  parts.push("- List all ingredients with exact quantities");
-  parts.push("- Provide numbered recipe steps (e.g., 'Step 1: Heat oil in pan...')");
+  parts.push("🥗 **For Meals (CRITICAL - ALWAYS INCLUDE FULL NUTRITION):**");
+  parts.push("- List all ingredients with exact quantities (e.g., '2 medium eggs', '100g chicken breast')");
+  parts.push("- Provide numbered recipe steps (e.g., 'Step 1: Heat oil in pan...', 'Step 2: Add chicken and cook...')");
   parts.push("- Include preparation time and cooking time");
-  parts.push("- Add portion guidance (e.g., '1 cup serving')");
+  parts.push("- Add portion guidance (e.g., '1 cup serving', '2 pieces')");
   parts.push("- Suggest healthy swaps when possible");
+  parts.push("- **MUST INCLUDE**: Total calories (e.g., 350 calories)");
+  parts.push("- **MUST INCLUDE**: Protein in grams (e.g., 25g protein)");
+  parts.push("- **MUST INCLUDE**: Carbs in grams (e.g., 30g carbs)");
+  parts.push("- **MUST INCLUDE**: Fat in grams (e.g., 12g fat)");
+  parts.push("- **MUST INCLUDE**: Fiber in grams (e.g., 5g fiber)");
+  parts.push("- **OPTIONAL**: Sugar and sodium if relevant");
   parts.push("");
   parts.push("Return your answer as VALID JSON matching this shape:");
   parts.push(`{
@@ -134,7 +143,8 @@ Where DayPlan contains:
         "steps": string[], // ["Step 1: Begin in...", "Step 2: Inhale and...", ...]
         "breathing_instructions": string, // "Inhale for 4 counts, exhale for 6 counts"
         "modifications": string,
-        "common_mistakes": string[]
+        "common_mistakes": string[],
+        "calories_burned": number // Estimated calories burned for this pose
       }
     ],
     "breathwork": string,
@@ -151,7 +161,15 @@ Where DayPlan contains:
       "cooking_time": string, // "5 minutes"
       "portion_guidance": string,
       "notes": string,
-      "swap": string
+      "swap": string,
+      // CRITICAL: ALWAYS include complete nutrition info
+      "calories": number, // e.g., 350
+      "protein_g": number, // e.g., 25
+      "carbs_g": number, // e.g., 30
+      "fat_g": number, // e.g., 12
+      "fiber_g": number, // e.g., 5
+      "sugar_g": number, // optional
+      "sodium_mg": number // optional
     },
     "lunch": {...same as breakfast...},
     "snacks": [...same structure...],
@@ -176,14 +194,23 @@ Where DayPlan contains:
       "common_mistakes": string[], // ["Don't arch back", "Avoid locking knees"]
       "progressions": string,
       "regressions": string,
-      "duration_min": number
+      "duration_min": number,
+      "calories_burned": number, // Estimated calories burned
+      "target_muscles": string[] // Muscles worked (e.g., ["chest", "triceps"])
     }
   ]
 }`);
   parts.push("");
   parts.push("DO NOT include Markdown fences. Respond with pure JSON only.");
   parts.push("");
-  parts.push("REMEMBER: Every yoga pose, exercise, and meal MUST include step-by-step instructions!");
+  parts.push("**CRITICAL REQUIREMENTS** (Plan will be rejected if these are missing):");
+  parts.push("1. Every meal MUST have: calories, protein_g, carbs_g, fat_g, fiber_g");
+  parts.push("2. Every yoga pose MUST have: steps array (at least 3 steps), breathing_instructions, calories_burned");
+  parts.push("3. Every exercise MUST have: steps array, form_cues array, calories_burned, target_muscles");
+  parts.push("4. Every recipe MUST have: ingredients array, recipe_steps array (minimum 3 steps)");
+  parts.push("5. All nutritional values must be realistic and accurate");
+  parts.push("");
+  parts.push("REMEMBER: A plan without detailed nutrition info and step-by-step instructions is INCOMPLETE!");
 
   return parts.join("\n");
 }

@@ -216,10 +216,23 @@ export default function PlanPreview({ plan }: PlanPreviewProps) {
 // ========== Section Components ==========
 
 function YogaSection({ yoga }: { yoga: any }) {
+  // Calculate total calories burned
+  const totalCalories = yoga.sequence?.reduce(
+    (sum: number, pose: any) => sum + (pose.calories_burned || 0),
+    0
+  );
+
   return (
-    <div className="p-4 bg-purple-50 rounded-xl">
-      <div className="font-semibold text-purple-800 mb-3 flex items-center gap-2">
-        <span>🧘‍♀️</span> Yoga Session
+    <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
+      <div className="font-semibold text-purple-800 mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span>🧘‍♀️</span> Yoga Session
+        </div>
+        {totalCalories > 0 && (
+          <div className="text-red-600 font-bold text-sm bg-white px-3 py-1 rounded-full shadow-sm">
+            🔥 {totalCalories} cal total
+          </div>
+        )}
       </div>
 
       {/* Warmup & Cooldown */}
@@ -243,14 +256,21 @@ function YogaSection({ yoga }: { yoga: any }) {
       {yoga.sequence && yoga.sequence.length > 0 && (
         <div className="space-y-3 mb-3">
           {yoga.sequence.map((pose: any, i: number) => (
-            <div key={i} className="bg-white p-4 rounded-lg shadow-sm">
+            <div key={i} className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
               <div className="flex items-start justify-between mb-2">
                 <h4 className="font-bold text-gray-800 text-base">
                   {pose.name}
                 </h4>
-                <span className="text-purple-600 font-semibold text-sm">
-                  {pose.duration_min} min
-                </span>
+                <div className="flex items-center gap-2">
+                  {pose.calories_burned && (
+                    <span className="text-red-600 font-semibold text-xs bg-red-50 px-2 py-1 rounded-full">
+                      🔥 {pose.calories_burned} cal
+                    </span>
+                  )}
+                  <span className="text-purple-600 font-semibold text-sm">
+                    {pose.duration_min} min
+                  </span>
+                </div>
               </div>
 
               {/* Benefits */}
@@ -336,29 +356,62 @@ function YogaSection({ yoga }: { yoga: any }) {
 }
 
 function ExercisesSection({ exercises }: { exercises: any[] }) {
+  // Calculate total calories burned
+  const totalCalories = exercises.reduce((sum, ex) => sum + (ex.calories_burned || 0), 0);
+
   return (
-    <div className="p-4 bg-orange-50 rounded-xl">
+    <div className="p-4 bg-gradient-to-br from-orange-50 to-red-50 rounded-xl">
       <div className="font-semibold text-orange-800 mb-3 flex items-center gap-2">
         <span>🏋️</span> Fitness Exercises
       </div>
 
+      {/* Total Calories Burned */}
+      {totalCalories > 0 && (
+        <div className="mb-4 p-3 bg-white rounded-lg shadow-sm border border-orange-200">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-700">Total Calories Burned:</span>
+            <span className="text-2xl font-bold text-red-600 flex items-center gap-1">
+              🔥 {Math.round(totalCalories)} cal
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-3">
         {exercises.map((exercise, i) => (
-          <div key={i} className="bg-white p-4 rounded-lg shadow-sm">
+          <div key={i} className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-orange-500">
             <div className="flex items-start justify-between mb-2">
-              <div>
-                <h4 className="font-bold text-gray-800 text-base">
+              <div className="flex-1">
+                <h4 className="font-bold text-gray-800 text-base flex items-center gap-2 flex-wrap">
                   {exercise.name}
+                  {exercise.calories_burned && (
+                    <span className="inline-flex items-center px-2 py-1 text-xs font-bold text-red-600 bg-red-50 rounded-full">
+                      🔥 {Math.round(exercise.calories_burned)} cal
+                    </span>
+                  )}
                 </h4>
                 {exercise.type && (
                   <span className="text-xs text-orange-600 font-semibold uppercase">
                     {exercise.type}
                   </span>
                 )}
+                {/* Target Muscles */}
+                {exercise.target_muscles && exercise.target_muscles.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {exercise.target_muscles.map((muscle: string, idx: number) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center px-2 py-0.5 text-xs font-medium text-purple-700 bg-purple-100 rounded-full"
+                      >
+                        💪 {muscle}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               {exercise.duration_min && (
-                <span className="text-orange-600 font-semibold text-sm">
-                  {exercise.duration_min} min
+                <span className="text-orange-600 font-semibold text-sm whitespace-nowrap ml-2">
+                  ⏱️ {exercise.duration_min} min
                 </span>
               )}
             </div>
@@ -440,11 +493,56 @@ function ExercisesSection({ exercises }: { exercises: any[] }) {
 }
 
 function DietSection({ diet }: { diet: any }) {
+  // Calculate total daily nutrition
+  const meals = ["breakfast", "lunch", "dinner"];
+  const totalNutrition = meals.reduce((acc, mealKey) => {
+    const meal = diet[mealKey];
+    if (meal) {
+      acc.calories += meal.calories || 0;
+      acc.protein += meal.protein_g || 0;
+      acc.carbs += meal.carbs_g || 0;
+      acc.fat += meal.fat_g || 0;
+      acc.fiber += meal.fiber_g || 0;
+    }
+    return acc;
+  }, { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 });
+
   return (
-    <div className="p-4 bg-green-50 rounded-xl">
+    <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl">
       <div className="font-semibold text-green-800 mb-3 flex items-center gap-2">
         <span>🥗</span> Nutrition Plan
       </div>
+
+      {/* Daily Nutrition Summary */}
+      {totalNutrition.calories > 0 && (
+        <div className="mb-4 p-4 bg-white rounded-xl shadow-sm border border-green-200">
+          <div className="font-bold text-gray-800 mb-3 flex items-center gap-2">
+            <span>📊</span> Daily Nutrition Totals
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <div className="text-center p-2 bg-gradient-to-br from-red-50 to-orange-50 rounded-lg">
+              <div className="text-2xl font-bold text-red-600">{Math.round(totalNutrition.calories)}</div>
+              <div className="text-xs text-gray-600 font-medium">🔥 Calories</div>
+            </div>
+            <div className="text-center p-2 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600">{Math.round(totalNutrition.protein)}g</div>
+              <div className="text-xs text-gray-600 font-medium">🥚 Protein</div>
+            </div>
+            <div className="text-center p-2 bg-gradient-to-br from-yellow-50 to-amber-50 rounded-lg">
+              <div className="text-2xl font-bold text-yellow-600">{Math.round(totalNutrition.carbs)}g</div>
+              <div className="text-xs text-gray-600 font-medium">🍞 Carbs</div>
+            </div>
+            <div className="text-center p-2 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg">
+              <div className="text-2xl font-bold text-purple-600">{Math.round(totalNutrition.fat)}g</div>
+              <div className="text-xs text-gray-600 font-medium">🥑 Fat</div>
+            </div>
+            <div className="text-center p-2 bg-gradient-to-br from-green-50 to-lime-50 rounded-lg">
+              <div className="text-2xl font-bold text-green-600">{Math.round(totalNutrition.fiber)}g</div>
+              <div className="text-xs text-gray-600 font-medium">🌾 Fiber</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-3">
         {["breakfast", "lunch", "dinner", "evening_tea"].map((mealKey) => {
@@ -480,6 +578,53 @@ function DietSection({ diet }: { diet: any }) {
               </div>
 
               <h5 className="text-gray-800 font-semibold mb-2">{meal.title}</h5>
+
+              {/* Nutrition Facts */}
+              {(meal.calories || meal.protein_g || meal.carbs_g || meal.fat_g) && (
+                <div className="mb-3 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                  <div className="font-semibold text-sm text-gray-700 mb-2 flex items-center gap-2">
+                    📊 Nutrition Facts
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {meal.calories && (
+                      <div className="flex flex-col items-center p-2 bg-white rounded">
+                        <div className="text-lg font-bold text-red-600">{Math.round(meal.calories)}</div>
+                        <div className="text-xs text-gray-600">🔥 Cal</div>
+                      </div>
+                    )}
+                    {meal.protein_g && (
+                      <div className="flex flex-col items-center p-2 bg-white rounded">
+                        <div className="text-lg font-bold text-blue-600">{Math.round(meal.protein_g)}g</div>
+                        <div className="text-xs text-gray-600">🥚 Protein</div>
+                      </div>
+                    )}
+                    {meal.carbs_g && (
+                      <div className="flex flex-col items-center p-2 bg-white rounded">
+                        <div className="text-lg font-bold text-yellow-600">{Math.round(meal.carbs_g)}g</div>
+                        <div className="text-xs text-gray-600">🍞 Carbs</div>
+                      </div>
+                    )}
+                    {meal.fat_g && (
+                      <div className="flex flex-col items-center p-2 bg-white rounded">
+                        <div className="text-lg font-bold text-purple-600">{Math.round(meal.fat_g)}g</div>
+                        <div className="text-xs text-gray-600">🥑 Fat</div>
+                      </div>
+                    )}
+                    {meal.fiber_g && (
+                      <div className="flex flex-col items-center p-2 bg-white rounded">
+                        <div className="text-lg font-bold text-green-600">{Math.round(meal.fiber_g)}g</div>
+                        <div className="text-xs text-gray-600">🌾 Fiber</div>
+                      </div>
+                    )}
+                    {meal.sugar_g && (
+                      <div className="flex flex-col items-center p-2 bg-white rounded">
+                        <div className="text-lg font-bold text-pink-600">{Math.round(meal.sugar_g)}g</div>
+                        <div className="text-xs text-gray-600">🍬 Sugar</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Ingredients */}
               {meal.ingredients && meal.ingredients.length > 0 && (

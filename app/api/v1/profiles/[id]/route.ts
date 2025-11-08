@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import type { Profile } from "@/app/types/lifeengine";
+import { db } from "@/lib/utils/db";
 
-// Demo profiles for Custom GPT Actions
+// Demo profiles for Custom GPT Actions (fallback for testing)
 const DEMO_PROFILES: Record<string, Profile> = {
   "ritika-001": {
     profile_id: "ritika-001",
@@ -43,16 +44,73 @@ const DEMO_PROFILES: Record<string, Profile> = {
   },
 };
 
+/**
+ * Convert database profile format to Custom GPT API format
+ */
+function convertToApiProfile(dbProfile: any): Profile {
+  return {
+    profile_id: dbProfile.id,
+    name: dbProfile.name || dbProfile.ui?.name || "User",
+    age: dbProfile.age || dbProfile.demographics?.age || dbProfile.ui?.age || 30,
+    gender: (dbProfile.gender || dbProfile.demographics?.sex || dbProfile.ui?.gender || "other").toLowerCase(),
+    location: dbProfile.contact?.location || "Global",
+    goal: Array.isArray(dbProfile.goals) 
+      ? dbProfile.goals.join(", ") 
+      : dbProfile.ui?.goals?.[0] || dbProfile.lifestyle?.primaryGoal || "general wellness",
+    plan_type: Array.isArray(dbProfile.ui?.planTypes) 
+      ? dbProfile.ui.planTypes 
+      : ["combined"],
+    preferred_time: dbProfile.preferredTime || dbProfile.ui?.preferredTime || "flexible",
+    diet_type: dbProfile.nutrition?.dietType || "vegetarian",
+    activity_level: dbProfile.lifestyle?.activityLevel || "moderate",
+    work_schedule: dbProfile.schedule?.notes || "9am-5pm",
+    sleep_hours: dbProfile.health?.sleepHours || 7,
+    stress_level: dbProfile.health?.stressLevel || "medium",
+    chronic_conditions: dbProfile.health?.chronicConditions || [],
+    mental_state: dbProfile.health?.mentalState || "balanced",
+    has_equipment: Array.isArray(dbProfile.equipment) && dbProfile.equipment.length > 0,
+    language: "English",
+  };
+}
+
 export async function GET(
   _request: Request,
   context: { params: { id: string } }
 ) {
   const { id } = context.params;
-  const profile = DEMO_PROFILES[id];
 
-  if (!profile) {
-    return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+  try {
+    // First check if it's a demo profile
+    if (DEMO_PROFILES[id]) {
+      console.log(`[v1/profiles] Returning demo profile: ${id}`);
+      return NextResponse.json(DEMO_PROFILES[id]);
+    }
+
+    // Try to fetch real profile from database
+    console.log(`[v1/profiles] Fetching real profile from DB: ${id}`);
+    const dbProfile = await db.getProfile(id);
+
+    if (!dbProfile) {
+      console.log(`[v1/profiles] Profile not found: ${id}`);
+      return NextResponse.json(
+        { 
+          error: "Profile not found", 
+          message: `No profile found with ID: ${id}. Available demo profiles: ritika-001, demo-002` 
+        }, 
+        { status: 404 }
+      );
+    }
+
+    // Convert to API format
+    const apiProfile = convertToApiProfile(dbProfile);
+    console.log(`[v1/profiles] Returning real profile: ${id} (${apiProfile.name})`);
+    
+    return NextResponse.json(apiProfile);
+  } catch (error: any) {
+    console.error(`[v1/profiles] Error fetching profile ${id}:`, error);
+    return NextResponse.json(
+      { error: "Internal server error", message: error.message },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json(profile);
 }
