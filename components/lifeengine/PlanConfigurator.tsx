@@ -1,5 +1,6 @@
 "use client";
 
+import CheckboxDropdown from "@/app/components/ui/CheckboxDropdown";
 import {
   PLAN_TYPE_OPTIONS,
   DURATION_OPTIONS,
@@ -25,29 +26,18 @@ export function PlanConfigurator({ form, setForm }: Props) {
   const intensityOptions = INTENSITY_OPTIONS.map((opt) => ({ ...opt }));
   const formatOptions = FORMAT_OPTIONS.map((opt) => ({ ...opt }));
   const routineOptions = ROUTINE_OPTIONS.map((opt) => ({ ...opt }));
-  
-  const toggleValue = (key: keyof PlanFormState, value: string) => {
-    setForm((prev) => {
-      const current = prev[key] as string[];
-      const exists = current.includes(value);
-      const next = exists
-        ? current.filter((val) => val !== value)
-        : [...current, value];
-      return { ...prev, [key]: next };
-    });
-  };
 
   return (
     <div className="space-y-8">
       {/* Plan Types Section */}
       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 shadow-sm">
-        <CheckboxGroup
-          label="🎯 Plan Types"
-          helper="Select one or more plan types to customize your wellness journey"
+        <CheckboxDropdown
+          label="Plan Types"
+          helper="Select up to 3 plan types to customize your wellness journey"
           options={planTypeOptions}
           selected={form.planTypes}
-          onToggle={(val) => toggleValue("planTypes", val)}
-          icon="🎯"
+          onChange={(values) => setForm((prev) => ({ ...prev, planTypes: values.slice(0, 3) }))}
+          maxSelected={3}
         />
       </div>
 
@@ -86,37 +76,37 @@ export function PlanConfigurator({ form, setForm }: Props) {
 
       {/* Focus Areas */}
       <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-200 shadow-sm">
-        <CheckboxGroup
-          label="🎨 Focus Areas"
-          helper="Select specific areas to emphasize in your plan"
+        <CheckboxDropdown
+          label="Focus Areas"
+          helper="Select specific areas to emphasize (max 4)"
           options={FOCUS_AREA_OPTIONS.map((value) => ({ label: value, value }))}
           selected={form.focusAreas}
-          onToggle={(val) => toggleValue("focusAreas", val)}
-          icon="🎨"
+          onChange={(values) => setForm((prev) => ({ ...prev, focusAreas: values.slice(0, 4) }))}
+          maxSelected={4}
         />
       </div>
 
       {/* Goals */}
       <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200 shadow-sm">
-        <CheckboxGroup
-          label="🎖️ Primary Goals"
-          helper="What are you trying to achieve?"
+        <CheckboxDropdown
+          label="Primary Goals"
+          helper="What are you trying to achieve? (max 3)"
           options={GOAL_OPTIONS.map((value) => ({ label: value, value }))}
           selected={form.goals}
-          onToggle={(val) => toggleValue("goals", val)}
-          icon="🎖️"
+          onChange={(values) => setForm((prev) => ({ ...prev, goals: values.slice(0, 3) }))}
+          maxSelected={3}
         />
       </div>
 
       {/* Health Considerations */}
       <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl p-6 border border-red-200 shadow-sm">
-        <CheckboxGroup
-          label="🏥 Health Conditions"
-          helper="Select any conditions to account for in your plan"
+        <CheckboxDropdown
+          label="Health Conditions"
+          helper="Select any conditions to account for (max 4)"
           options={CHRONIC_CONDITION_OPTIONS.map((value) => ({ label: value, value }))}
           selected={form.chronicConditions}
-          onToggle={(val) => toggleValue("chronicConditions", val)}
-          icon="🏥"
+          onChange={(values) => setForm((prev) => ({ ...prev, chronicConditions: values.slice(0, 4) }))}
+          maxSelected={4}
         />
       </div>
 
@@ -160,66 +150,6 @@ export function PlanConfigurator({ form, setForm }: Props) {
             onChange={(value) => setForm((prev) => ({ ...prev, stressLevel: value }))}
           />
         </div>
-      </div>
-    </div>
-  );
-}
-
-type CheckboxGroupProps = {
-  label: string;
-  helper?: string;
-  options: { label: string; value: string }[];
-  selected: string[];
-  onToggle: (value: string) => void;
-  icon?: string;
-};
-
-function CheckboxGroup({ label, helper, options, selected, onToggle, icon }: CheckboxGroupProps) {
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <label className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-          {label}
-        </label>
-        {selected.length > 0 && (
-          <span className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full shadow-sm">
-            {selected.length} selected
-          </span>
-        )}
-      </div>
-      {helper && <p className="text-sm text-gray-600 mb-4">{helper}</p>}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-        {options.map((option) => {
-          const checked = selected.includes(option.value);
-          return (
-            <label
-              key={option.value}
-              className={`
-                flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer
-                transition-all duration-200 ease-in-out
-                ${
-                  checked
-                    ? "bg-blue-100 border-blue-500 shadow-md scale-[1.02]"
-                    : "bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50"
-                }
-              `}
-            >
-              <input
-                type="checkbox"
-                checked={checked}
-                onChange={() => onToggle(option.value)}
-                className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              />
-              <span
-                className={`text-sm ${
-                  checked ? "font-semibold text-gray-900" : "font-medium text-gray-700"
-                }`}
-              >
-                {option.label}
-              </span>
-            </label>
-          );
-        })}
       </div>
     </div>
   );
@@ -281,4 +211,3 @@ function InputField({ label, value, onChange, type = "text", min, max, icon }: I
     </div>
   );
 }
-

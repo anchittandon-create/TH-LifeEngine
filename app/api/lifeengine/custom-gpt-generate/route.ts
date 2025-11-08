@@ -1,5 +1,19 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const OPENAI_API_URL = "https://api.openai.com/v1/responses";
+
+type OpenAIResponse = {
+  output_text?: string[];
+  output?: Array<{
+    content?: Array<{ type: string; text?: string }>;
+  }>;
+  usage?: {
+    input_tokens?: number;
+    output_tokens?: number;
+    total_tokens?: number;
+  };
+  error?: { message?: string };
+};
 
 export async function POST(req: Request) {
   try {
@@ -19,61 +33,68 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!process.env.GOOGLE_API_KEY) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
       return NextResponse.json(
-        { error: "GOOGLE_API_KEY not configured in environment" },
+        { error: "OPENAI_API_KEY not configured in environment" },
         { status: 500 }
       );
     }
 
-    console.log("🤖 [CustomGPT API] Generating plan with AI...");
-    console.log("📝 [CustomGPT API] Prompt length:", prompt.length);
-    console.log("👤 [CustomGPT API] Profile ID:", profileId);
-    console.log("🎯 [CustomGPT API] Model:", model || "gemini-2.0-flash-exp");
+    const modelToUse =
+      model ||
+      process.env.OPENAI_CUSTOM_GPT_ID ||
+      process.env.NEXT_PUBLIC_LIFEENGINE_GPT_ID ||
+      "gpt-4.1-mini";
 
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-    const modelToUse = model && model.startsWith("gemini-") 
-      ? model 
-      : "gemini-2.0-flash-exp"; // Use latest model
-    
-    const aiModel = genAI.getGenerativeModel({
-      model: modelToUse,
-      generationConfig: {
-        temperature: 0.7,
-        topP: 0.9,
-        topK: 40,
-        maxOutputTokens: 8192, // Increased for longer plans
+    const response = await fetch(OPENAI_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
       },
+      body: JSON.stringify({
+        model: modelToUse,
+        input: prompt,
+        temperature: 0.7,
+        max_output_tokens: 6000,
+      }),
     });
 
-    const result = await aiModel.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const data = (await response.json()) as OpenAIResponse;
 
-    console.log("✅ [CustomGPT API] Generated response length:", text.length);
+    if (!response.ok) {
+      const message =
+        data?.error?.message ||
+        `Custom GPT request failed with status ${response.status}`;
+      return NextResponse.json(
+        { error: "CustomGPT request failed", details: message },
+        { status: response.status }
+      );
+    }
 
-    // Track token usage
-    const usageMetadata = response.usageMetadata;
-    const inputTokens = usageMetadata?.promptTokenCount || 0;
-    const outputTokens = usageMetadata?.candidatesTokenCount || 0;
-    const totalTokens = usageMetadata?.totalTokenCount || 0;
+    const planText =
+      data.output_text?.join("\n").trim() ||
+      data.output?.[0]?.content?.map((c) => c.text).join("\n").trim() ||
+      "";
 
-    console.log("📊 [CustomGPT API] Token usage:", {
-      inputTokens,
-      outputTokens,
-      totalTokens,
-    });
+    if (!planText) {
+      return NextResponse.json(
+        { error: "CustomGPT returned an empty response" },
+        { status: 502 }
+      );
+    }
 
     return NextResponse.json({
-      plan: text,
+      plan: planText,
       formatted: true,
       metadata: {
         model: modelToUse,
         profileId,
         tokens: {
-          input: inputTokens,
-          output: outputTokens,
-          total: totalTokens,
+          input: data.usage?.input_tokens ?? 0,
+          output: data.usage?.output_tokens ?? 0,
+          total: data.usage?.total_tokens ?? 0,
         },
         generatedAt: new Date().toISOString(),
       },

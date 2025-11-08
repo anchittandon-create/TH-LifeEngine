@@ -8,6 +8,9 @@ interface CheckboxDropdownProps {
   onChange: (selected: string[]) => void;
   placeholder?: string;
   required?: boolean;
+  helper?: string;
+  maxSelected?: number;
+  disabled?: boolean;
 }
 
 export default function CheckboxDropdown({
@@ -17,6 +20,9 @@ export default function CheckboxDropdown({
   onChange,
   placeholder = "Select options...",
   required = false,
+  helper,
+  maxSelected,
+  disabled = false,
 }: CheckboxDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -33,11 +39,17 @@ export default function CheckboxDropdown({
   }, []);
 
   const toggleOption = (value: string) => {
-    if (selected.includes(value)) {
+    const exists = selected.includes(value);
+    if (exists) {
       onChange(selected.filter((v) => v !== value));
-    } else {
-      onChange([...selected, value]);
+      return;
     }
+
+    if (maxSelected && selected.length >= maxSelected) {
+      return;
+    }
+
+    onChange([...selected, value]);
   };
 
   const displayText = selected.length > 0
@@ -50,11 +62,18 @@ export default function CheckboxDropdown({
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
+      {helper && (
+        <p className="text-xs text-gray-500 mb-1">
+          {helper}
+          {maxSelected ? ` (max ${maxSelected})` : ""}
+        </p>
+      )}
       
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-2 text-left bg-white border border-gray-300 rounded-lg shadow-sm hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        className="w-full px-4 py-2 text-left bg-white border border-gray-300 rounded-lg shadow-sm hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all disabled:opacity-50"
+        disabled={disabled}
       >
         <div className="flex items-center justify-between">
           <span className={selected.length === 0 ? "text-gray-400" : "text-gray-900"}>
@@ -71,7 +90,7 @@ export default function CheckboxDropdown({
         </div>
       </button>
 
-      {isOpen && (
+      {isOpen && !disabled && (
         <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
           {options.map((option) => (
             <label
@@ -81,6 +100,11 @@ export default function CheckboxDropdown({
               <input
                 type="checkbox"
                 checked={selected.includes(option.value)}
+                disabled={
+                  maxSelected
+                    ? !selected.includes(option.value) && selected.length >= maxSelected
+                    : false
+                }
                 onChange={() => toggleOption(option.value)}
                 className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
               />

@@ -75,6 +75,31 @@ export function buildPromptFromForm(form: PromptBuilderInput): string {
   parts.push("3. Considers all health conditions and goals mentioned");
   parts.push("4. Provides actionable, easy-to-follow guidance");
   parts.push("5. Is structured in a clear, organized format");
+  parts.push("");
+  parts.push("Return your answer as VALID JSON matching this shape:");
+  parts.push(`{
+  "motivation": string,
+  "category_tag": string,
+  "summary": string,
+  "weekly_schedule": {
+    "monday": DayPlan,
+    ...
+    "sunday": DayPlan
+  },
+  "recovery_tips": string[],
+  "hydration_goals": string,
+  "metadata": {
+    "generated_by": "gpt",
+    "plan_type": string[],
+    "language": "en",
+    "timestamp": ISO8601,
+    "profile_id": "${form.profileName ?? "unknown"}"
+  },
+  "disclaimer": string
+}
+Where DayPlan contains optional "yoga", "diet", and "holistic" objects mirroring TH_LifeEngine schema.`);
+  parts.push("");
+  parts.push("DO NOT include Markdown fences. Respond with pure JSON only.");
 
   return parts.join("\n");
 }

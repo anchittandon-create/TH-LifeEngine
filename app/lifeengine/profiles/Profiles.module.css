@@ -3,6 +3,37 @@
   gap: var(--space-6);
 }
 
+.feedback {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-weight: 500;
+  border: 1px solid transparent;
+  animation: fadeIn 0.3s ease;
+}
+
+.success {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+.error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (min-width: 960px) {
   .wrapper {
     grid-template-columns: 1.1fr 0.9fr;

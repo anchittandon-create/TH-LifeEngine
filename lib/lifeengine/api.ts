@@ -130,7 +130,11 @@ export async function generatePlan(payload: any): Promise<PlanGenerationResponse
 /**
  * Generates a plan using CustomGPT with AI-generated content
  */
-export async function generatePlanWithGPT(prompt: string): Promise<CustomGPTResponse> {
+export async function generatePlanWithGPT(payload: {
+  prompt: string;
+  profileId: string;
+  model?: string;
+}): Promise<CustomGPTResponse> {
   return withRetry(async () => {
     try {
       const response = await fetchWithTimeout("/api/lifeengine/custom-gpt-generate", {
@@ -138,7 +142,7 @@ export async function generatePlanWithGPT(prompt: string): Promise<CustomGPTResp
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify(payload),
       }, 120000); // 120 second timeout for GPT generation
 
       if (!response.ok) {

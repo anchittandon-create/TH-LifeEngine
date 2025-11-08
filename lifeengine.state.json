@@ -4,7 +4,7 @@
       "id": "prof_anchit",
       "name": "Anchit",
       "demographics": {
-        "age": 34,
+        "age": 27,
         "sex": "M",
         "height": 178,
         "weight": 78
@@ -18,10 +18,9 @@
         "occupation": "Senior Product Manager",
         "timeZone": "Asia/Kolkata",
         "activityLevel": "moderate",
-        "primaryGoal": "PCOD-friendly lean gain",
+        "primaryGoal": "Weight Loss",
         "secondaryGoals": [
-          "stress_balance",
-          "gut_health"
+          "Sleep Cycle Fixing"
         ]
       },
       "health": {
@@ -36,7 +35,7 @@
         ],
         "injuries": [],
         "medications": [],
-        "notes": "Prefers low-impact flows during luteal phase."
+        "notes": "None"
       },
       "nutrition": {
         "dietType": "vegetarian",
@@ -55,8 +54,8 @@
         "daysPerWeek": 5,
         "preferredSlots": [
           {
-            "start": "19:30",
-            "end": "21:00"
+            "start": "18:00",
+            "end": "19:00"
           }
         ],
         "notes": "Avoid late-night sessions on Fridays."
@@ -75,265 +74,746 @@
         "tone": "balanced",
         "indoorOnly": true,
         "level": "intermediate",
-        "coachingNotes": "Enjoys metrics and weekly progress summaries.",
+        "coachingNotes": "None",
         "focusAreas": [
-          "pelvic_floor",
-          "core_strength"
+          "Weight Loss",
+          "Sleep Cycle Fixing"
         ]
       },
-      "coachingNotes": "Cycle-sensitive programming required; integrate hydration reminders.",
+      "coachingNotes": "None",
       "createdAt": "2025-10-19T22:07:08.425Z",
-      "updatedAt": "2025-11-01T03:14:39.401Z",
+      "updatedAt": "2025-11-08T02:13:36.388Z",
       "ui": {
         "id": "prof_anchit",
         "name": "Anchit",
-        "age": 34,
+        "age": 27,
         "gender": "male",
         "goals": [
-          "PCOD-friendly lean gain",
-          "stress_balance",
-          "gut_health"
+          "Weight Loss",
+          "Sleep Cycle Fixing"
         ],
-        "healthConcerns": "Prefers low-impact flows during luteal phase.",
+        "healthConcerns": "None",
         "experience": "intermediate",
-        "preferredTime": "evening",
-        "subscriptionType": "quarterly",
-        "createdAt": "2025-11-01T03:14:39.401Z",
-        "updatedAt": "2025-11-01T03:14:39.401Z"
-      }
-    },
-    {
-      "id": "prof_f6cf230b",
-      "name": "Data Persistence Test User",
-      "demographics": {
-        "age": 25,
-        "sex": "M",
-        "height": 170,
-        "weight": 70
+        "preferredTime": "flexible",
+        "subscriptionType": "custom",
+        "createdAt": "2025-10-19T22:07:08.425Z",
+        "updatedAt": "2025-11-08T02:13:36.388Z"
       },
-      "contact": {
-        "email": "",
-        "phone": "",
-        "location": "Global"
-      },
-      "lifestyle": {
-        "occupation": "Professional",
-        "timeZone": "UTC",
-        "activityLevel": "moderate",
-        "primaryGoal": "weight_loss",
-        "secondaryGoals": []
-      },
-      "health": {
-        "flags": [],
-        "allergies": [],
-        "chronicConditions": [],
-        "injuries": [],
-        "medications": [],
-        "notes": ""
-      },
-      "nutrition": {
-        "dietType": "veg",
-        "cuisinePreference": "indian",
-        "dislikes": [],
-        "supplements": [],
-        "hydrationTargetMl": 2500,
-        "fastingWindow": "12:12"
-      },
-      "schedule": {
-        "timeBudgetMin": 30,
-        "daysPerWeek": 5,
-        "preferredSlots": [
-          {
-            "start": "18:00",
-            "end": "19:00"
-          }
-        ],
-        "notes": ""
-      },
-      "equipment": [
-        "mat"
-      ],
-      "preferences": {
-        "modules": [
-          "fitness",
-          "nutrition"
-        ],
-        "tone": "balanced",
-        "indoorOnly": false,
-        "level": "beginner",
-        "coachingNotes": "",
-        "focusAreas": []
-      },
-      "coachingNotes": "",
-      "createdAt": "2025-11-01T09:13:37.270Z",
-      "updatedAt": "2025-11-01T09:13:37.270Z"
-    },
-    {
-      "name": "Local Test",
-      "age": 25,
+      "age": 27,
       "gender": "male",
       "goals": [
-        "fitness"
+        "Weight Loss",
+        "Sleep Cycle Fixing"
       ],
-      "experience": "beginner",
-      "id": "5ff9e6de-2774-46a1-8b49-79135a80eed2",
-      "healthConcerns": "",
+      "healthConcerns": "None",
+      "experience": "intermediate",
       "preferredTime": "flexible",
-      "subscriptionType": "quarterly",
-      "demographics": {
-        "age": 25,
-        "sex": "M",
-        "height": 170,
-        "weight": 70
-      },
-      "lifestyle": {
-        "primaryGoal": "fitness",
-        "secondaryGoals": [],
-        "timeZone": "UTC",
-        "activityLevel": "light"
-      },
-      "preferences": {
-        "level": "beginner",
-        "focusAreas": [
-          "fitness"
-        ],
-        "coachingNotes": "",
-        "tone": "balanced",
-        "indoorOnly": false
-      },
-      "schedule": {
-        "preferredSlots": [
-          {
-            "start": "18:00",
-            "end": "19:00"
-          }
-        ],
-        "daysPerWeek": 5,
-        "timeBudgetMin": 30
-      },
-      "health": {
-        "notes": "",
-        "flags": [],
-        "allergies": [],
-        "chronicConditions": [],
-        "injuries": [],
-        "medications": []
-      },
-      "nutrition": {
-        "dietType": "veg",
-        "cuisinePreference": "indian",
-        "dislikes": [],
-        "supplements": []
-      },
-      "equipment": [],
-      "contact": {
-        "email": "",
-        "phone": "",
-        "location": "Global"
-      },
-      "coachingNotes": "",
-      "createdAt": "2025-11-01T07:24:16.376Z",
-      "updatedAt": "2025-11-01T07:24:16.376Z",
-      "ui": {
-        "id": "5ff9e6de-2774-46a1-8b49-79135a80eed2",
-        "name": "Local Test",
-        "age": 25,
-        "gender": "male",
-        "goals": [
-          "fitness"
-        ],
-        "healthConcerns": "",
-        "experience": "beginner",
-        "preferredTime": "flexible",
-        "subscriptionType": "quarterly",
-        "createdAt": "2025-11-01T07:24:16.376Z",
-        "updatedAt": "2025-11-01T07:24:16.376Z"
-      }
-    },
-    {
-      "name": "Debug Test",
-      "age": 30,
-      "gender": "male",
-      "goals": [
-        "fitness"
-      ],
-      "experience": "beginner",
-      "id": "e271ba20-caa9-4845-aa68-a86436b1799c",
-      "healthConcerns": "",
-      "preferredTime": "flexible",
-      "subscriptionType": "quarterly",
-      "demographics": {
-        "age": 30,
-        "sex": "M",
-        "height": 170,
-        "weight": 70
-      },
-      "lifestyle": {
-        "primaryGoal": "fitness",
-        "secondaryGoals": [],
-        "timeZone": "UTC",
-        "activityLevel": "light"
-      },
-      "preferences": {
-        "level": "beginner",
-        "focusAreas": [
-          "fitness"
-        ],
-        "coachingNotes": "",
-        "tone": "balanced",
-        "indoorOnly": false
-      },
-      "schedule": {
-        "preferredSlots": [
-          {
-            "start": "18:00",
-            "end": "19:00"
-          }
-        ],
-        "daysPerWeek": 5,
-        "timeBudgetMin": 30
-      },
-      "health": {
-        "notes": "",
-        "flags": [],
-        "allergies": [],
-        "chronicConditions": [],
-        "injuries": [],
-        "medications": []
-      },
-      "nutrition": {
-        "dietType": "veg",
-        "cuisinePreference": "indian",
-        "dislikes": [],
-        "supplements": []
-      },
-      "equipment": [],
-      "contact": {
-        "email": "",
-        "phone": "",
-        "location": "Global"
-      },
-      "coachingNotes": "",
-      "createdAt": "2025-11-01T03:46:24.292Z",
-      "updatedAt": "2025-11-01T03:46:24.292Z",
-      "ui": {
-        "id": "e271ba20-caa9-4845-aa68-a86436b1799c",
-        "name": "Debug Test",
-        "age": 30,
-        "gender": "male",
-        "goals": [
-          "fitness"
-        ],
-        "healthConcerns": "",
-        "experience": "beginner",
-        "preferredTime": "flexible",
-        "subscriptionType": "quarterly",
-        "createdAt": "2025-11-01T03:46:24.292Z",
-        "updatedAt": "2025-11-01T03:46:24.292Z"
-      }
+      "subscriptionType": "custom"
     }
   ],
   "plans": [
+    {
+      "planId": "plan_4f33feea73aa",
+      "profileId": "prof_anchit",
+      "planName": "Plan for Anchit",
+      "inputSummary": "diet + stress_relief | 1 weeks | intermediate",
+      "days": 7,
+      "confidence": 0.9,
+      "warnings": [],
+      "planJSON": {
+        "id": "plan_4f33feea73aa",
+        "profileId": "prof_anchit",
+        "intakeId": "prof_anchit",
+        "goals": [],
+        "createdAt": "2025-11-08T02:14:50.815Z",
+        "days": [
+          {
+            "date": "2025-11-08",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Cat-Cow Pose",
+                "duration": 15,
+                "description": "Cat-Cow Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Warrior II",
+                "duration": 20,
+                "description": "Warrior II yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Bridge Pose",
+                "duration": 15,
+                "description": "Bridge Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Savasana",
+                "duration": 10,
+                "description": "Savasana yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal with Berries & Seeds",
+                "calories": 600,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup with Whole Wheat Bread",
+                "calories": 800,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu Stir-fry with Brown Rice",
+                "calories": 832,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-09",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Downward-Facing Dog",
+                "duration": 15,
+                "description": "Downward-Facing Dog yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Pigeon Pose (with block)",
+                "duration": 20,
+                "description": "Pigeon Pose (with block) yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Seated Forward Bend",
+                "duration": 15,
+                "description": "Seated Forward Bend yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Savasana",
+                "duration": 10,
+                "description": "Savasana yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble with Spinach",
+                "calories": 600,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Chickpeas & Veggies",
+                "calories": 850,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Black Bean Burgers on Buns",
+                "calories": 782,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-10",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Plank Pose",
+                "duration": 15,
+                "description": "Plank Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Cobra Pose",
+                "duration": 20,
+                "description": "Cobra Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Locust Pose",
+                "duration": 15,
+                "description": "Locust Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 10,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt with Fruit & Seeds",
+                "calories": 550,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover Tofu Stir-fry",
+                "calories": 832,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Curry with Basmati Rice",
+                "calories": 850,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-11",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation A",
+                "duration": 25,
+                "description": "Sun Salutation A yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Legs Up The Wall Pose",
+                "duration": 20,
+                "description": "Legs Up The Wall Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Savasana",
+                "duration": 15,
+                "description": "Savasana yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal with Berries & Seeds",
+                "calories": 600,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover Veggie Curry",
+                "calories": 850,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Paneer Tikka with Roasted Veggies",
+                "calories": 782,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-12",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Chair Pose",
+                "duration": 15,
+                "description": "Chair Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Triangle Pose",
+                "duration": 20,
+                "description": "Triangle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Side Plank (Vasisthasana)",
+                "duration": 15,
+                "description": "Side Plank (Vasisthasana) yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Savasana",
+                "duration": 10,
+                "description": "Savasana yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble with Spinach",
+                "calories": 600,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Chickpea Salad Sandwich",
+                "calories": 800,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom & Spinach Pasta",
+                "calories": 832,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-13",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Revolved Lunge Pose",
+                "duration": 20,
+                "description": "Revolved Lunge Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Supine Spinal Twist",
+                "duration": 20,
+                "description": "Supine Spinal Twist yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Happy Baby Pose",
+                "duration": 10,
+                "description": "Happy Baby Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Savasana",
+                "duration": 10,
+                "description": "Savasana yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt with Fruit & Seeds",
+                "calories": 550,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover Mushroom Pasta",
+                "calories": 832,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Lentil Shepherd's Pie",
+                "calories": 850,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-14",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Gentle Flow/Restorative",
+                "duration": 45,
+                "description": "Gentle Flow/Restorative yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Extended Savasana",
+                "duration": 15,
+                "description": "Extended Savasana yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Pancakes with Berries & Maple Syrup",
+                "calories": 650,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Large Mixed Green Salad with Tofu",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Homemade Veggie Pizza",
+                "calories": 832,
+                "description": "Healthy dinner"
+              }
+            ]
+          }
+        ]
+      },
+      "analytics": {
+        "safety_score": 0.95,
+        "diet_match": 0.92,
+        "progression_score": 0.9,
+        "adherence_score": 0.88,
+        "overall": 0.91
+      },
+      "costMetrics": {
+        "inputTokens": 249,
+        "outputTokens": 1840,
+        "totalTokens": 3121,
+        "model": "gemini-2.5-flash"
+      },
+      "createdAt": "2025-11-08T02:14:50.815Z"
+    },
+    {
+      "planId": "plan_777ae79adb1d",
+      "profileId": "prof_anchit",
+      "planName": "Plan for Anchit",
+      "inputSummary": "diet + holistic | 1 weeks | intermediate",
+      "days": 7,
+      "confidence": 0.9,
+      "warnings": [],
+      "planJSON": {
+        "id": "plan_777ae79adb1d",
+        "profileId": "prof_anchit",
+        "intakeId": "prof_anchit",
+        "goals": [],
+        "createdAt": "2025-11-08T02:02:30.170Z",
+        "days": [
+          {
+            "date": "2025-11-08",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation A",
+                "duration": 15,
+                "description": "Sun Salutation A yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Warrior II",
+                "duration": 10,
+                "description": "Warrior II yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Plank Pose",
+                "duration": 10,
+                "description": "Plank Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Savasana",
+                "duration": 10,
+                "description": "Savasana yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal with berries & chia seeds",
+                "calories": 650,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa salad with chickpeas & veggies",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu stir-fry with brown rice",
+                "calories": 778,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-09",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Cat-Cow Pose",
+                "duration": 15,
+                "description": "Cat-Cow Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Bridge Pose",
+                "duration": 15,
+                "description": "Bridge Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Legs Up The Wall",
+                "duration": 15,
+                "description": "Legs Up The Wall yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu scramble with spinach",
+                "calories": 650,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil soup with whole-grain toast",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Black bean burgers on lettuce",
+                "calories": 778,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-10",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Chair Pose",
+                "duration": 15,
+                "description": "Chair Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Triangle Pose",
+                "duration": 15,
+                "description": "Triangle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Dolphin Pose",
+                "duration": 15,
+                "description": "Dolphin Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek yogurt, pumpkin seeds, pear",
+                "calories": 650,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover black bean burgers",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Chickpea curry, cauliflower rice",
+                "calories": 778,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-11",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Pigeon Pose",
+                "duration": 15,
+                "description": "Pigeon Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Seated Forward Bend",
+                "duration": 15,
+                "description": "Seated Forward Bend yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Supine Spinal Twist",
+                "duration": 15,
+                "description": "Supine Spinal Twist yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal with berries & chia seeds",
+                "calories": 650,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover chickpea curry",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie chili with avocado",
+                "calories": 778,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-12",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Warrior I",
+                "duration": 15,
+                "description": "Warrior I yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Side Plank (Vasisthasana)",
+                "duration": 10,
+                "description": "Side Plank (Vasisthasana) yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Locust Pose",
+                "duration": 10,
+                "description": "Locust Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Savasana",
+                "duration": 10,
+                "description": "Savasana yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu scramble with spinach",
+                "calories": 650,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa salad with chickpeas & veggies",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom and lentil bolognese",
+                "calories": 778,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-13",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 15,
+                "description": "Child's Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Bound Angle Pose",
+                "duration": 15,
+                "description": "Bound Angle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Reclined Hero Pose",
+                "duration": 15,
+                "description": "Reclined Hero Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek yogurt, pumpkin seeds, pear",
+                "calories": 650,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover lentil bolognese",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Baked sweet potato, black beans",
+                "calories": 778,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-14",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation B",
+                "duration": 15,
+                "description": "Sun Salutation B yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Downward-Facing Dog",
+                "duration": 15,
+                "description": "Downward-Facing Dog yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Warrior III",
+                "duration": 15,
+                "description": "Warrior III yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal with berries & chia seeds",
+                "calories": 650,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil soup with whole-grain toast",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu stir-fry with brown rice",
+                "calories": 778,
+                "description": "Healthy dinner"
+              }
+            ]
+          }
+        ]
+      },
+      "analytics": {
+        "safety_score": 0.95,
+        "diet_match": 0.92,
+        "progression_score": 0.9,
+        "adherence_score": 0.88,
+        "overall": 0.91
+      },
+      "costMetrics": {
+        "inputTokens": 247,
+        "outputTokens": 2094,
+        "totalTokens": 3798,
+        "model": "gemini-2.5-flash"
+      },
+      "createdAt": "2025-11-08T02:02:30.170Z"
+    },
     {
       "planId": "plan_d31d14938c7d",
       "profileId": "prof_anchit",

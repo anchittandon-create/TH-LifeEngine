@@ -34,10 +34,17 @@ export default function ProfilesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(toFormState(DEFAULT_PROFILE as Profile));
   const [loading, setLoading] = useState(true);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   useEffect(() => {
     fetchProfiles();
   }, []);
+
+  useEffect(() => {
+    if (!feedback) return;
+    const timer = setTimeout(() => setFeedback(null), 4000);
+    return () => clearTimeout(timer);
+  }, [feedback]);
 
   const fetchProfiles = async () => {
     try {
@@ -102,9 +109,9 @@ export default function ProfilesPage() {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    const confirmMessage = `Are you sure you want to delete the profile "${name}"?\n\nThis action cannot be undone and will remove all associated data.`;
-    
-    if (!window.confirm(confirmMessage)) return;
+    if (!window.confirm(`Delete profile "${name}"? This action cannot be undone.`)) {
+      return;
+    }
 
     try {
       const response = await fetch(`/api/lifeengine/profiles?id=${id}`, {
@@ -117,14 +124,14 @@ export default function ProfilesPage() {
           setEditingId(null);
           setForm(toFormState({ ...DEFAULT_PROFILE, id: "" } as Profile));
         }
-        alert(`Profile "${name}" deleted successfully.`);
+        setFeedback({ type: "success", message: `Profile "${name}" deleted.` });
       } else {
         const errorData = await response.json();
-        alert(`Failed to delete profile: ${errorData.error || 'Unknown error'}`);
+        setFeedback({ type: "error", message: errorData.error || "Failed to delete profile." });
       }
     } catch (error) {
       console.error('Failed to delete profile:', error);
-      alert('Failed to delete profile: Network error');
+      setFeedback({ type: "error", message: "Network error while deleting profile." });
     }
   };
 
@@ -134,6 +141,15 @@ export default function ProfilesPage() {
 
   return (
     <div className={styles.wrapper}>
+      {feedback && (
+        <div
+          className={`${styles.feedback} ${
+            feedback.type === "success" ? styles.success : styles.error
+          }`}
+        >
+          {feedback.message}
+        </div>
+      )}
       <section className={styles.section}>
         <div className={styles.headingRow}>
           <h1 className={styles.title}>Profiles</h1>
