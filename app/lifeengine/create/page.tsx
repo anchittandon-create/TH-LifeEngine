@@ -77,8 +77,9 @@ export default function CreatePlan() {
     if (selectedProfileId && selectedProfileId !== "new") {
       const profile = profiles.find(p => p.id === selectedProfileId);
       if (profile) {
-        setFormData({
-          ...formData,
+        // Use functional setState to avoid formData in dependencies (prevents infinite loop)
+        setFormData(prevData => ({
+          ...prevData,
           fullName: profile.name,
           age: profile.age,
           gender: profile.gender,
@@ -87,10 +88,10 @@ export default function CreatePlan() {
           // Map experience to intensity
           intensity: profile.experience === "beginner" ? "low" : 
                      profile.experience === "advanced" ? "high" : "medium",
-        });
+        }));
       }
     }
-  }, [selectedProfileId, profiles]);
+  }, [selectedProfileId, profiles]); // Safe - no formData dependency
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

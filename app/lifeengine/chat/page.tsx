@@ -189,20 +189,11 @@ export default function UseCustomGPTPage() {
     <main className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-10">
       <div className="max-w-5xl mx-auto px-6 space-y-10">
         <div className="text-center space-y-3">
-          <h1 className="text-4xl font-bold text-gray-900">🤖 Use Custom GPT</h1>
+          <h1 className="text-4xl font-bold text-gray-900">🤖 AI Plan Generator</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Generate personalized wellness plans using TH_LifeEngine Companion GPT
+            Generate personalized wellness plans using advanced AI
           </p>
         </div>
-
-                  </p>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm text-red-800">
-            {error}
-          </div>
-        )}
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm text-red-800">

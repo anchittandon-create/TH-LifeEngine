@@ -15,16 +15,31 @@ export default function Sidebar() {
   const [rootUser, setRootUser] = useState<any>(null);
 
   useEffect(() => {
-    // Initialize root user on mount
+    // Initialize root user on mount - RUNS ONLY ONCE
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('th_lifeengine_root_user');
       if (stored) {
-        const user = JSON.parse(stored);
-        user.lastLogin = new Date().toISOString();
-        localStorage.setItem('th_lifeengine_root_user', JSON.stringify(user));
-        setRootUser(user);
+        try {
+          const user = JSON.parse(stored);
+          // Only update lastLogin, don't write back to localStorage to avoid loops
+          user.lastLogin = new Date().toISOString();
+          setRootUser(user);
+        } catch (err) {
+          console.error('Failed to parse user data:', err);
+          // Create fresh user if data is corrupted
+          const newUser = {
+            id: `root_${Date.now()}`,
+            username: 'root',
+            email: 'root@thlifeengine.com',
+            role: 'root',
+            createdAt: new Date().toISOString(),
+            lastLogin: new Date().toISOString()
+          };
+          localStorage.setItem('th_lifeengine_root_user', JSON.stringify(newUser));
+          setRootUser(newUser);
+        }
       } else {
-        // Create root user
+        // Create root user only if doesn't exist
         const newUser = {
           id: `root_${Date.now()}`,
           username: 'root',
@@ -37,7 +52,7 @@ export default function Sidebar() {
         setRootUser(newUser);
       }
     }
-  }, []);
+  }, []); // Empty dependency array - runs only once on mount
 
   return (
     <aside className="sidebar" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
