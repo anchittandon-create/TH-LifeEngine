@@ -13,7 +13,6 @@ import type { Profile } from "@/lib/ai/schemas";
 import type { LifeEnginePlan } from "@/app/types/lifeengine";
 import {
   defaultPlanFormState,
-  describePlanBrief,
   type PlanFormState,
 } from "@/lib/lifeengine/planConfig";
 import { PlanConfigurator } from "@/components/lifeengine/PlanConfigurator";
@@ -22,11 +21,7 @@ import { requestPlanFromCustomGPT, fallbackToRuleEngine } from "@/lib/lifeengine
 import { savePlanRecord } from "@/lib/lifeengine/storage";
 import { formatErrorMessage } from "@/lib/lifeengine/api";
 
-const GPT_URL =
-  process.env.NEXT_PUBLIC_LIFEENGINE_GPT_URL ||
-  "https://chatgpt.com/g/g-690630c1dfe48191b63fc09f8f024ccb-th-lifeengine-companion?ref=mini";
-
-export default function UseCustomGPTPage() {
+export default function AIWellnessArchitectPage() {
   const router = useRouter();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState("");
@@ -59,16 +54,6 @@ export default function UseCustomGPTPage() {
   };
 
   const selectedProfile = profiles.find((p) => p.id === selectedProfileId);
-  const planBrief = describePlanBrief(selectedProfileId || "unknown", form);
-
-  const openGPT = async () => {
-    try {
-      await navigator.clipboard.writeText(planBrief);
-    } catch (err) {
-      console.warn("Failed to copy prompt", err);
-    }
-    window.open(GPT_URL, "_blank", "noopener,noreferrer");
-  };
 
   const handleGenerate = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -131,12 +116,12 @@ export default function UseCustomGPTPage() {
       try {
         const fallbackPlanId = await fallbackToRuleEngine(form, selectedProfileId);
         alert(
-          `Custom GPT failed (${message}). A rule-based plan was generated instead. Redirecting you now.`
+          `AI generation failed (${message}). A rule-based plan was generated instead. Redirecting you now.`
         );
         router.push(`/lifeengine/plan/${fallbackPlanId}`);
       } catch (fallbackError) {
         setError(
-          `Custom GPT failed (${message}) and fallback generation also failed: ${formatErrorMessage(
+          `AI generation failed (${message}) and fallback generation also failed: ${formatErrorMessage(
             fallbackError
           )}`
         );
@@ -196,10 +181,10 @@ export default function UseCustomGPTPage() {
       <div className="max-w-7xl mx-auto px-6 space-y-10">
         {/* Header */}
         <div className="text-center space-y-3">
-          <div className="text-6xl mb-4">🤖</div>
-          <h1 className="text-4xl font-bold text-gray-900">AI-Powered Plan Generation</h1>
+          <div className="text-6xl mb-4">�</div>
+          <h1 className="text-4xl font-bold text-gray-900">AI Wellness Architect</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Generate personalized wellness plans using advanced AI (Google Gemini) with your Custom GPT prompts
+            Generate hyper-personalized wellness plans with advanced AI - powered by TH_LifeEngine's intelligence
           </p>
         </div>
 
@@ -213,25 +198,25 @@ export default function UseCustomGPTPage() {
               <span className="flex-shrink-0 w-6 h-6 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center text-sm font-bold">
                 1
               </span>
-              Configure your plan below with the same options as "Create Plan"
+              Select your profile and configure your wellness plan preferences below
             </li>
             <li className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center text-sm font-bold">
                 2
               </span>
-              Click "Generate with AI" for advanced AI-powered plan generation using Google Gemini
+              Click "Generate Your Plan" and our AI will create a hyper-personalized wellness program
             </li>
             <li className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center text-sm font-bold">
                 3
               </span>
-              Optionally open the Custom GPT tab to refine via chat (prompt auto-copied)
+              Review your plan with step-by-step instructions for yoga, exercises, and meals
             </li>
             <li className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center text-sm font-bold">
                 4
               </span>
-              Download your plan as PDF or JSON once generation completes
+              Download your plan as PDF or JSON for offline access
             </li>
           </ol>
         </div>
@@ -318,26 +303,19 @@ export default function UseCustomGPTPage() {
           {/* Actions */}
           <div className="flex flex-wrap gap-4">
             <Button type="submit" disabled={loading || !selectedProfileId}>
-              {loading ? "Generating..." : "✨ Generate with AI"}
-            </Button>
-            <Button type="button" variant="ghost" onClick={openGPT}>
-              🚀 Open Custom GPT in ChatGPT
+              {loading ? "🔄 Generating Your Plan..." : "✨ Generate Your Plan"}
             </Button>
           </div>
         </form>
 
-        {/* GPT Prompt Brief */}
-        <PlanBrief
-          block={planBrief}
-          copyBrief={() => navigator.clipboard.writeText(planBrief)}
-        />
+        {/* GPT Prompt Brief - Removed, not needed for in-app generation */}
 
         {/* Generated Plan */}
         {plan && (
           <div id="generated-plan" className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 space-y-4">
             <div className="flex flex-wrap gap-3 items-center justify-between">
               <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
-                <span className="text-2xl">📖</span> AI-Generated Plan
+                <span className="text-2xl">📖</span> Your Personalized Wellness Plan
               </h2>
               <div className="flex flex-wrap gap-3">
                 <Button variant="ghost" type="button" onClick={() => setShowJson(!showJson)}>
@@ -369,45 +347,11 @@ export default function UseCustomGPTPage() {
             <div className="text-6xl mb-4">🌟</div>
             <h3 className="text-xl font-semibold text-gray-700 mb-2">No plan yet</h3>
             <p className="text-gray-600">
-              Configure your profile and preferences above, then click "Generate with Custom GPT" to get started.
+              Configure your profile and preferences above, then click "Generate Your Plan" to get started.
             </p>
           </div>
         )}
       </div>
     </main>
-  );
-}
-
-type PlanBriefProps = {
-  block: string;
-  copyBrief: () => Promise<void> | void;
-};
-
-function PlanBrief({ block, copyBrief }: PlanBriefProps) {
-  return (
-    <div className="bg-purple-50 border border-purple-100 rounded-xl p-4 space-y-3">
-      <div className="flex items-center gap-2 justify-between">
-        <div className="font-semibold text-purple-800 flex items-center gap-2">
-          <span className="text-xl">📝</span> GPT Prompt Snapshot
-        </div>
-        <button
-          onClick={copyBrief}
-          className="text-sm text-purple-600 hover:text-purple-800 font-semibold"
-        >
-          Copy Brief
-        </button>
-      </div>
-      <textarea
-        readOnly
-        aria-label="GPT Prompt Brief"
-        title="GPT Prompt Brief"
-        className="w-full border border-purple-200 rounded-lg bg-white/80 text-sm p-3 text-gray-700"
-        rows={6}
-        value={block}
-      />
-      <p className="text-xs text-purple-600">
-        The brief is automatically copied when you open the Custom GPT tab.
-      </p>
-    </div>
   );
 }
