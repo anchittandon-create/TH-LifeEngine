@@ -6,8 +6,8 @@ const NAV:[string,string][]= [
   ["/lifeengine","Home"],
   ["/lifeengine/dashboard","Dashboard"],
   ["/lifeengine/profiles","Profiles"],
-  ["/lifeengine/create-v2","Create Plan"],
-  ["/lifeengine/chat-v2","Use Custom GPT"],
+  ["/lifeengine/create","Create Plan"],
+  ["/lifeengine/chat","Use Custom GPT"],
   ["/lifeengine/plan","My Plans"],
   ["/lifeengine/plan-demo","📔 Plan Demo"],
   ["/lifeengine/settings","Settings"]

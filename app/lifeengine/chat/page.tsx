@@ -22,6 +22,8 @@ export default function UseCustomGPTPage() {
   const [showJson, setShowJson] = useState(false);
   const [rawPlanText, setRawPlanText] = useState("");
   const planRef = useRef<HTMLDivElement>(null);
+  const customGptUrl = process.env.NEXT_PUBLIC_LIFEENGINE_GPT_URL;
+  const customGptModel = process.env.NEXT_PUBLIC_LIFEENGINE_GPT_ID;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,14 +60,16 @@ export default function UseCustomGPTPage() {
         setLoadingMessage("📋 Creating step-by-step instructions...");
       }, 15000);
       
-      // Call API to generate plan using Google Gemini
+      const gptProfileId = `gpt_${Date.now()}`;
+
+      // Call API to generate plan via Custom GPT
       const response = await fetch("/api/lifeengine/custom-gpt-generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt,
-          profileId: `gpt_${Date.now()}`,
-          model: process.env.GEMINI_MODEL || "gemini-1.5-flash-8b"
+          profileId: gptProfileId,
+          model: customGptModel,
         }),
       });
 
@@ -97,10 +101,10 @@ export default function UseCustomGPTPage() {
         setGeneratedPlan(parsedPlan);
         
         // Save plan
-        const planId = `gpt_${Date.now()}`;
+        const planId = `gpt_plan_${Date.now()}`;
         savePlanRecord({
           id: planId,
-          profileId: `gpt_${Date.now()}`,
+          profileId: gptProfileId,
           planName: `Plan for ${formData.fullName}`,
           planTypes: formData.planTypes,
           createdAt: new Date().toISOString(),
@@ -198,6 +202,18 @@ export default function UseCustomGPTPage() {
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Powered by advanced AI to create hyper-personalized wellness plans with comprehensive step-by-step guidance
           </p>
+          {customGptUrl && (
+            <div className="mt-6 flex justify-center">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => window.open(customGptUrl, "_blank", "noopener,noreferrer")}
+                className="px-6 py-3 text-base"
+              >
+                🔗 Open TH-LifeEngine Companion GPT
+              </Button>
+            </div>
+          )}
         </header>
 
         {/* How It Works */}

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
+import PlanPreview from "@/app/components/PlanPreview";
 import type { LifeEnginePlan, WeeklySchedule, DayPlan as CustomDayPlan } from "@/app/types/lifeengine";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -72,7 +73,10 @@ export default function PlanDetailPage({ params }: Props) {
 
   const notebookDays = useMemo<NotebookDay[]>(() => {
     if (customPlan) {
-      return normalizeCustomPlan(customPlan.weekly_schedule);
+      const customDays = normalizeCustomPlan(customPlan.weekly_schedule);
+      if (customDays.length) {
+        return customDays;
+      }
     }
     if (rulePlan) {
       return normalizeRulePlan(rulePlan);
@@ -438,12 +442,12 @@ function DayPage({ day }: { day: NotebookDay }) {
 function normalizeRulePlan(plan: RulePlan): NotebookDay[] {
   return (plan.days || []).map((day, idx) => {
     const yogaActivity = day.activities?.find((act) => act.type === "movement" || act.type === "yoga");
-    const exerciseActivities = (day.activities || []).filter(
-      (act) => act.type === "habit" || act.type === "movement" || act.type === "exercise"
+    const exerciseActivities = (day.activities || []).filter((act) =>
+      ["habit", "movement", "exercise"].includes(act.type)
     );
 
     const meals = (day.meals || []).map((meal) => ({
-      title: `${meal.type}: ${meal.name}`,
+      title: `${capitalize(meal.type)}: ${meal.name}`,
       portion: `${meal.calories} kcal`,
       recipe: [meal.description || "Enjoy mindfully."],
     }));
@@ -459,12 +463,12 @@ function normalizeRulePlan(plan: RulePlan): NotebookDay[] {
         ? {
             title: yogaActivity.name,
             duration: `${yogaActivity.duration} min`,
-            steps: [yogaActivity.description],
+            steps: yogaActivity.description ? [yogaActivity.description] : ["Gentle flow and breathwork."],
           }
         : null,
       exercise: exerciseActivities.map((act) => ({
         name: act.name,
-        sets: `${act.duration} minutes`,
+        sets: `${act.duration} min`,
         cues: act.description,
       })),
       meals,
@@ -474,8 +478,7 @@ function normalizeRulePlan(plan: RulePlan): NotebookDay[] {
 }
 
 function normalizeCustomPlan(schedule: WeeklySchedule): NotebookDay[] {
-  const days: NotebookDay[] = [];
-  const order: (keyof WeeklySchedule)[] = [
+  const orderedKeys: (keyof WeeklySchedule)[] = [
     "monday",
     "tuesday",
     "wednesday",
@@ -485,14 +488,16 @@ function normalizeCustomPlan(schedule: WeeklySchedule): NotebookDay[] {
     "sunday",
   ];
 
-  order.forEach((key, idx) => {
+  const days: NotebookDay[] = [];
+
+  orderedKeys.forEach((key) => {
     const dayPlan = schedule[key];
     if (!dayPlan) return;
     days.push({
-      dayNumber: idx + 1,
-      dateLabel: key.charAt(0).toUpperCase() + key.slice(1),
+      dayNumber: days.length + 1,
+      dateLabel: capitalize(key),
       yoga: normalizeYoga(dayPlan),
-      exercise: normalizeExercise(dayPlan),
+      exercise: normalizeExercises(dayPlan),
       meals: normalizeMeals(dayPlan),
       tips: normalizeTips(dayPlan),
     });
@@ -502,63 +507,139 @@ function normalizeCustomPlan(schedule: WeeklySchedule): NotebookDay[] {
 }
 
 function normalizeYoga(dayPlan: CustomDayPlan): NotebookDay["yoga"] {
-  if (!dayPlan?.yoga) return null;
+  const session = dayPlan?.yoga;
+  if (!session) return null;
+
+  const steps =
+    session.sequence?.map((pose) => {
+      const parts: string[] = [];
+      parts.push(`${pose.name}${pose.duration_min ? ` – ${pose.duration_min} min` : ""}`);
+      if (pose.steps?.length) {
+        parts.push(...pose.steps);
+      }
+      if (pose.breathing_instructions) {
+        parts.push(`Breathing: ${pose.breathing_instructions}`);
+      }
+      if (pose.benefits) {
+        parts.push(`Benefits: ${pose.benefits}`);
+      }
+      if (pose.modifications) {
+        parts.push(`Modifications: ${pose.modifications}`);
+      }
+      return parts.join(" · ");
+    }) ?? ["Gentle flow focused on mindful breathing."];
+
   return {
-    title: dayPlan.yoga.focus_area || "Balanced Flow",
-    duration: dayPlan.yoga.warmup_min
-      ? `${dayPlan.yoga.warmup_min + (dayPlan.yoga.cooldown_min || 0)} min`
-      : undefined,
-    steps:
-      dayPlan.yoga.sequence?.map((pose) => {
-        const details = [`${pose.name} – ${pose.duration_min} min`];
-        if (pose.focus) details.push(`Focus: ${pose.focus}`);
-        if (pose.modifications) details.push(`Modifications: ${pose.modifications}`);
-        return details.join(". ");
-      }) || [],
-    notes: dayPlan.yoga.journal_prompt,
+    title: session.focus_area || "Balanced Flow",
+    duration:
+      session.warmup_min || session.cooldown_min
+        ? `${(session.warmup_min ?? 0) + (session.cooldown_min ?? 0)} min`
+        : undefined,
+    steps,
+    notes: session.journal_prompt || session.breathwork || undefined,
   };
 }
 
-function normalizeExercise(dayPlan: CustomDayPlan): NotebookDay["exercise"] {
-  if (!dayPlan?.strength && !dayPlan?.cardio) {
+function normalizeExercises(dayPlan: CustomDayPlan): NotebookDay["exercise"] {
+  if (!Array.isArray(dayPlan?.exercises) || !dayPlan.exercises.length) {
     return [];
   }
-  const exerciseBlocks: NotebookDay["exercise"] = [];
-  const blocks = [dayPlan.strength, dayPlan.cardio].filter(Boolean) as Array<
-    NonNullable<CustomDayPlan["strength"]>
-  >;
-  blocks.forEach((block) => {
-    if (Array.isArray(block)) {
-      block.forEach((item) =>
-        exerciseBlocks.push({
-          name: item.name,
-          sets: item.sets ? `${item.sets} sets` : undefined,
-          cues: item.cues,
-          tips: item.tips,
-        })
-      );
-    }
+
+  return dayPlan.exercises.map((exercise) => {
+    const setsReps =
+      exercise.sets && exercise.reps
+        ? `${exercise.sets} × ${typeof exercise.reps === "number" ? `${exercise.reps} reps` : exercise.reps}`
+        : undefined;
+    const duration = exercise.duration_min ? `${exercise.duration_min} min` : undefined;
+    const cues = exercise.steps?.length
+      ? exercise.steps.join(" → ")
+      : exercise.description || exercise.type || "";
+    const tips = exercise.form_cues?.length
+      ? `Form: ${exercise.form_cues.join(" • ")}`
+      : exercise.common_mistakes?.length
+      ? `Avoid: ${exercise.common_mistakes.join(" • ")}`
+      : exercise.progressions || exercise.regressions || undefined;
+
+    return {
+      name: exercise.name,
+      sets: setsReps || duration,
+      cues,
+      tips,
+    };
   });
-  return exerciseBlocks;
 }
 
 function normalizeMeals(dayPlan: CustomDayPlan): NotebookDay["meals"] {
-  if (!dayPlan?.nutrition) return [];
-  const { meals } = dayPlan.nutrition;
-  if (!meals) return [];
-  return Object.entries(meals).map(([key, meal]) => ({
-    title: `${capitalize(key)}: ${meal?.title || meal?.name || "Meal"}`,
-    portion: meal?.portion_guidance,
-    recipe: meal?.steps || meal?.instructions || (meal?.notes ? [meal.notes] : []),
-  }));
+  const diet = (dayPlan as any).diet ?? (dayPlan as any).nutrition;
+  if (!diet) return [];
+
+  const meals: NotebookDay["meals"] = [];
+  const addMeal = (label: string, meal: any) => {
+    if (!meal) return;
+    meals.push({
+      title: `${label}: ${meal.title || meal.name || "Meal"}`,
+      portion: meal.portion_guidance || meal.portions,
+      recipe: collectRecipeSteps(meal),
+    });
+  };
+
+  addMeal("Breakfast", diet.breakfast);
+  addMeal("Lunch", diet.lunch);
+  addMeal("Dinner", diet.dinner);
+
+  if (Array.isArray(diet.snacks)) {
+    diet.snacks.forEach((snack: any, index: number) => addMeal(`Snack ${index + 1}`, snack));
+  }
+
+  if (diet.evening_tea) {
+    addMeal("Evening Tea", diet.evening_tea);
+  }
+
+  return meals;
+}
+
+function collectRecipeSteps(meal: any): string[] {
+  if (Array.isArray(meal?.recipe_steps) && meal.recipe_steps.length) {
+    return meal.recipe_steps;
+  }
+  if (Array.isArray(meal?.steps) && meal.steps.length) {
+    return meal.steps;
+  }
+  if (Array.isArray(meal?.instructions) && meal.instructions.length) {
+    return meal.instructions;
+  }
+  if (Array.isArray(meal?.ingredients) && meal.ingredients.length) {
+    return meal.ingredients;
+  }
+  if (meal?.notes) {
+    return [meal.notes];
+  }
+  return ["Follow intuitive cooking cues based on ingredients provided."];
 }
 
 function normalizeTips(dayPlan: CustomDayPlan): string[] {
   const tips: string[] = [];
-  if (dayPlan?.holistic?.mindfulness) tips.push(`Mindfulness: ${dayPlan.holistic.mindfulness}`);
-  if (dayPlan?.holistic?.affirmation) tips.push(`Affirmation: ${dayPlan.holistic.affirmation}`);
-  if (dayPlan?.holistic?.sleep) tips.push(`Sleep: ${dayPlan.holistic.sleep}`);
-  if (dayPlan?.holistic?.rest_day) tips.push("Rest day – focus on recovery.");
+
+  if (dayPlan?.holistic?.mindfulness) {
+    tips.push(`Mindfulness: ${dayPlan.holistic.mindfulness}`);
+  }
+  if (dayPlan?.holistic?.affirmation) {
+    tips.push(`Affirmation: ${dayPlan.holistic.affirmation}`);
+  }
+  if (dayPlan?.holistic?.sleep) {
+    tips.push(`Sleep Focus: ${dayPlan.holistic.sleep}`);
+  }
+  if (dayPlan?.holistic?.rest_day) {
+    tips.push("Rest day – prioritize gentle movement and reflection.");
+  }
+  if (dayPlan?.yoga?.journal_prompt) {
+    tips.push(`Journal: ${dayPlan.yoga.journal_prompt}`);
+  }
+  const dietNotes = (dayPlan as any)?.diet?.notes || (dayPlan as any)?.nutrition?.notes;
+  if (dietNotes) {
+    tips.push(`Nutrition Tip: ${dietNotes}`);
+  }
+
   return tips.length ? tips : ["Stay hydrated and note how you feel today."];
 }
 
