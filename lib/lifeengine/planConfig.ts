@@ -27,12 +27,12 @@ export const PLAN_TYPE_OPTIONS = [
 ] as const;
 
 export const DURATION_OPTIONS = [
-  { label: "7 Days (Jumpstart)", value: "7_days" },
-  { label: "14 Days (Quick Reset)", value: "14_days" },
-  // Longer durations disabled for cost control (hobby project)
-  // { label: "28 Days (4 Weeks)", value: "28_days" },
-  // { label: "60 Days (8 Weeks)", value: "60_days" },
-  // { label: "90 Days (12 Weeks)", value: "90_days" },
+  { label: "1 Week", value: "1_week" },
+  { label: "2 Weeks", value: "2_weeks" },
+  { label: "3 Weeks", value: "3_weeks" },
+  { label: "1 Month", value: "1_month" },
+  { label: "3 Months", value: "3_months" },
+  { label: "6 Months", value: "6_months" },
 ] as const;
 
 export const INTENSITY_OPTIONS = [
@@ -233,9 +233,22 @@ export const defaultPlanFormState: PlanFormState = {
 };
 
 export function buildIntakeFromForm(form: PlanFormState, overridePlanType?: string) {
-  const durationMonths = Number(form.duration) || 1;
+  // Parse duration from format like "1_week", "2_weeks", "3_months", etc.
+  let durationInDays: number;
+  
+  if (form.duration.includes("week")) {
+    const weeks = parseInt(form.duration.match(/\d+/)?.[0] || "1", 10);
+    durationInDays = weeks * 7;
+  } else if (form.duration.includes("month")) {
+    const months = parseInt(form.duration.match(/\d+/)?.[0] || "1", 10);
+    durationInDays = months * 30;
+  } else {
+    // Fallback to days
+    durationInDays = parseInt(form.duration.match(/\d+/)?.[0] || "7", 10);
+  }
+  
   const now = Date.now();
-  const end = new Date(now + durationMonths * 30 * 24 * 60 * 60 * 1000);
+  const end = new Date(now + durationInDays * 24 * 60 * 60 * 1000);
   const planType = overridePlanType ?? form.planTypes[0] ?? PLAN_TYPE_OPTIONS[0].value;
 
   return {
@@ -254,10 +267,14 @@ export function buildIntakeFromForm(form: PlanFormState, overridePlanType?: stri
 
 export function describePlanBrief(profileId: string, form: PlanFormState) {
   const planTypes = form.planTypes.length ? form.planTypes : [PLAN_TYPE_OPTIONS[0].value];
+  
+  // Get human-readable duration from DURATION_OPTIONS
+  const durationLabel = DURATION_OPTIONS.find(opt => opt.value === form.duration)?.label || form.duration;
+  
   return [
     `profile_id: ${profileId}`,
     `plan_types: ${planTypes.join(", ")}`,
-    `duration_months: ${form.duration}`,
+    `duration: ${durationLabel}`,
     `intensity: ${form.intensity}`,
     `focus_areas: ${form.focusAreas.length ? form.focusAreas.join(", ") : "coach to determine"}`,
     `output_format: ${form.format}`,

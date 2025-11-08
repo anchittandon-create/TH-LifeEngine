@@ -118,8 +118,23 @@ export default function CreatePlan() {
         : `inline_${Date.now()}`;
         
       const normalizedGender = GENDER_MAP[formData.gender] ?? "Other";
-      const durationValue = parseInt(formData.duration.match(/\d+/)?.[0] || "1", 10);
-      const durationUnit = formData.duration.includes("week") ? "weeks" : "days";
+      
+      // Parse duration from the new format (e.g., "1_week", "2_weeks", "3_months")
+      let durationValue: number;
+      let durationUnit: "days" | "weeks" | "months";
+      
+      if (formData.duration.includes("week")) {
+        durationValue = parseInt(formData.duration.match(/\d+/)?.[0] || "1", 10);
+        durationUnit = "weeks";
+      } else if (formData.duration.includes("month")) {
+        durationValue = parseInt(formData.duration.match(/\d+/)?.[0] || "1", 10);
+        durationUnit = "months";
+      } else {
+        // Fallback to days
+        durationValue = parseInt(formData.duration.match(/\d+/)?.[0] || "7", 10);
+        durationUnit = "days";
+      }
+      
       const preferredSlot = SLOT_PRESETS[formData.preferredTime] ?? SLOT_PRESETS.flexible;
       const daysPerWeek =
         formData.activityLevel === "intense" ? 6 : formData.activityLevel === "sedentary" ? 4 : 5;
