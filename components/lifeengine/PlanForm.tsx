@@ -130,8 +130,7 @@ export function PlanForm({ formData, setFormData, errors = {} }: Props) {
             </label>
             <input
               type="number"
-              min={10}
-              max={100}
+              min={1}
               value={formData.age}
               onChange={(e) => updateField("age", parseInt(e.target.value) || 0)}
               onBlur={() => validateField("age", formData.age)}
@@ -282,8 +281,7 @@ export function PlanForm({ formData, setFormData, errors = {} }: Props) {
             </label>
             <input
               type="number"
-              min={4}
-              max={12}
+              min={0}
               step={0.5}
               value={formData.sleepHours}
               onChange={(e) => updateField("sleepHours", e.target.value)}
