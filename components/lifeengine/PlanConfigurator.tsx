@@ -34,11 +34,10 @@ export function PlanConfigurator({ form, setForm }: Props) {
       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 shadow-sm">
         <CheckboxDropdown
           label="Plan Types"
-          helper="Select up to 3 plan types to customize your wellness journey"
+          helper="Select plan types to customize your wellness journey"
           options={planTypeOptions}
           selected={form.planTypes}
-          onChange={(values) => setForm((prev) => ({ ...prev, planTypes: values.slice(0, 3) }))}
-          maxSelected={3}
+          onChange={(values) => setForm((prev) => ({ ...prev, planTypes: values }))}
         />
       </div>
 
@@ -79,11 +78,10 @@ export function PlanConfigurator({ form, setForm }: Props) {
       <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-200 shadow-sm">
         <CheckboxDropdown
           label="Focus Areas"
-          helper="Select specific areas to emphasize (max 4)"
+          helper="Select specific areas to emphasize"
           options={FOCUS_AREA_OPTIONS.map((value) => ({ label: value, value }))}
           selected={form.focusAreas}
-          onChange={(values) => setForm((prev) => ({ ...prev, focusAreas: values.slice(0, 4) }))}
-          maxSelected={4}
+          onChange={(values) => setForm((prev) => ({ ...prev, focusAreas: values }))}
         />
       </div>
 
@@ -91,11 +89,10 @@ export function PlanConfigurator({ form, setForm }: Props) {
       <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200 shadow-sm">
         <CheckboxDropdown
           label="Primary Goals"
-          helper="What are you trying to achieve? (max 3)"
+          helper="What are you trying to achieve?"
           options={GOAL_OPTIONS.map((value) => ({ label: value, value }))}
           selected={form.goals}
-          onChange={(values) => setForm((prev) => ({ ...prev, goals: values.slice(0, 3) }))}
-          maxSelected={3}
+          onChange={(values) => setForm((prev) => ({ ...prev, goals: values }))}
         />
       </div>
 
@@ -103,11 +100,10 @@ export function PlanConfigurator({ form, setForm }: Props) {
       <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl p-6 border border-red-200 shadow-sm">
         <CheckboxDropdown
           label="Health Conditions"
-          helper="Select any conditions to account for (max 4)"
+          helper="Select any conditions to account for"
           options={CHRONIC_CONDITION_OPTIONS.map((value) => ({ label: value, value }))}
           selected={form.chronicConditions}
-          onChange={(values) => setForm((prev) => ({ ...prev, chronicConditions: values.slice(0, 4) }))}
-          maxSelected={4}
+          onChange={(values) => setForm((prev) => ({ ...prev, chronicConditions: values }))}
         />
       </div>
 
@@ -136,8 +132,7 @@ export function PlanConfigurator({ form, setForm }: Props) {
             value={form.sleepHours}
             onChange={(value) => setForm((prev) => ({ ...prev, sleepHours: value }))}
             type="number"
-            min={4}
-            max={12}
+            min={0}
             icon="😴"
           />
           <SelectField

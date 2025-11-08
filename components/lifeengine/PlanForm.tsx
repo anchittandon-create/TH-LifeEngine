@@ -68,8 +68,8 @@ export function PlanForm({ formData, setFormData, errors = {} }: Props) {
         }
         break;
       case "age":
-        if (value < 10 || value > 100) {
-          newErrors.age = "Age must be between 10 and 100";
+        if (value < 1) {
+          newErrors.age = "Age must be at least 1";
         } else {
           delete newErrors.age;
         }
@@ -449,8 +449,8 @@ export function validatePlanFormData(formData: PlanFormData): { valid: boolean; 
     errors.fullName = "Name must be at least 2 characters";
   }
   
-  if (formData.age < 10 || formData.age > 100) {
-    errors.age = "Age must be between 10 and 100";
+  if (formData.age < 1) {
+    errors.age = "Age must be at least 1";
   }
   
   if (!formData.planTypes || formData.planTypes.length === 0) {
