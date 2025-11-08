@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { PlanForm, PlanFormData, defaultPlanFormData, validatePlanFormData } from "@/components/lifeengine/PlanForm";
@@ -11,8 +11,25 @@ import type { LifeEnginePlan } from "@/app/types/lifeengine";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
+interface Profile {
+  id: string;
+  name: string;
+  age: number;
+  gender: "male" | "female" | "other";
+  goals: string[];
+  healthConcerns: string;
+  experience: "beginner" | "intermediate" | "advanced";
+  preferredTime: "morning" | "evening" | "flexible";
+  subscriptionType?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export default function UseCustomGPTPage() {
   const router = useRouter();
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [selectedProfileId, setSelectedProfileId] = useState<string>("");
+  const [loadingProfiles, setLoadingProfiles] = useState(true);
   const [formData, setFormData] = useState<PlanFormData>(defaultPlanFormData);
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState<string>("Connecting to AI...");
@@ -24,6 +41,44 @@ export default function UseCustomGPTPage() {
   const planRef = useRef<HTMLDivElement>(null);
   const customGptUrl = process.env.NEXT_PUBLIC_LIFEENGINE_GPT_URL;
   const customGptModel = process.env.NEXT_PUBLIC_LIFEENGINE_GPT_ID;
+
+  // Fetch profiles on mount
+  useEffect(() => {
+    async function fetchProfiles() {
+      try {
+        const response = await fetch("/api/lifeengine/profiles");
+        if (response.ok) {
+          const data = await response.json();
+          setProfiles(data.profiles || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch profiles:", err);
+      } finally {
+        setLoadingProfiles(false);
+      }
+    }
+    fetchProfiles();
+  }, []);
+
+  // Update form when profile is selected
+  useEffect(() => {
+    if (selectedProfileId && selectedProfileId !== "new") {
+      const profile = profiles.find(p => p.id === selectedProfileId);
+      if (profile) {
+        setFormData({
+          ...formData,
+          fullName: profile.name,
+          age: profile.age,
+          gender: profile.gender,
+          goals: profile.goals || [],
+          preferredTime: profile.preferredTime || "flexible",
+          // Map experience to intensity
+          intensity: profile.experience === "beginner" ? "low" : 
+                     profile.experience === "advanced" ? "high" : "medium",
+        });
+      }
+    }
+  }, [selectedProfileId, profiles]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +101,11 @@ export default function UseCustomGPTPage() {
       // Build detailed GPT prompt
       const prompt = buildDetailedGPTPrompt(formData);
       
-      console.log('📝 [CustomGPT] Generated prompt:', buildPromptSummary(formData));
+      console.log('📝 [CustomGPT] Generated prompt for profile:', {
+        profileId: selectedProfileId,
+        name: formData.fullName,
+        summary: buildPromptSummary(formData)
+      });
       
       setTimeout(() => {
         setLoadingMessage("🧠 AI is analyzing your requirements...");
@@ -60,7 +119,10 @@ export default function UseCustomGPTPage() {
         setLoadingMessage("📋 Creating step-by-step instructions...");
       }, 15000);
       
-      const gptProfileId = `gpt_${Date.now()}`;
+      // Use selected profile ID or create inline profile
+      const gptProfileId = selectedProfileId && selectedProfileId !== "new"
+        ? selectedProfileId
+        : `gpt_${Date.now()}`;
 
       // Call API to generate plan via Custom GPT
       const response = await fetch("/api/lifeengine/custom-gpt-generate", {
@@ -80,7 +142,7 @@ export default function UseCustomGPTPage() {
 
       const result = await response.json();
       
-      console.log('✅ [CustomGPT] Plan generated successfully');
+      console.log('✅ [CustomGPT] Plan generated successfully for profile:', gptProfileId);
       
       // Parse the plan
       let planText = result.plan?.trim();
@@ -246,6 +308,66 @@ export default function UseCustomGPTPage() {
         </section>
 
         <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Profile Selector */}
+          <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-blue-200">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="text-4xl">👤</span>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">Select Profile</h2>
+                <p className="text-gray-600">Use an existing profile or create a new one</p>
+              </div>
+            </div>
+
+            {loadingProfiles ? (
+              <div className="flex items-center justify-center py-8 text-gray-500">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+                <span>Loading profiles...</span>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="profile-select" className="block text-sm font-semibold text-gray-700 mb-2">
+                    Choose Profile
+                  </label>
+                  <select
+                    id="profile-select"
+                    value={selectedProfileId}
+                    onChange={(e) => setSelectedProfileId(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    aria-label="Select a profile"
+                  >
+                    <option value="">-- Select a Profile --</option>
+                    {profiles.map((profile) => (
+                      <option key={profile.id} value={profile.id}>
+                        {profile.name} (Age: {profile.age}, {profile.gender})
+                      </option>
+                    ))}
+                    <option value="new">➕ Create New Profile</option>
+                  </select>
+                </div>
+
+                {/* Feedback message */}
+                {selectedProfileId && selectedProfileId !== "new" && (
+                  <div className="bg-blue-50 border-2 border-blue-300 rounded-xl p-4">
+                    <p className="text-blue-800 font-medium flex items-center gap-2">
+                      <span>✓</span>
+                      Profile loaded! Form fields have been pre-filled with your profile data.
+                    </p>
+                  </div>
+                )}
+
+                {selectedProfileId === "new" && (
+                  <div className="bg-green-50 border-2 border-green-300 rounded-xl p-4">
+                    <p className="text-green-800 font-medium flex items-center gap-2">
+                      <span>✨</span>
+                      Creating a new profile. Fill out the form below to get started.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Error Messages */}
           {Object.keys(formErrors).length > 0 && (
             <div className="bg-red-50 border-2 border-red-400 rounded-2xl p-6 shadow-lg animate-pulse">

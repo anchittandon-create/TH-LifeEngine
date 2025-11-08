@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { PlanForm, PlanFormData, defaultPlanFormData, validatePlanFormData } from "@/components/lifeengine/PlanForm";
@@ -28,14 +28,69 @@ const SLOT_PRESETS: Record<
   flexible: { start: "09:00", end: "10:00" },
 };
 
+interface Profile {
+  id: string;
+  name: string;
+  age: number;
+  gender: "male" | "female" | "other";
+  goals: string[];
+  healthConcerns: string;
+  experience: "beginner" | "intermediate" | "advanced";
+  preferredTime: "morning" | "evening" | "flexible";
+  subscriptionType?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export default function CreatePlan() {
   const router = useRouter();
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [selectedProfileId, setSelectedProfileId] = useState<string>("");
+  const [loadingProfiles, setLoadingProfiles] = useState(true);
   const [formData, setFormData] = useState<PlanFormData>(defaultPlanFormData);
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState<string>("Preparing your plan...");
   const [error, setError] = useState<string>("");
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [generatedPlanId, setGeneratedPlanId] = useState<string>("");
+
+  // Fetch profiles on mount
+  useEffect(() => {
+    async function fetchProfiles() {
+      try {
+        const response = await fetch("/api/lifeengine/profiles");
+        if (response.ok) {
+          const data = await response.json();
+          setProfiles(data.profiles || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch profiles:", err);
+      } finally {
+        setLoadingProfiles(false);
+      }
+    }
+    fetchProfiles();
+  }, []);
+
+  // Update form when profile is selected
+  useEffect(() => {
+    if (selectedProfileId && selectedProfileId !== "new") {
+      const profile = profiles.find(p => p.id === selectedProfileId);
+      if (profile) {
+        setFormData({
+          ...formData,
+          fullName: profile.name,
+          age: profile.age,
+          gender: profile.gender,
+          goals: profile.goals || [],
+          preferredTime: profile.preferredTime || "flexible",
+          // Map experience to intensity
+          intensity: profile.experience === "beginner" ? "low" : 
+                     profile.experience === "advanced" ? "high" : "medium",
+        });
+      }
+    }
+  }, [selectedProfileId, profiles]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +111,11 @@ export default function CreatePlan() {
     setLoadingMessage("🔮 Analyzing your profile and preferences...");
 
     try {
-      const inlineProfileId = `inline_${Date.now()}`;
+      // Use selected profile ID or create inline profile
+      const profileId = selectedProfileId && selectedProfileId !== "new" 
+        ? selectedProfileId 
+        : `inline_${Date.now()}`;
+        
       const normalizedGender = GENDER_MAP[formData.gender] ?? "Other";
       const durationValue = parseInt(formData.duration.match(/\d+/)?.[0] || "1", 10);
       const durationUnit = formData.duration.includes("week") ? "weeks" : "days";
@@ -66,9 +125,9 @@ export default function CreatePlan() {
 
       // Convert PlanFormData to API format
       const payload = {
-        profileId: inlineProfileId, // Inline profile
+        profileId,
         profileSnapshot: {
-          id: inlineProfileId,
+          id: profileId,
           name: formData.fullName,
           age: formData.age,
           gender: normalizedGender,
@@ -111,7 +170,8 @@ export default function CreatePlan() {
         equipment: []
       };
       
-      console.log('🔍 [CreatePlan] Generating with unified form data:', {
+      console.log('🔍 [CreatePlan] Generating with profile:', {
+        profileId,
         name: formData.fullName,
         age: formData.age,
         planTypes: formData.planTypes,
@@ -180,6 +240,61 @@ export default function CreatePlan() {
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Profile Selector */}
+          <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-blue-200">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="text-4xl">👤</span>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Select Profile</h2>
+                <p className="text-gray-600">Use an existing profile or create a new one</p>
+              </div>
+            </div>
+            
+            {loadingProfiles ? (
+              <div className="flex items-center gap-3 text-gray-600">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                <span>Loading profiles...</span>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <label htmlFor="profile-select" className="block text-sm font-medium text-gray-700 mb-2">
+                  Choose Profile
+                </label>
+                <select
+                  id="profile-select"
+                  value={selectedProfileId}
+                  onChange={(e) => setSelectedProfileId(e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-lg"
+                  aria-label="Select a profile"
+                >
+                  <option value="">-- Select a Profile --</option>
+                  {profiles.map((profile) => (
+                    <option key={profile.id} value={profile.id}>
+                      {profile.name} (Age: {profile.age}, {profile.gender})
+                    </option>
+                  ))}
+                  <option value="new">➕ Create New Profile</option>
+                </select>
+                
+                {selectedProfileId && selectedProfileId !== "new" && (
+                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                    <p className="text-sm text-blue-800">
+                      ✅ Profile loaded. You can modify the details below before generating your plan.
+                    </p>
+                  </div>
+                )}
+                
+                {selectedProfileId === "new" && (
+                  <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl">
+                    <p className="text-sm text-green-800">
+                      ✨ Creating a new profile. Fill in the details below.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Error Messages */}
           {Object.keys(formErrors).length > 0 && (
             <div className="bg-red-50 border-2 border-red-400 rounded-2xl p-6 shadow-lg animate-pulse">
