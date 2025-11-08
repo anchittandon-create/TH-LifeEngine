@@ -84,39 +84,93 @@ async function generateWithOpenAI({
   apiKey: string;
 }) {
   const client = new OpenAI({ apiKey });
-  const model =
-    modelOverride || process.env.LIFEENGINE_CUSTOM_GPT_ID || process.env.NEXT_PUBLIC_LIFEENGINE_GPT_ID;
+  
+  // Use standard OpenAI models (gpt-4o, gpt-4o-mini, etc.)
+  // NOT Custom GPT IDs (those start with 'g-')
+  const model = modelOverride || process.env.NEXT_PUBLIC_LIFEENGINE_GPT_ID || "gpt-4o-mini";
 
   if (!model) {
-    throw new Error("Custom GPT model ID is not configured.");
+    throw new Error("OpenAI model is not configured.");
   }
 
-  // The Responses API is exposed via `responses` in the latest OpenAI SDK.
-  const responsesClient = (client as any).responses;
-  if (!responsesClient?.create) {
-    throw new Error("Responses API is unavailable in the current OpenAI SDK.");
+  // Validate that we're not trying to use a Custom GPT ID
+  if (model.startsWith('g-')) {
+    throw new Error(
+      `Invalid model "${model}". Custom GPT IDs (g-xxxxx) cannot be used via API. ` +
+      `Please use standard OpenAI models like "gpt-4o" or "gpt-4o-mini". ` +
+      `Set NEXT_PUBLIC_LIFEENGINE_GPT_ID in your .env file.`
+    );
   }
 
-  const response = await responsesClient.create({
+  console.log(`[OpenAI] Generating plan with model: ${model}`);
+
+  // Use standard Chat Completions API
+  const response = await client.chat.completions.create({
     model,
-    input: prompt,
-    temperature: 0.65,
-    max_output_tokens: 6000,
+    messages: [
+      {
+        role: "system",
+        content: "You are TH_LifeEngine, an expert wellness coach. Generate comprehensive, personalized wellness plans in valid JSON format with detailed step-by-step instructions for all exercises, yoga poses, and recipes."
+      },
+      {
+        role: "user",
+        content: prompt
+      }
+    ],
+    temperature: 0.7,
+    max_tokens: 6000,
+    response_format: { type: "json_object" }
   });
 
-  const planText = extractResponseText(response).trim();
+  const planText = response.choices[0]?.message?.content?.trim() || "";
+  
   if (!planText) {
-    throw new Error("Custom GPT returned an empty response.");
+    throw new Error("OpenAI returned an empty response.");
   }
+
+  // Log token usage for cost tracking
+  const usage = response.usage;
+  const inputTokens = usage?.prompt_tokens || 0;
+  const outputTokens = usage?.completion_tokens || 0;
+  const totalTokens = usage?.total_tokens || 0;
+
+  // Calculate cost based on model pricing
+  let inputCostPer1M = 0.15;  // gpt-4o-mini default
+  let outputCostPer1M = 0.60;
+  
+  if (model.includes('gpt-4o') && !model.includes('mini')) {
+    inputCostPer1M = 2.50;  // gpt-4o
+    outputCostPer1M = 10.00;
+  } else if (model.includes('gpt-3.5-turbo')) {
+    inputCostPer1M = 0.50;  // gpt-3.5-turbo
+    outputCostPer1M = 1.50;
+  }
+
+  const inputCost = (inputTokens / 1000000) * inputCostPer1M;
+  const outputCost = (outputTokens / 1000000) * outputCostPer1M;
+  const totalCost = inputCost + outputCost;
+
+  console.log(`[COST TRACKING] Tokens - Input: ${inputTokens}, Output: ${outputTokens}, Total: ${totalTokens}`);
+  console.log(`[COST TRACKING] Estimated cost: $${totalCost.toFixed(6)} (Input: $${inputCost.toFixed(6)}, Output: $${outputCost.toFixed(6)})`);
 
   return {
     plan: planText,
     formatted: true,
     metadata: {
-      provider: "openai-gpts",
+      provider: "openai",
       model,
       profileId,
-      usage: response.usage ?? null,
+      tokens: {
+        input: inputTokens,
+        output: outputTokens,
+        total: totalTokens,
+      },
+      cost: {
+        input_usd: inputCost,
+        output_usd: outputCost,
+        total_usd: totalCost,
+      },
+      usage: response.usage,
       generatedAt: new Date().toISOString(),
     },
   };
