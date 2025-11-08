@@ -249,6 +249,203 @@
   width: 100%;
 }
 
+/* Table view styles */
+.plansSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.planActions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: var(--space-4);
+}
+
+.plansTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--panel);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.plansTable thead {
+  background: var(--bg);
+  border-bottom: 2px solid var(--border);
+}
+
+.plansTable th {
+  padding: var(--space-4);
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.plansTable tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.plansTable tbody tr:hover {
+  background: var(--bg);
+}
+
+.plansTable tbody tr:last-child {
+  border-bottom: none;
+}
+
+.selectedRow {
+  background: rgba(99, 102, 241, 0.05) !important;
+  border-left: 3px solid var(--brand);
+}
+
+.plansTable td {
+  padding: var(--space-4);
+  font-size: 14px;
+}
+
+.checkboxCell {
+  width: 40px;
+  text-align: center;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--brand);
+}
+
+.planNameCell {
+  min-width: 250px;
+}
+
+.planName {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.planIcon {
+  font-size: 20px;
+}
+
+.planTitle {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.planId {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: monospace;
+}
+
+.dateCell {
+  min-width: 140px;
+}
+
+.date {
+  display: block;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.time {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.paramsCell {
+  min-width: 220px;
+  max-width: 300px;
+}
+
+.params {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  align-items: center;
+  margin-bottom: var(--space-1);
+}
+
+.paramRow {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  margin-top: var(--space-1);
+}
+
+.paramLabel {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.paramValue {
+  font-size: 13px;
+  color: var(--text);
+  background: var(--brand-quiet);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.noParams {
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.actionsCell {
+  min-width: 160px;
+}
+
+.actionButtons {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.actionBtn {
+  white-space: nowrap;
+}
+
+.selectedCard {
+  border-color: var(--brand);
+  background: rgba(99, 102, 241, 0.05);
+  box-shadow: 0 0 0 2px var(--brand);
+}
+
+.cardCheckbox {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+}
+
+.card {
+  position: relative;
+}
+
+.cardActions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
 /* Skeleton loading styles */
 .titleSkeleton {
   height: 36px;

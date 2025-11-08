@@ -4,8 +4,9 @@ import { z } from "zod";
 
 // Initialize Gemini AI conditionally
 let genAI: GoogleGenerativeAI | null = null;
-if (process.env.GOOGLE_AI_API_KEY) {
-  genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
+const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GOOGLE_API_KEY;
+if (apiKey) {
+  genAI = new GoogleGenerativeAI(apiKey);
 }
 
 const chatRequestSchema = z.object({
@@ -31,15 +32,33 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { profileId, message, conversationHistory } = chatRequestSchema.parse(body);
 
-    // Get profile data (in a real app, this would come from database)
-    // For now, we'll use a mock profile or fetch from our in-memory store
-    const profile = {
+    // Fetch the actual profile from the API
+    let profile = {
       id: profileId,
       name: "User",
-      goals: ["weight loss", "fitness"],
+      goals: ["wellness"],
       healthConcerns: "none",
       experience: "beginner",
     };
+
+    try {
+      const profileResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/lifeengine/profiles`);
+      if (profileResponse.ok) {
+        const profilesData = await profileResponse.json();
+        const foundProfile = profilesData.profiles?.find((p: any) => p.id === profileId);
+        if (foundProfile) {
+          profile = {
+            id: foundProfile.id,
+            name: foundProfile.name || "User",
+            goals: foundProfile.goals || ["wellness"],
+            healthConcerns: foundProfile.healthConcerns || "none",
+            experience: foundProfile.experience || "beginner",
+          };
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to fetch profile, using defaults:", err);
+    }
 
     // Build conversation context
     const context = `

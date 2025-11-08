@@ -12,6 +12,9 @@ type PlanSummary = {
   intakeId: string;
   createdAt: string;
   goals: string[];
+  planTypes?: string[];
+  duration?: string;
+  intensity?: string;
 };
 
 type Profile = {
@@ -37,6 +40,8 @@ export default function DashboardPage() {
   const [activityLog, setActivityLog] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedPlans, setSelectedPlans] = useState<Set<string>>(new Set());
+  const [viewMode, setViewMode] = useState<"cards" | "table">("table");
 
   useEffect(() => {
     loadDashboardData();
@@ -88,6 +93,77 @@ export default function DashboardPage() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getProfileName = (profileId: string) => {
+    const profile = profiles.find(p => p.id === profileId);
+    return profile?.name || "Unknown User";
+  };
+
+  const togglePlanSelection = (planId: string) => {
+    const newSelected = new Set(selectedPlans);
+    if (newSelected.has(planId)) {
+      newSelected.delete(planId);
+    } else {
+      newSelected.add(planId);
+    }
+    setSelectedPlans(newSelected);
+  };
+
+  const selectAllPlans = () => {
+    if (selectedPlans.size === plans.length) {
+      setSelectedPlans(new Set());
+    } else {
+      setSelectedPlans(new Set(plans.map(p => p.id)));
+    }
+  };
+
+  const downloadPlanAsPDF = async (planId: string) => {
+    try {
+      window.open(`/lifeengine/plan/${planId}`, '_blank');
+      // User can use the PDF download button on the plan page
+    } catch (error) {
+      console.error("Failed to open plan:", error);
+      alert("Failed to open plan");
+    }
+  };
+
+  const exportSelectedAsZip = async () => {
+    if (selectedPlans.size === 0) {
+      alert("Please select at least one plan to export");
+      return;
+    }
+
+    try {
+      // For now, we'll open each plan in a new tab
+      // In production, you'd want to create actual ZIP files server-side
+      alert(`Opening ${selectedPlans.size} plan(s) in new tabs. Use your browser's PDF save feature to download each one.`);
+      
+      selectedPlans.forEach(planId => {
+        window.open(`/lifeengine/plan/${planId}`, '_blank');
+      });
+    } catch (error) {
+      console.error("Failed to export plans:", error);
+      alert("Failed to export plans");
+    }
+  };
+
+  const exportAllAsZip = async () => {
+    if (plans.length === 0) {
+      alert("No plans to export");
+      return;
+    }
+
+    try {
+      alert(`Opening all ${plans.length} plan(s) in new tabs. Use your browser's PDF save feature to download each one.`);
+      
+      plans.forEach(plan => {
+        window.open(`/lifeengine/plan/${plan.id}`, '_blank');
+      });
+    } catch (error) {
+      console.error("Failed to export plans:", error);
+      alert("Failed to export all plans");
     }
   };
 
@@ -216,7 +292,45 @@ export default function DashboardPage() {
 
         {/* Plans Overview */}
         <div className={styles.plansSection}>
-          <h2 className={styles.sectionTitle}>My Health Plans</h2>
+          <div className={styles.plansSectionHeader}>
+            <h2 className={styles.sectionTitle}>My Health Plans</h2>
+            <div className={styles.planActions}>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setViewMode(viewMode === "cards" ? "table" : "cards")}
+              >
+                {viewMode === "cards" ? "📊 Table View" : "🎴 Card View"}
+              </Button>
+              {selectedPlans.size > 0 && (
+                <>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={exportSelectedAsZip}
+                  >
+                    📦 Export Selected ({selectedPlans.size})
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setSelectedPlans(new Set())}
+                  >
+                    ✖️ Clear Selection
+                  </Button>
+                </>
+              )}
+              {plans.length > 0 && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={exportAllAsZip}
+                >
+                  📥 Export All ({plans.length})
+                </Button>
+              )}
+            </div>
+          </div>
 
           {plans.length === 0 ? (
             <div className={styles.empty}>
@@ -230,12 +344,134 @@ export default function DashboardPage() {
                 </Link>
               </div>
             </div>
+          ) : viewMode === "table" ? (
+            <div className={styles.tableContainer}>
+              <table className={styles.plansTable}>
+                <thead>
+                  <tr>
+                    <th className={styles.checkboxCell}>
+                      <input
+                        type="checkbox"
+                        checked={selectedPlans.size === plans.length && plans.length > 0}
+                        onChange={selectAllPlans}
+                        className={styles.checkbox}
+                        aria-label="Select all plans"
+                        title="Select all plans"
+                      />
+                    </th>
+                    <th>Plan Name</th>
+                    <th>Created</th>
+                    <th>Input Parameters</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {plans.map((plan) => (
+                    <tr key={plan.id} className={selectedPlans.has(plan.id) ? styles.selectedRow : ""}>
+                      <td className={styles.checkboxCell}>
+                        <input
+                          type="checkbox"
+                          checked={selectedPlans.has(plan.id)}
+                          onChange={() => togglePlanSelection(plan.id)}
+                          className={styles.checkbox}
+                          aria-label={`Select plan for ${getProfileName(plan.profileId)}`}
+                          title={`Select plan for ${getProfileName(plan.profileId)}`}
+                        />
+                      </td>
+                      <td className={styles.planNameCell}>
+                        <div className={styles.planName}>
+                          <span className={styles.planIcon}>📋</span>
+                          <span className={styles.planTitle}>
+                            Plan for {getProfileName(plan.profileId)}
+                          </span>
+                        </div>
+                        <div className={styles.planId}>ID: {plan.id.slice(-8)}</div>
+                      </td>
+                      <td className={styles.dateCell}>
+                        <div className={styles.date}>
+                          {new Date(plan.createdAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </div>
+                        <div className={styles.time}>
+                          {new Date(plan.createdAt).toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </div>
+                      </td>
+                      <td className={styles.paramsCell}>
+                        <div className={styles.params}>
+                          {plan.planTypes && plan.planTypes.length > 0 ? (
+                            <>
+                              <span className={styles.paramLabel}>Types:</span>
+                              <span className={styles.paramValue}>{plan.planTypes.join(", ")}</span>
+                            </>
+                          ) : plan.goals && plan.goals.length > 0 ? (
+                            <>
+                              <span className={styles.paramLabel}>Goals:</span>
+                              <span className={styles.paramValue}>{plan.goals.slice(0, 2).join(", ")}</span>
+                              {plan.goals.length > 2 && <span className={styles.more}>+{plan.goals.length - 2}</span>}
+                            </>
+                          ) : (
+                            <span className={styles.noParams}>No parameters</span>
+                          )}
+                        </div>
+                        {plan.duration && (
+                          <div className={styles.paramRow}>
+                            <span className={styles.paramLabel}>Duration:</span>
+                            <span className={styles.paramValue}>{plan.duration}</span>
+                          </div>
+                        )}
+                        {plan.intensity && (
+                          <div className={styles.paramRow}>
+                            <span className={styles.paramLabel}>Intensity:</span>
+                            <span className={styles.paramValue}>{plan.intensity}</span>
+                          </div>
+                        )}
+                      </td>
+                      <td className={styles.actionsCell}>
+                        <div className={styles.actionButtons}>
+                          <Link href={`/lifeengine/plan/${plan.id}`}>
+                            <Button variant="ghost" size="sm" className={styles.actionBtn}>
+                              👁️ View
+                            </Button>
+                          </Link>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => downloadPlanAsPDF(plan.id)}
+                            className={styles.actionBtn}
+                          >
+                            📄 PDF
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
             <div className={styles.grid}>
               {plans.map((plan) => (
-                <div key={plan.id} className={styles.card}>
+                <div key={plan.id} className={`${styles.card} ${selectedPlans.has(plan.id) ? styles.selectedCard : ""}`}>
+                  <div className={styles.cardCheckbox}>
+                    <input
+                      type="checkbox"
+                      checked={selectedPlans.has(plan.id)}
+                      onChange={() => togglePlanSelection(plan.id)}
+                      className={styles.checkbox}
+                      aria-label={`Select plan for ${getProfileName(plan.profileId)}`}
+                      title={`Select plan for ${getProfileName(plan.profileId)}`}
+                    />
+                  </div>
                   <div className={styles.cardHeader}>
-                    <h3 className={styles.cardTitle}>Plan #{plan.id.slice(-8)}</h3>
+                    <h3 className={styles.cardTitle}>
+                      Plan for {getProfileName(plan.profileId)}
+                    </h3>
                     <span className={styles.date}>
                       {new Date(plan.createdAt).toLocaleDateString()}
                     </span>
@@ -250,11 +486,20 @@ export default function DashboardPage() {
                       <span className={styles.more}>+{plan.goals.length - 3} more</span>
                     )}
                   </div>
-                  <Link href={`/lifeengine/plan/${plan.id}`}>
-                    <Button variant="ghost" className={styles.viewButton}>
-                      View Plan
+                  <div className={styles.cardActions}>
+                    <Link href={`/lifeengine/plan/${plan.id}`}>
+                      <Button variant="ghost" className={styles.viewButton}>
+                        👁️ View Plan
+                      </Button>
+                    </Link>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => downloadPlanAsPDF(plan.id)}
+                    >
+                      📄 PDF
                     </Button>
-                  </Link>
+                  </div>
                 </div>
               ))}
             </div>
