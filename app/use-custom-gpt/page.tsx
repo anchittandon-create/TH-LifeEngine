@@ -195,15 +195,6 @@ export default function UseCustomGPTPage() {
           </p>
         </div>
 
-                  </p>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm text-red-800">
-            {error}
-          </div>
-        )}
-
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm text-red-800">
             {error}
