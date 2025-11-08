@@ -216,13 +216,12 @@ export function PlanForm({ formData, setFormData, errors = {} }: Props) {
         </div>
         <CheckboxDropdown
           label="Select Plan Types"
-          helper="Choose up to 3 types to customize your wellness journey"
+          helper="Choose one or more types to customize your wellness journey"
           options={PLAN_TYPE_OPTIONS.map((opt) => ({ ...opt }))}
           selected={formData.planTypes}
           onChange={(values) => {
-            updateField("planTypes", values.slice(0, 3));
+            updateField("planTypes", values);
           }}
-          maxSelected={3}
         />
         {allErrors.planTypes && (
           <p className="text-red-600 text-sm mt-2 flex items-center gap-1">
@@ -317,11 +316,10 @@ export function PlanForm({ formData, setFormData, errors = {} }: Props) {
         <div className="mt-6">
           <CheckboxDropdown
             label="Chronic Health Conditions"
-            helper="Select any conditions we should account for (max 4)"
+            helper="Select any conditions we should account for"
             options={CHRONIC_CONDITION_OPTIONS.map((value) => ({ label: value, value }))}
             selected={formData.chronicConditions}
-            onChange={(values) => updateField("chronicConditions", values.slice(0, 4))}
-            maxSelected={4}
+            onChange={(values) => updateField("chronicConditions", values)}
           />
         </div>
       </section>
@@ -337,22 +335,20 @@ export function PlanForm({ formData, setFormData, errors = {} }: Props) {
           <div>
             <CheckboxDropdown
               label="Primary Fitness Goals"
-              helper="What are you trying to achieve? (max 3)"
+              helper="What are you trying to achieve?"
               options={GOAL_OPTIONS.map((value) => ({ label: value, value }))}
               selected={formData.goals}
-              onChange={(values) => updateField("goals", values.slice(0, 3))}
-              maxSelected={3}
+              onChange={(values) => updateField("goals", values)}
             />
           </div>
 
           <div>
             <CheckboxDropdown
               label="Focus Areas"
-              helper="Specific areas to emphasize (max 4)"
+              helper="Specific areas to emphasize"
               options={FOCUS_AREA_OPTIONS.map((value) => ({ label: value, value }))}
               selected={formData.focusAreas}
-              onChange={(values) => updateField("focusAreas", values.slice(0, 4))}
-              maxSelected={4}
+              onChange={(values) => updateField("focusAreas", values)}
             />
           </div>
         </div>

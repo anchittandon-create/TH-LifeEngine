@@ -240,6 +240,121 @@ Return the plan as a JSON object with this structure:
 
 8. Ensure JSON is valid and properly formatted
 
+**CRITICAL CONTENT REQUIREMENTS - READ CAREFULLY**
+
+⚠️ **ONLY USE REAL, WELL-KNOWN EXERCISES AND POSES**
+
+YOGA POSES - Use only authentic poses like:
+- Tadasana (Mountain Pose), Adho Mukha Svanasana (Downward Dog)
+- Virabhadrasana I/II/III (Warrior I/II/III)
+- Trikonasana (Triangle Pose), Bhujangasana (Cobra Pose)
+- Balasana (Child's Pose), Savasana (Corpse Pose)
+- Surya Namaskar (Sun Salutation sequence)
+- Vrikshasana (Tree Pose), Paschimottanasana (Seated Forward Bend)
+
+EXERCISES - Use only real, proven exercises:
+- Strength: Push-ups, Squats, Lunges, Deadlifts, Bench Press, Pull-ups, Rows
+- Cardio: Running, Cycling, Jumping Jacks, Burpees, Mountain Climbers, Jump Rope
+- Core: Planks, Crunches, Russian Twists, Bicycle Crunches, Leg Raises
+- Flexibility: Hamstring stretches, Hip openers, Shoulder stretches
+
+RECIPES - Provide COMPLETE details:
+- List ALL ingredients with EXACT measurements (cups, grams, tablespoons)
+- Write FULL step-by-step cooking instructions (not just "mix" or "cook")
+- Include cooking temperature and time
+- Mention pan/pot type needed
+- Specify serving size
+
+**EXAMPLE OF CORRECT YOGA POSE FORMAT:**
+
+{
+  "name": "Adho Mukha Svanasana",
+  "sanskrit_name": "Downward-Facing Dog",
+  "steps": [
+    "Start on your hands and knees in a tabletop position, hands shoulder-width apart",
+    "Spread your fingers wide and press firmly through your palms and knuckles",
+    "Tuck your toes under and lift your knees off the floor, straightening your legs",
+    "Press your hips up and back, creating an inverted V-shape with your body",
+    "Keep your head between your arms, ears aligned with your upper arms",
+    "Hold for 5-8 breaths, pressing your heels toward the floor"
+  ],
+  "breathing_instructions": "Inhale deeply through your nose, exhale slowly. Match each breath to the movement.",
+  "duration_sec": 60,
+  "benefits": "Strengthens arms and legs, stretches hamstrings and calves, energizes the body, relieves stress",
+  "modifications": "Bend knees if hamstrings are tight, place hands on blocks for less intensity"
+}
+
+**EXAMPLE OF CORRECT EXERCISE FORMAT:**
+
+{
+  "name": "Bodyweight Squats",
+  "type": "strength",
+  "steps": [
+    "Stand with feet shoulder-width apart, toes pointed slightly outward",
+    "Keep your chest up and core engaged, hands clasped in front of chest",
+    "Lower your body by bending knees and pushing hips back as if sitting in a chair",
+    "Go down until thighs are parallel to floor, keeping knees behind toes",
+    "Push through your heels to return to starting position, squeezing glutes at top"
+  ],
+  "sets": 3,
+  "reps": 15,
+  "rest_sec": 60,
+  "form_cues": [
+    "Keep your weight in your heels",
+    "Don't let knees cave inward",
+    "Maintain neutral spine throughout",
+    "Go as low as comfortable with good form"
+  ],
+  "target_muscles": ["Quadriceps", "Glutes", "Hamstrings", "Core"],
+  "benefits": "Builds lower body strength, improves mobility, functional movement for daily activities"
+}
+
+**EXAMPLE OF CORRECT RECIPE FORMAT:**
+
+{
+  "name": "Oatmeal with Berries and Almonds",
+  "timing": "7:30 AM",
+  "ingredients": [
+    "1/2 cup rolled oats",
+    "1 cup water or milk",
+    "1/4 cup fresh blueberries",
+    "1/4 cup fresh strawberries, sliced",
+    "10 raw almonds, roughly chopped",
+    "1 tablespoon honey or maple syrup",
+    "1/4 teaspoon cinnamon powder",
+    "Pinch of salt"
+  ],
+  "recipe_steps": [
+    "In a small pot, bring 1 cup water (or milk) to a boil over medium-high heat",
+    "Add rolled oats and a pinch of salt, stir well",
+    "Reduce heat to low and simmer for 5-7 minutes, stirring occasionally",
+    "Once oats are creamy and cooked through, remove from heat",
+    "Transfer to a bowl and top with fresh berries",
+    "Sprinkle chopped almonds and cinnamon on top",
+    "Drizzle honey or maple syrup over everything",
+    "Serve hot and enjoy immediately"
+  ],
+  "calories": 320,
+  "protein_g": 10,
+  "carbs_g": 52,
+  "fats_g": 9,
+  "prep_time_min": 10
+}
+
+❌ DO NOT:
+- Create fake or made-up exercise names
+- Use vague instructions like "do some stretches" or "eat healthy"
+- Skip ingredient measurements
+- Omit cooking steps
+- Use poses/exercises you're not certain exist
+
+✅ DO:
+- Use only well-established, real exercises and yoga poses
+- Provide complete, detailed step-by-step instructions
+- Include exact measurements for all recipe ingredients
+- Write full cooking procedures
+- Be specific about timing, sets, reps, hold durations
+
 Generate the complete plan now.`;
 
   return prompt;

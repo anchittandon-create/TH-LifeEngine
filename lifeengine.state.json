@@ -113,6 +113,3710 @@
   ],
   "plans": [
     {
+      "planId": "plan_ad5d56852bfc",
+      "profileId": "prof_anchit",
+      "planName": "Plan for Anchit",
+      "inputSummary": "diet | 60 days | intermediate",
+      "days": 60,
+      "confidence": 0.9,
+      "warnings": [],
+      "planJSON": {
+        "id": "plan_ad5d56852bfc",
+        "profileId": "prof_anchit",
+        "intakeId": "prof_anchit",
+        "goals": [],
+        "createdAt": "2025-11-08T04:48:41.472Z",
+        "days": [
+          {
+            "date": "2025-11-08",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation A",
+                "duration": 20,
+                "description": "Sun Salutation A yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Warrior II",
+                "duration": 10,
+                "description": "Warrior II yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Bridge Pose",
+                "duration": 15,
+                "description": "Bridge Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup & Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu Stir-fry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-09",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Cat-Cow Stretch",
+                "duration": 10,
+                "description": "Cat-Cow Stretch yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Downward Dog",
+                "duration": 20,
+                "description": "Downward Dog yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Plank",
+                "duration": 15,
+                "description": "Plank yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt & Fruit",
+                "calories": 450,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Chickpea Salad Sandwich",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Curry & Quinoa",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-10",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Triangle Pose",
+                "duration": 15,
+                "description": "Triangle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Tree Pose",
+                "duration": 15,
+                "description": "Tree Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 15,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Black Bean Burrito Bowl",
+                "calories": 780,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom Risotto",
+                "calories": 750,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-11",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation A",
+                "duration": 20,
+                "description": "Sun Salutation A yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Warrior II",
+                "duration": 10,
+                "description": "Warrior II yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Bridge Pose",
+                "duration": 15,
+                "description": "Bridge Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup & Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu Stir-fry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-12",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Cat-Cow Stretch",
+                "duration": 10,
+                "description": "Cat-Cow Stretch yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Downward Dog",
+                "duration": 20,
+                "description": "Downward Dog yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Plank",
+                "duration": 15,
+                "description": "Plank yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt & Fruit",
+                "calories": 450,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Chickpea Salad Sandwich",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Curry & Quinoa",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-13",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Triangle Pose",
+                "duration": 15,
+                "description": "Triangle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Tree Pose",
+                "duration": 15,
+                "description": "Tree Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 15,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Black Bean Burrito Bowl",
+                "calories": 780,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom Risotto",
+                "calories": 750,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-14",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Active Rest",
+                "duration": 45,
+                "description": "Active Rest yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover Veggie Curry",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Pasta",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-15",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation A",
+                "duration": 20,
+                "description": "Sun Salutation A yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Warrior II",
+                "duration": 10,
+                "description": "Warrior II yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Bridge Pose",
+                "duration": 15,
+                "description": "Bridge Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup & Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu Stir-fry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-16",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Cat-Cow Stretch",
+                "duration": 10,
+                "description": "Cat-Cow Stretch yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Downward Dog",
+                "duration": 20,
+                "description": "Downward Dog yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Plank",
+                "duration": 15,
+                "description": "Plank yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt & Fruit",
+                "calories": 450,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Chickpea Salad Sandwich",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Curry & Quinoa",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-17",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Triangle Pose",
+                "duration": 15,
+                "description": "Triangle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Tree Pose",
+                "duration": 15,
+                "description": "Tree Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 15,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Black Bean Burrito Bowl",
+                "calories": 780,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom Risotto",
+                "calories": 750,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-18",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation A",
+                "duration": 20,
+                "description": "Sun Salutation A yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Warrior II",
+                "duration": 10,
+                "description": "Warrior II yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Bridge Pose",
+                "duration": 15,
+                "description": "Bridge Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup & Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu Stir-fry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-19",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Cat-Cow Stretch",
+                "duration": 10,
+                "description": "Cat-Cow Stretch yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Downward Dog",
+                "duration": 20,
+                "description": "Downward Dog yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Plank",
+                "duration": 15,
+                "description": "Plank yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt & Fruit",
+                "calories": 450,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Chickpea Salad Sandwich",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Curry & Quinoa",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-20",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Triangle Pose",
+                "duration": 15,
+                "description": "Triangle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Tree Pose",
+                "duration": 15,
+                "description": "Tree Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 15,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Black Bean Burrito Bowl",
+                "calories": 780,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom Risotto",
+                "calories": 750,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-21",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Active Rest",
+                "duration": 45,
+                "description": "Active Rest yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover Veggie Curry",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Pasta",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-22",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation B",
+                "duration": 20,
+                "description": "Sun Salutation B yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Chair Pose",
+                "duration": 15,
+                "description": "Chair Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Boat Pose",
+                "duration": 10,
+                "description": "Boat Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Protein Smoothie",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Edamame",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Lentil Shepherd's Pie",
+                "calories": 780,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-23",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "High Lunge",
+                "duration": 15,
+                "description": "High Lunge yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Side Plank",
+                "duration": 15,
+                "description": "Side Plank yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Dolphin Pose",
+                "duration": 15,
+                "description": "Dolphin Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Spicy Black Bean Burgers",
+                "calories": 730,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Paneer Tikka Masala",
+                "calories": 800,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-24",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Warrior III",
+                "duration": 15,
+                "description": "Warrior III yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Chaturanga",
+                "duration": 15,
+                "description": "Chaturanga yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Upward-Facing Dog",
+                "duration": 15,
+                "description": "Upward-Facing Dog yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover Paneer",
+                "calories": 780,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Stuffed Bell Peppers",
+                "calories": 750,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-25",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation B",
+                "duration": 20,
+                "description": "Sun Salutation B yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Chair Pose",
+                "duration": 15,
+                "description": "Chair Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Boat Pose",
+                "duration": 10,
+                "description": "Boat Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Protein Smoothie",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Edamame",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Lentil Shepherd's Pie",
+                "calories": 780,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-26",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "High Lunge",
+                "duration": 15,
+                "description": "High Lunge yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Side Plank",
+                "duration": 15,
+                "description": "Side Plank yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Dolphin Pose",
+                "duration": 15,
+                "description": "Dolphin Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Spicy Black Bean Burgers",
+                "calories": 730,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Paneer Tikka Masala",
+                "calories": 800,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-27",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Warrior III",
+                "duration": 15,
+                "description": "Warrior III yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Chaturanga",
+                "duration": 15,
+                "description": "Chaturanga yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Upward-Facing Dog",
+                "duration": 15,
+                "description": "Upward-Facing Dog yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover Paneer",
+                "calories": 780,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Stuffed Bell Peppers",
+                "calories": 750,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-28",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Active Rest",
+                "duration": 45,
+                "description": "Active Rest yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt & Fruit",
+                "calories": 450,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Veggie Pizza",
+                "calories": 800,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mixed Green Salad",
+                "calories": 780,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-29",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation B",
+                "duration": 20,
+                "description": "Sun Salutation B yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Chair Pose",
+                "duration": 15,
+                "description": "Chair Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Boat Pose",
+                "duration": 10,
+                "description": "Boat Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Protein Smoothie",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Edamame",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Lentil Shepherd's Pie",
+                "calories": 780,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-30",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "High Lunge",
+                "duration": 15,
+                "description": "High Lunge yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Side Plank",
+                "duration": 15,
+                "description": "Side Plank yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Dolphin Pose",
+                "duration": 15,
+                "description": "Dolphin Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Spicy Black Bean Burgers",
+                "calories": 730,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Paneer Tikka Masala",
+                "calories": 800,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-01",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Warrior III",
+                "duration": 15,
+                "description": "Warrior III yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Chaturanga",
+                "duration": 15,
+                "description": "Chaturanga yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Upward-Facing Dog",
+                "duration": 15,
+                "description": "Upward-Facing Dog yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover Paneer",
+                "calories": 780,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Stuffed Bell Peppers",
+                "calories": 750,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-02",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation B",
+                "duration": 20,
+                "description": "Sun Salutation B yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Chair Pose",
+                "duration": 15,
+                "description": "Chair Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Boat Pose",
+                "duration": 10,
+                "description": "Boat Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Protein Smoothie",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Edamame",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Lentil Shepherd's Pie",
+                "calories": 780,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-03",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "High Lunge",
+                "duration": 15,
+                "description": "High Lunge yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Side Plank",
+                "duration": 15,
+                "description": "Side Plank yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Dolphin Pose",
+                "duration": 15,
+                "description": "Dolphin Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Spicy Black Bean Burgers",
+                "calories": 730,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Paneer Tikka Masala",
+                "calories": 800,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-04",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Warrior III",
+                "duration": 15,
+                "description": "Warrior III yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Chaturanga",
+                "duration": 15,
+                "description": "Chaturanga yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Upward-Facing Dog",
+                "duration": 15,
+                "description": "Upward-Facing Dog yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover Paneer",
+                "calories": 780,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Stuffed Bell Peppers",
+                "calories": 750,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-05",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Active Rest",
+                "duration": 45,
+                "description": "Active Rest yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt & Fruit",
+                "calories": 450,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Veggie Pizza",
+                "calories": 800,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mixed Green Salad",
+                "calories": 780,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-06",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Pigeon Pose",
+                "duration": 15,
+                "description": "Pigeon Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Seated Forward Bend",
+                "duration": 15,
+                "description": "Seated Forward Bend yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Happy Baby Pose",
+                "duration": 15,
+                "description": "Happy Baby Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup & Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu Stir-fry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-07",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Bound Angle Pose",
+                "duration": 15,
+                "description": "Bound Angle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Revolved Triangle Pose",
+                "duration": 15,
+                "description": "Revolved Triangle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Savasana",
+                "duration": 15,
+                "description": "Savasana yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt & Fruit",
+                "calories": 450,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Chickpea Salad Sandwich",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Curry & Quinoa",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-08",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Supine Spinal Twist",
+                "duration": 15,
+                "description": "Supine Spinal Twist yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Cow Face Pose",
+                "duration": 15,
+                "description": "Cow Face Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 15,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Black Bean Burrito Bowl",
+                "calories": 780,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom Risotto",
+                "calories": 750,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-09",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Pigeon Pose",
+                "duration": 15,
+                "description": "Pigeon Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Seated Forward Bend",
+                "duration": 15,
+                "description": "Seated Forward Bend yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Happy Baby Pose",
+                "duration": 15,
+                "description": "Happy Baby Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup & Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu Stir-fry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-10",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Bound Angle Pose",
+                "duration": 15,
+                "description": "Bound Angle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Revolved Triangle Pose",
+                "duration": 15,
+                "description": "Revolved Triangle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Savasana",
+                "duration": 15,
+                "description": "Savasana yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt & Fruit",
+                "calories": 450,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Chickpea Salad Sandwich",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Curry & Quinoa",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-11",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Supine Spinal Twist",
+                "duration": 15,
+                "description": "Supine Spinal Twist yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Cow Face Pose",
+                "duration": 15,
+                "description": "Cow Face Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 15,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Black Bean Burrito Bowl",
+                "calories": 780,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom Risotto",
+                "calories": 750,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-12",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Active Rest",
+                "duration": 45,
+                "description": "Active Rest yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover Veggie Curry",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Pasta",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-13",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation A",
+                "duration": 20,
+                "description": "Sun Salutation A yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Warrior II",
+                "duration": 10,
+                "description": "Warrior II yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Bridge Pose",
+                "duration": 15,
+                "description": "Bridge Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup & Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu Stir-fry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-14",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Cat-Cow Stretch",
+                "duration": 10,
+                "description": "Cat-Cow Stretch yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Downward Dog",
+                "duration": 20,
+                "description": "Downward Dog yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Plank",
+                "duration": 15,
+                "description": "Plank yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt & Fruit",
+                "calories": 450,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Chickpea Salad Sandwich",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Curry & Quinoa",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-15",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Triangle Pose",
+                "duration": 15,
+                "description": "Triangle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Tree Pose",
+                "duration": 15,
+                "description": "Tree Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 15,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Black Bean Burrito Bowl",
+                "calories": 780,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom Risotto",
+                "calories": 750,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-16",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation A",
+                "duration": 20,
+                "description": "Sun Salutation A yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Warrior II",
+                "duration": 10,
+                "description": "Warrior II yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Bridge Pose",
+                "duration": 15,
+                "description": "Bridge Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup & Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu Stir-fry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-17",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Cat-Cow Stretch",
+                "duration": 10,
+                "description": "Cat-Cow Stretch yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Downward Dog",
+                "duration": 20,
+                "description": "Downward Dog yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Plank",
+                "duration": 15,
+                "description": "Plank yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt & Fruit",
+                "calories": 450,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Chickpea Salad Sandwich",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Curry & Quinoa",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-18",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Triangle Pose",
+                "duration": 15,
+                "description": "Triangle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Tree Pose",
+                "duration": 15,
+                "description": "Tree Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 15,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Black Bean Burrito Bowl",
+                "calories": 780,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom Risotto",
+                "calories": 750,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-19",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Active Rest",
+                "duration": 45,
+                "description": "Active Rest yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover Veggie Curry",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Pasta",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-20",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation B",
+                "duration": 20,
+                "description": "Sun Salutation B yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Chair Pose",
+                "duration": 15,
+                "description": "Chair Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Boat Pose",
+                "duration": 10,
+                "description": "Boat Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Protein Smoothie",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Edamame",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Lentil Shepherd's Pie",
+                "calories": 780,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-21",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "High Lunge",
+                "duration": 15,
+                "description": "High Lunge yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Side Plank",
+                "duration": 15,
+                "description": "Side Plank yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Dolphin Pose",
+                "duration": 15,
+                "description": "Dolphin Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Spicy Black Bean Burgers",
+                "calories": 730,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Paneer Tikka Masala",
+                "calories": 800,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-22",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Warrior III",
+                "duration": 15,
+                "description": "Warrior III yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Chaturanga",
+                "duration": 15,
+                "description": "Chaturanga yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Upward-Facing Dog",
+                "duration": 15,
+                "description": "Upward-Facing Dog yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover Paneer",
+                "calories": 780,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Stuffed Bell Peppers",
+                "calories": 750,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-23",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation B",
+                "duration": 20,
+                "description": "Sun Salutation B yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Chair Pose",
+                "duration": 15,
+                "description": "Chair Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Boat Pose",
+                "duration": 10,
+                "description": "Boat Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Protein Smoothie",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Edamame",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Lentil Shepherd's Pie",
+                "calories": 780,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-24",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "High Lunge",
+                "duration": 15,
+                "description": "High Lunge yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Side Plank",
+                "duration": 15,
+                "description": "Side Plank yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Dolphin Pose",
+                "duration": 15,
+                "description": "Dolphin Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Spicy Black Bean Burgers",
+                "calories": 730,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Paneer Tikka Masala",
+                "calories": 800,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-25",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Warrior III",
+                "duration": 15,
+                "description": "Warrior III yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Chaturanga",
+                "duration": 15,
+                "description": "Chaturanga yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Upward-Facing Dog",
+                "duration": 15,
+                "description": "Upward-Facing Dog yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover Paneer",
+                "calories": 780,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Stuffed Bell Peppers",
+                "calories": 750,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-26",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Active Rest",
+                "duration": 45,
+                "description": "Active Rest yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt & Fruit",
+                "calories": 450,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Veggie Pizza",
+                "calories": 800,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mixed Green Salad",
+                "calories": 780,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-27",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Pigeon Pose",
+                "duration": 15,
+                "description": "Pigeon Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Seated Forward Bend",
+                "duration": 15,
+                "description": "Seated Forward Bend yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Happy Baby Pose",
+                "duration": 15,
+                "description": "Happy Baby Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup & Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu Stir-fry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-28",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Bound Angle Pose",
+                "duration": 15,
+                "description": "Bound Angle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Revolved Triangle Pose",
+                "duration": 15,
+                "description": "Revolved Triangle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Savasana",
+                "duration": 15,
+                "description": "Savasana yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt & Fruit",
+                "calories": 450,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Chickpea Salad Sandwich",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Curry & Quinoa",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-29",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Supine Spinal Twist",
+                "duration": 15,
+                "description": "Supine Spinal Twist yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Cow Face Pose",
+                "duration": 15,
+                "description": "Cow Face Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 15,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Black Bean Burrito Bowl",
+                "calories": 780,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom Risotto",
+                "calories": 750,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-30",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Pigeon Pose",
+                "duration": 15,
+                "description": "Pigeon Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Seated Forward Bend",
+                "duration": 15,
+                "description": "Seated Forward Bend yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Happy Baby Pose",
+                "duration": 15,
+                "description": "Happy Baby Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup & Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu Stir-fry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-31",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Bound Angle Pose",
+                "duration": 15,
+                "description": "Bound Angle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Revolved Triangle Pose",
+                "duration": 15,
+                "description": "Revolved Triangle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Savasana",
+                "duration": 15,
+                "description": "Savasana yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt & Fruit",
+                "calories": 450,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Chickpea Salad Sandwich",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Curry & Quinoa",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-01",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Supine Spinal Twist",
+                "duration": 15,
+                "description": "Supine Spinal Twist yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Cow Face Pose",
+                "duration": 15,
+                "description": "Cow Face Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 15,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Black Bean Burrito Bowl",
+                "calories": 780,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom Risotto",
+                "calories": 750,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-02",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Active Rest",
+                "duration": 45,
+                "description": "Active Rest yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover Veggie Curry",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Pasta",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-03",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation A",
+                "duration": 15,
+                "description": "Sun Salutation A yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Sun Salutation B",
+                "duration": 15,
+                "description": "Sun Salutation B yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Savasana",
+                "duration": 15,
+                "description": "Savasana yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal, Berries, Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup & Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu Stir-fry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-04",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Warrior II",
+                "duration": 10,
+                "description": "Warrior II yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Triangle Pose",
+                "duration": 10,
+                "description": "Triangle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Side Plank",
+                "duration": 10,
+                "description": "Side Plank yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 15,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt & Fruit",
+                "calories": 450,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Chickpea Salad Sandwich",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Veggie Curry & Quinoa",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-05",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Pigeon Pose",
+                "duration": 15,
+                "description": "Pigeon Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Boat Pose",
+                "duration": 15,
+                "description": "Boat Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Bridge Pose",
+                "duration": 15,
+                "description": "Bridge Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Black Bean Burrito Bowl",
+                "calories": 780,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom Risotto",
+                "calories": 750,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-06",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Favorite Poses",
+                "duration": 30,
+                "description": "Favorite Poses yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Savasana",
+                "duration": 15,
+                "description": "Savasana yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Protein Smoothie",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Edamame",
+                "calories": 750,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Lentil Shepherd's Pie",
+                "calories": 780,
+                "description": "Healthy dinner"
+              }
+            ]
+          }
+        ]
+      },
+      "analytics": {
+        "safety_score": 0.95,
+        "diet_match": 0.92,
+        "progression_score": 0.9,
+        "adherence_score": 0.88,
+        "overall": 0.91
+      },
+      "costMetrics": {
+        "inputTokens": 232,
+        "outputTokens": 10911,
+        "totalTokens": 13211,
+        "model": "gemini-2.5-flash"
+      },
+      "createdAt": "2025-11-08T04:48:41.472Z"
+    },
+    {
+      "planId": "plan_aa16fabedd96",
+      "profileId": "prof_anchit",
+      "planName": "Plan for Anchit",
+      "inputSummary": "combined + strength, stress_relief | 28 days | intermediate",
+      "days": 28,
+      "confidence": 0.9,
+      "warnings": [],
+      "planJSON": {
+        "id": "plan_aa16fabedd96",
+        "profileId": "prof_anchit",
+        "intakeId": "prof_anchit",
+        "goals": [],
+        "createdAt": "2025-11-08T04:46:11.079Z",
+        "days": [
+          {
+            "date": "2025-11-08",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation A",
+                "duration": 15,
+                "description": "Sun Salutation A yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Warrior II",
+                "duration": 10,
+                "description": "Warrior II yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Downward-Facing Dog",
+                "duration": 10,
+                "description": "Downward-Facing Dog yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Corpse Pose",
+                "duration": 10,
+                "description": "Corpse Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal with Berries & Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup and Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu and Vegetable Stir-fry",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-09",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Cat-Cow Stretch",
+                "duration": 10,
+                "description": "Cat-Cow Stretch yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Bridge Pose",
+                "duration": 15,
+                "description": "Bridge Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Cobra Pose",
+                "duration": 10,
+                "description": "Cobra Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 10,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble with Spinach",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Chickpeas",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Black Bean Burgers",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-10",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Active Rest: 45min Walk",
+                "duration": 45,
+                "description": "Active Rest: 45min Walk yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt with Granola",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Large Veggie Wrap",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Vegetable Curry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-11",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation B",
+                "duration": 15,
+                "description": "Sun Salutation B yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Triangle Pose",
+                "duration": 10,
+                "description": "Triangle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Plank Pose",
+                "duration": 10,
+                "description": "Plank Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Corpse Pose",
+                "duration": 10,
+                "description": "Corpse Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal with Berries & Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup and Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu and Vegetable Stir-fry",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-12",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Chair Pose",
+                "duration": 10,
+                "description": "Chair Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Tree Pose",
+                "duration": 15,
+                "description": "Tree Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Pigeon Pose",
+                "duration": 10,
+                "description": "Pigeon Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 10,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble with Spinach",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Chickpeas",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Black Bean Burgers",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-13",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Active Rest: 45min Walk",
+                "duration": 45,
+                "description": "Active Rest: 45min Walk yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt with Granola",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Large Veggie Wrap",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Vegetable Curry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-14",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Gentle Flow Yoga",
+                "duration": 45,
+                "description": "Gentle Flow Yoga yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Fruit Smoothie with Protein",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover Veggie Curry",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom Risotto",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-15",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation A",
+                "duration": 15,
+                "description": "Sun Salutation A yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Warrior II",
+                "duration": 10,
+                "description": "Warrior II yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Downward-Facing Dog",
+                "duration": 10,
+                "description": "Downward-Facing Dog yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Corpse Pose",
+                "duration": 10,
+                "description": "Corpse Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal with Berries & Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup and Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu and Vegetable Stir-fry",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-16",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Cat-Cow Stretch",
+                "duration": 10,
+                "description": "Cat-Cow Stretch yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Bridge Pose",
+                "duration": 15,
+                "description": "Bridge Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Cobra Pose",
+                "duration": 10,
+                "description": "Cobra Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 10,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble with Spinach",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Chickpeas",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Black Bean Burgers",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-17",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Active Rest: 45min Walk",
+                "duration": 45,
+                "description": "Active Rest: 45min Walk yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt with Granola",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Large Veggie Wrap",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Vegetable Curry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-18",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation B",
+                "duration": 15,
+                "description": "Sun Salutation B yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Triangle Pose",
+                "duration": 10,
+                "description": "Triangle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Plank Pose",
+                "duration": 10,
+                "description": "Plank Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Corpse Pose",
+                "duration": 10,
+                "description": "Corpse Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal with Berries & Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup and Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu and Vegetable Stir-fry",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-19",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Chair Pose",
+                "duration": 10,
+                "description": "Chair Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Tree Pose",
+                "duration": 15,
+                "description": "Tree Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Pigeon Pose",
+                "duration": 10,
+                "description": "Pigeon Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 10,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble with Spinach",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Chickpeas",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Black Bean Burgers",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-20",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Active Rest: 45min Walk",
+                "duration": 45,
+                "description": "Active Rest: 45min Walk yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt with Granola",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Large Veggie Wrap",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Vegetable Curry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-21",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Gentle Flow Yoga",
+                "duration": 45,
+                "description": "Gentle Flow Yoga yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Fruit Smoothie with Protein",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover Veggie Curry",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom Risotto",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-22",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation A",
+                "duration": 15,
+                "description": "Sun Salutation A yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Warrior II",
+                "duration": 10,
+                "description": "Warrior II yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Downward-Facing Dog",
+                "duration": 10,
+                "description": "Downward-Facing Dog yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Corpse Pose",
+                "duration": 10,
+                "description": "Corpse Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal with Berries & Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup and Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu and Vegetable Stir-fry",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-23",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Cat-Cow Stretch",
+                "duration": 10,
+                "description": "Cat-Cow Stretch yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Bridge Pose",
+                "duration": 15,
+                "description": "Bridge Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Cobra Pose",
+                "duration": 10,
+                "description": "Cobra Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 10,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble with Spinach",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Chickpeas",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Black Bean Burgers",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-24",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Active Rest: 45min Walk",
+                "duration": 45,
+                "description": "Active Rest: 45min Walk yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt with Granola",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Large Veggie Wrap",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Vegetable Curry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-25",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation B",
+                "duration": 15,
+                "description": "Sun Salutation B yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Triangle Pose",
+                "duration": 10,
+                "description": "Triangle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Plank Pose",
+                "duration": 10,
+                "description": "Plank Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Corpse Pose",
+                "duration": 10,
+                "description": "Corpse Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal with Berries & Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup and Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu and Vegetable Stir-fry",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-26",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Chair Pose",
+                "duration": 10,
+                "description": "Chair Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Tree Pose",
+                "duration": 15,
+                "description": "Tree Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Pigeon Pose",
+                "duration": 10,
+                "description": "Pigeon Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 10,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble with Spinach",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Chickpeas",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Black Bean Burgers",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-27",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Active Rest: 45min Walk",
+                "duration": 45,
+                "description": "Active Rest: 45min Walk yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt with Granola",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Large Veggie Wrap",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Vegetable Curry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-28",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Gentle Flow Yoga",
+                "duration": 45,
+                "description": "Gentle Flow Yoga yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Fruit Smoothie with Protein",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover Veggie Curry",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom Risotto",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-29",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation A",
+                "duration": 15,
+                "description": "Sun Salutation A yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Warrior II",
+                "duration": 10,
+                "description": "Warrior II yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Downward-Facing Dog",
+                "duration": 10,
+                "description": "Downward-Facing Dog yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Corpse Pose",
+                "duration": 10,
+                "description": "Corpse Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal with Berries & Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup and Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu and Vegetable Stir-fry",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-11-30",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Cat-Cow Stretch",
+                "duration": 10,
+                "description": "Cat-Cow Stretch yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Bridge Pose",
+                "duration": 15,
+                "description": "Bridge Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Cobra Pose",
+                "duration": 10,
+                "description": "Cobra Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 10,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble with Spinach",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Chickpeas",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Black Bean Burgers",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-01",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Active Rest: 45min Walk",
+                "duration": 45,
+                "description": "Active Rest: 45min Walk yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt with Granola",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Large Veggie Wrap",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Vegetable Curry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-02",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Sun Salutation B",
+                "duration": 15,
+                "description": "Sun Salutation B yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Triangle Pose",
+                "duration": 10,
+                "description": "Triangle Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Plank Pose",
+                "duration": 10,
+                "description": "Plank Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Corpse Pose",
+                "duration": 10,
+                "description": "Corpse Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Oatmeal with Berries & Nuts",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Lentil Soup and Whole Wheat Bread",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Tofu and Vegetable Stir-fry",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-03",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Chair Pose",
+                "duration": 10,
+                "description": "Chair Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Tree Pose",
+                "duration": 15,
+                "description": "Tree Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Pigeon Pose",
+                "duration": 10,
+                "description": "Pigeon Pose yoga practice"
+              },
+              {
+                "type": "yoga",
+                "name": "Child's Pose",
+                "duration": 10,
+                "description": "Child's Pose yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Tofu Scramble with Spinach",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Quinoa Salad with Chickpeas",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Black Bean Burgers",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-04",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Active Rest: 45min Walk",
+                "duration": 45,
+                "description": "Active Rest: 45min Walk yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Greek Yogurt with Granola",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Large Veggie Wrap",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Vegetable Curry with Brown Rice",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          },
+          {
+            "date": "2025-12-05",
+            "activities": [
+              {
+                "type": "yoga",
+                "name": "Gentle Flow Yoga",
+                "duration": 45,
+                "description": "Gentle Flow Yoga yoga practice"
+              }
+            ],
+            "meals": [
+              {
+                "type": "breakfast",
+                "name": "Fruit Smoothie with Protein",
+                "calories": 500,
+                "description": "Healthy breakfast"
+              },
+              {
+                "type": "lunch",
+                "name": "Leftover Veggie Curry",
+                "calories": 700,
+                "description": "Healthy lunch"
+              },
+              {
+                "type": "dinner",
+                "name": "Mushroom Risotto",
+                "calories": 830,
+                "description": "Healthy dinner"
+              }
+            ]
+          }
+        ]
+      },
+      "analytics": {
+        "safety_score": 0.95,
+        "diet_match": 0.92,
+        "progression_score": 0.9,
+        "adherence_score": 0.88,
+        "overall": 0.91
+      },
+      "costMetrics": {
+        "inputTokens": 232,
+        "outputTokens": 6072,
+        "totalTokens": 7939,
+        "model": "gemini-2.5-flash"
+      },
+      "createdAt": "2025-11-08T04:46:11.079Z"
+    },
+    {
       "planId": "plan_c1bbc3f5da59",
       "profileId": "prof_anchit",
       "planName": "Plan for Anchit",

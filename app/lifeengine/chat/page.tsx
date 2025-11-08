@@ -257,25 +257,13 @@ export default function UseCustomGPTPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <header className="text-center mb-10">
-          <div className="text-7xl mb-4">🧠</div>
+          <div className="text-7xl mb-4">�</div>
           <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            AI Wellness Architect
+            AI Plan Generator
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Powered by advanced AI to create hyper-personalized wellness plans with comprehensive step-by-step guidance
+            Powered by Google Gemini AI to create comprehensive, personalized wellness plans with real exercises, detailed recipes, and step-by-step guidance
           </p>
-          {customGptUrl && (
-            <div className="mt-6 flex justify-center">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => window.open(customGptUrl, "_blank", "noopener,noreferrer")}
-                className="px-6 py-3 text-base"
-              >
-                🔗 Open TH-LifeEngine Companion GPT
-              </Button>
-            </div>
-          )}
         </header>
 
         {/* How It Works */}
