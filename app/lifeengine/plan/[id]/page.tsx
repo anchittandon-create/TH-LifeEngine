@@ -91,25 +91,51 @@ export default function PlanDetailPage({ params }: Props) {
     }
   }, [notebookDays]);
 
-  const loadPlan = async () => {
+  const loadPlan = async (retryCount = 0) => {
     setLoading(true);
     setError(null);
     try {
+      // Try the new API format first (Gemini plans)
       const detailRes = await fetch(`/api/lifeengine/plan/detail?planId=${params.id}`);
       if (detailRes.ok) {
         const detailData = await detailRes.json();
+        
+        // Check if it's a custom GPT plan (has weekly_schedule)
         if (detailData.plan?.weekly_schedule) {
+          console.log('✅ Loaded Custom GPT plan');
           setCustomPlan(detailData.plan as LifeEnginePlan);
           setRulePlan(null);
           return;
         }
+        
+        // Check if it's a Gemini plan (has days array)
+        if (detailData.plan?.days) {
+          console.log('✅ Loaded Gemini plan');
+          setRulePlan(detailData.plan as RulePlan);
+          setCustomPlan(null);
+          return;
+        }
       }
+      
+      // Fallback to old API
+      console.log('Trying fallback API...');
       const response = await fetch(`/api/lifeengine/getPlan?id=${params.id}`);
-      if (!response.ok) throw new Error("Failed to load plan");
+      if (!response.ok) {
+        // If plan not found and this is a recent generation, retry
+        if (response.status === 404 && retryCount < 3) {
+          console.log(`Plan not found yet, retrying in ${(retryCount + 1) * 500}ms... (attempt ${retryCount + 1}/3)`);
+          await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 500));
+          return loadPlan(retryCount + 1);
+        }
+        throw new Error("Failed to load plan");
+      }
+      
       const data = await response.json();
+      console.log('✅ Loaded plan from fallback API');
       setRulePlan(data.plan);
       setCustomPlan(null);
     } catch (err: any) {
+      console.error('❌ Failed to load plan:', err);
       setError(err.message || "Failed to load plan");
     } finally {
       setLoading(false);
@@ -203,7 +229,7 @@ export default function PlanDetailPage({ params }: Props) {
           <h2 className={styles.errorTitle}>Unable to load plan</h2>
           <p className={styles.errorMessage}>{error || "Plan not found."}</p>
           <div className={styles.errorActions}>
-            <Button onClick={loadPlan}>Try Again</Button>
+            <Button onClick={() => loadPlan()}>Try Again</Button>
             <Link href="/lifeengine/dashboard">
               <Button variant="ghost">Back to Dashboard</Button>
             </Link>
