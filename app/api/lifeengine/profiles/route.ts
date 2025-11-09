@@ -300,25 +300,52 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const profileId = body.id || uuidv4();
 
+    console.log(`📝 [PROFILES] ${body.id ? 'Updating' : 'Creating'} profile:`, {
+      profileId,
+      name: body.name,
+      hasId: !!body.id,
+    });
+
     const existing = body.id ? await db.getProfile(body.id) : null;
     const profile = prepareProfilePayload({ ...body, id: profileId }, existing);
 
     if (existing) {
       await db.updateProfile(profile);
+      console.log(`✅ [PROFILES] Profile updated in persistent storage:`, {
+        profileId,
+        name: profile.name,
+        updatedAt: profile.updatedAt,
+      });
       logger.info("Profile updated in persistent storage", {
         profileId,
         name: profile.name,
       });
     } else {
       await db.saveProfile(profile);
+      console.log(`✅ [PROFILES] Profile created in persistent storage:`, {
+        profileId,
+        name: profile.name,
+        createdAt: profile.createdAt,
+      });
       logger.info("Profile created in persistent storage", {
         profileId,
         name: profile.name,
       });
     }
 
+    // Verify the save by reading it back
+    const verification = await db.getProfile(profileId);
+    if (!verification) {
+      console.error(`❌ [PROFILES] VERIFICATION FAILED: Profile not found after save!`, {
+        profileId,
+      });
+      throw new Error('Profile save verification failed');
+    }
+    console.log(`✅ [PROFILES] Verification successful - profile exists in storage`);
+
     return NextResponse.json(toEnhancedProfile(profile));
   } catch (error: any) {
+    console.error(`❌ [PROFILES] Failed to create/update profile:`, error);
     logger.error("Failed to create/update profile", { error: error.message });
     return NextResponse.json(
       { error: "Failed to save profile" },
