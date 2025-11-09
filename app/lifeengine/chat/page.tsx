@@ -5,6 +5,7 @@ import Link from "next/link";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import PlanPreview from "@/app/components/PlanPreview";
 import { CustomGPTForm } from "@/components/lifeengine/CustomGPTForm";
 import type { Profile } from "@/lib/ai/schemas";
@@ -29,6 +30,7 @@ export default function UseCustomGPTPage() {
   const [plan, setPlan] = useState<LifeEnginePlan | null>(null);
   const [rawPlan, setRawPlan] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showJson, setShowJson] = useState(false);
   const planRef = useRef<HTMLDivElement>(null);
 
@@ -40,6 +42,7 @@ export default function UseCustomGPTPage() {
         setProfiles(data.profiles || []);
       } catch (err) {
         console.error("Failed to load profiles", err);
+        setError("Failed to load profiles. Please refresh the page.");
       }
     };
     loadProfiles();
@@ -51,8 +54,12 @@ export default function UseCustomGPTPage() {
   const openGPT = async () => {
     try {
       await navigator.clipboard.writeText(planBrief);
+      setSuccessMessage("Prompt copied to clipboard!");
+      setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       console.warn("Failed to copy prompt", err);
+      setError("Failed to copy prompt to clipboard");
+      setTimeout(() => setError(null), 3000);
     }
     window.open(GPT_URL, "_blank", "noopener,noreferrer");
   };
