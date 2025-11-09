@@ -168,13 +168,28 @@ export async function POST(req: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+    
+    // Calculate appropriate token limit based on plan duration
+    let daysCount = 0;
+    if (input.duration.unit === 'days') daysCount = input.duration.value;
+    else if (input.duration.unit === 'weeks') daysCount = input.duration.value * 7;
+    else if (input.duration.unit === 'months') daysCount = input.duration.value * 30;
+    
+    // Dynamic token allocation: ~2000 tokens per day + 4000 base overhead
+    const estimatedTokensNeeded = Math.min(
+      4000 + (daysCount * 2000), // Base + per-day allocation
+      32768 // Gemini 2.5 Pro maximum (increased from 16384)
+    );
+    
+    console.log(`📊 [GENERATE] Allocating ${estimatedTokensNeeded} tokens for ${daysCount}-day plan`);
+    
     const model = genAI.getGenerativeModel({ 
       model: 'gemini-2.5-pro', // Using Pro model for detailed output
       generationConfig: {
         temperature: 0.7, // Increased for more natural, coach-like responses
         topP: 0.8,
         topK: 20,
-        maxOutputTokens: 16384, // Allow comprehensive plans
+        maxOutputTokens: estimatedTokensNeeded, // Dynamic allocation based on plan length
       },
     });
     
@@ -512,6 +527,15 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
     console.log('📦 [RESPONSE LENGTH]:', responseText.length);
     console.log('📦 [LAST 200 CHARS]:', responseText.substring(responseText.length - 200));
     
+    // Check if response was truncated (incomplete JSON)
+    const lastChar = responseText[responseText.length - 1];
+    const isLikelyTruncated = lastChar !== '}' && lastChar !== ']';
+    
+    if (isLikelyTruncated) {
+      console.warn('⚠️ [GENERATE] Response may be truncated - last char is not } or ]');
+      console.warn('⚠️ [GENERATE] Consider increasing maxOutputTokens or using shorter plan duration');
+    }
+    
     // Strip markdown code blocks if present
     if (responseText.startsWith('```json')) {
       responseText = responseText.replace(/^```json\n/, '').replace(/\n```$/, '');
@@ -519,19 +543,49 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       responseText = responseText.replace(/^```\n/, '').replace(/\n```$/, '');
     }
     
+    // Additional cleanup: remove any trailing incomplete content
+    if (isLikelyTruncated) {
+      // Try to salvage by finding the last complete object/array
+      const lastValidBrace = responseText.lastIndexOf('}');
+      const lastValidBracket = responseText.lastIndexOf(']');
+      const lastValidPos = Math.max(lastValidBrace, lastValidBracket);
+      
+      if (lastValidPos > responseText.length * 0.8) { // Only if we're keeping >80% of content
+        console.log(`⚙️ [GENERATE] Attempting to salvage truncated JSON by trimming to position ${lastValidPos}`);
+        responseText = responseText.substring(0, lastValidPos + 1);
+      }
+    }
+    
     try {
       planJson = JSON.parse(responseText);
-      logger.info('✅ Plan JSON parsed successfully');
+      logger.info('✅ Plan JSON parsed successfully', {
+        responseLength: responseText.length,
+        wasTruncated: isLikelyTruncated
+      });
     } catch (parseError: any) {
       logger.error('❌ JSON parse failed', { 
-        error: parseError.message, 
-        responsePreview: responseText.substring(0, 200),
-        responseTail: responseText.substring(Math.max(0, responseText.length - 200))
+        error: parseError.message,
+        errorPosition: parseError.message.match(/position (\d+)/)?.[1],
+        responseLength: responseText.length,
+        responsePreview: responseText.substring(0, 500),
+        responseTail: responseText.substring(Math.max(0, responseText.length - 500)),
+        truncated: isLikelyTruncated
       });
-      // Return error instead of retrying to save costs
+      
+      // Provide helpful error message
+      let errorMessage = 'Failed to generate valid plan. ';
+      if (isLikelyTruncated) {
+        errorMessage += `Response was truncated at ${responseText.length} characters. Try a shorter plan duration or split into multiple plans.`;
+      } else {
+        errorMessage += `JSON parsing failed: ${parseError.message}`;
+      }
+      
       return NextResponse.json({ 
-        error: 'Failed to generate valid plan. Please try again.',
-        details: parseError.message 
+        error: errorMessage,
+        details: parseError.message,
+        responseLength: responseText.length,
+        truncated: isLikelyTruncated,
+        suggestion: isLikelyTruncated ? 'Try reducing plan duration (e.g., 3-5 days instead of 7+)' : 'Please try again'
       }, { status: 500 });
     }
 
