@@ -70,6 +70,10 @@ const dailyRequestCount = new Map<string, { date: string; count: number }>();
 const globalDailySpend = new Map<string, { date: string; totalCost: number }>();
 const MAX_DAILY_BUDGET_USD = 0.50; // Hard stop at $0.50/day (~₹42)
 
+// ⏱️ Set maximum execution time for this API route
+// For long-duration plans, we need extended time
+export const maxDuration = 600; // 10 minutes (Vercel Pro plan allows up to 300s, Enterprise allows more)
+
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
   
@@ -402,10 +406,40 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       version: 'TH-LifeEngine v2.0'
     });
 
-    // Add timeout to prevent hanging
-    const timeoutMs = 180000; // 3 minutes (increased from 2 minutes for v2.0 comprehensive prompts)
+    // ⏱️ Dynamic timeout based on plan duration
+    // Longer plans need more time for AI to generate comprehensive content
+    const calculateTimeout = (duration: { unit: string; value: number }) => {
+      let daysCount = 0;
+      
+      // Convert duration to days
+      if (duration.unit === 'days') {
+        daysCount = duration.value;
+      } else if (duration.unit === 'weeks') {
+        daysCount = duration.value * 7;
+      } else if (duration.unit === 'months') {
+        daysCount = duration.value * 30;
+      }
+      
+      // Base timeout: 60 seconds
+      // Additional time: 15 seconds per day (up to 30 days)
+      // For longer plans: 10 seconds per day beyond 30 days
+      const baseTimeout = 60000; // 1 minute
+      const timePerDay = daysCount <= 30 ? 15000 : 10000; // 15s or 10s per day
+      const additionalTime = Math.min(daysCount, 30) * 15000 + Math.max(0, daysCount - 30) * 10000;
+      
+      const totalTimeout = baseTimeout + additionalTime;
+      const maxTimeout = 600000; // Cap at 10 minutes for very long plans
+      
+      return Math.min(totalTimeout, maxTimeout);
+    };
+    
+    const timeoutMs = calculateTimeout(input.duration);
+    const timeoutMinutes = Math.ceil(timeoutMs / 60000);
+    
+    console.log(`⏱️ [GENERATE] Dynamic timeout: ${timeoutMinutes} minutes for ${input.duration.value} ${input.duration.unit} plan`);
+    
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Generation timeout: Request took longer than 3 minutes')), timeoutMs);
+      setTimeout(() => reject(new Error(`Generation timeout: Request took longer than ${timeoutMinutes} minutes`)), timeoutMs);
     });
 
     let result: any;
