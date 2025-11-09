@@ -8,23 +8,23 @@ interface GenerationProgressProps {
 
 export function GenerationProgress({ onComplete }: GenerationProgressProps) {
   const [progress, setProgress] = useState(0);
-  const [stage, setStage] = useState("Starting");
+  const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [eta, setEta] = useState(90);
   const [elapsedTime, setElapsedTime] = useState(0);
 
   const stages = [
-    { name: "🔮 Analyzing your profile", duration: 8, progress: 10 },
-    { name: "📋 Structuring your plan", duration: 5, progress: 20 },
-    { name: "🧘‍♀️ Generating yoga sequences", duration: 15, progress: 35 },
-    { name: "🏋️ Creating workout routines", duration: 15, progress: 50 },
-    { name: "🥗 Crafting meal recipes", duration: 20, progress: 70 },
-    { name: "✨ Adding step-by-step details", duration: 15, progress: 85 },
-    { name: "📝 Finalizing your plan", duration: 12, progress: 95 },
-    { name: "✅ Complete!", duration: 0, progress: 100 },
+    { name: "Analyzing", icon: "🔮", duration: 8, progress: 10 },
+    { name: "Structuring", icon: "📋", duration: 5, progress: 20 },
+    { name: "Yoga", icon: "🧘‍♀️", duration: 15, progress: 35 },
+    { name: "Workouts", icon: "🏋️", duration: 15, progress: 50 },
+    { name: "Recipes", icon: "🥗", duration: 20, progress: 70 },
+    { name: "Details", icon: "✨", duration: 15, progress: 85 },
+    { name: "Finalizing", icon: "📝", duration: 12, progress: 95 },
+    { name: "Complete", icon: "✅", duration: 0, progress: 100 },
   ];
 
   useEffect(() => {
-    let currentStageIndex = 0;
+    let stageIndex = 0;
     let stageStartTime = Date.now();
     const startTime = Date.now();
 
@@ -33,33 +33,33 @@ export function GenerationProgress({ onComplete }: GenerationProgressProps) {
       const totalElapsed = Math.floor((now - startTime) / 1000);
       setElapsedTime(totalElapsed);
 
-      if (currentStageIndex >= stages.length) {
+      if (stageIndex >= stages.length) {
         clearInterval(interval);
         if (onComplete) onComplete();
         return;
       }
 
-      const currentStage = stages[currentStageIndex];
+      const currentStage = stages[stageIndex];
       const stageElapsed = (now - stageStartTime) / 1000;
 
       // Move to next stage if duration exceeded
       if (stageElapsed >= currentStage.duration) {
-        currentStageIndex++;
+        stageIndex++;
         stageStartTime = now;
-        if (currentStageIndex < stages.length) {
-          setStage(stages[currentStageIndex].name);
-          setProgress(stages[currentStageIndex].progress);
+        if (stageIndex < stages.length) {
+          setCurrentStageIndex(stageIndex);
+          setProgress(stages[stageIndex].progress);
           
           // Calculate remaining ETA
-          const remainingStages = stages.slice(currentStageIndex);
+          const remainingStages = stages.slice(stageIndex);
           const remainingTime = remainingStages.reduce((sum, s) => sum + s.duration, 0);
           setEta(Math.max(0, remainingTime));
         }
       } else {
         // Smooth progress within stage
         const stageProgress = Math.min(1, stageElapsed / currentStage.duration);
-        const nextProgress = currentStageIndex < stages.length - 1 
-          ? stages[currentStageIndex + 1].progress 
+        const nextProgress = stageIndex < stages.length - 1 
+          ? stages[stageIndex + 1].progress 
           : 100;
         const interpolatedProgress = 
           currentStage.progress + (nextProgress - currentStage.progress) * stageProgress;
@@ -67,7 +67,7 @@ export function GenerationProgress({ onComplete }: GenerationProgressProps) {
         
         // Update ETA
         const remainingInStage = Math.max(0, currentStage.duration - stageElapsed);
-        const remainingStages = stages.slice(currentStageIndex + 1);
+        const remainingStages = stages.slice(stageIndex + 1);
         const remainingTime = remainingInStage + remainingStages.reduce((sum, s) => sum + s.duration, 0);
         setEta(Math.max(0, Math.ceil(remainingTime)));
       }
@@ -77,102 +77,111 @@ export function GenerationProgress({ onComplete }: GenerationProgressProps) {
   }, [onComplete]);
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 shadow-xl border-2 border-blue-200">
-      {/* Header */}
-      <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-500 rounded-full mb-4 animate-pulse">
-          <span className="text-4xl">🧠</span>
+    <div className="w-full bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 shadow-xl border-2 border-blue-200">
+      {/* Header Row - Compact */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center animate-pulse">
+            <span className="text-2xl">{stages[currentStageIndex].icon}</span>
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-800">Generating Your Plan</h3>
+            <p className="text-sm text-gray-600">{stages[currentStageIndex].name}</p>
+          </div>
         </div>
-        <h3 className="text-2xl font-bold text-gray-800 mb-2">Generating Your Plan</h3>
-        <p className="text-gray-600">AI is crafting your personalized wellness journey...</p>
-      </div>
-
-      {/* Current Stage */}
-      <div className="mb-6 text-center">
-        <p className="text-xl font-semibold text-blue-700 mb-2">{stage}</p>
-        <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-          <div className="flex items-center gap-1">
+        
+        {/* Time Stats - Compact */}
+        <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-1 text-gray-600">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>Elapsed: {elapsedTime}s</span>
+            <span className="font-medium">{elapsedTime}s</span>
           </div>
-          <span>•</span>
-          <div className="flex items-center gap-1">
+          <div className="h-4 w-px bg-gray-300"></div>
+          <div className="flex items-center gap-1 text-blue-600">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
-            <span>ETA: ~{eta}s remaining</span>
+            <span className="font-semibold">~{eta}s left</span>
           </div>
+          <div className="h-4 w-px bg-gray-300"></div>
+          <span className="text-lg font-bold text-blue-600">{progress}%</span>
         </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700">Progress</span>
-          <span className="text-sm font-bold text-blue-600">{progress}%</span>
+      {/* Horizontal Stage Progress Bar */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between gap-2">
+          {stages.map((stage, idx) => (
+            <div key={idx} className="flex-1 flex flex-col items-center gap-2">
+              {/* Stage Icon */}
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300 ${
+                  idx < currentStageIndex
+                    ? "bg-green-500 text-white shadow-lg scale-110"
+                    : idx === currentStageIndex
+                    ? "bg-blue-500 text-white shadow-lg scale-125 animate-pulse"
+                    : "bg-gray-200 text-gray-400"
+                }`}
+              >
+                {idx < currentStageIndex ? "✓" : stage.icon}
+              </div>
+              
+              {/* Stage Name */}
+              <span
+                className={`text-xs font-medium text-center transition-all duration-300 ${
+                  idx === currentStageIndex
+                    ? "text-blue-700 font-bold"
+                    : idx < currentStageIndex
+                    ? "text-green-600"
+                    : "text-gray-400"
+                }`}
+              >
+                {stage.name}
+              </span>
+              
+              {/* Connecting Line */}
+              {idx < stages.length - 1 && (
+                <div className="absolute left-0 right-0 h-1 top-5 -z-10">
+                  <div
+                    className={`h-full transition-all duration-300 ${
+                      idx < currentStageIndex ? "bg-green-500" : "bg-gray-200"
+                    }`}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
         </div>
-        <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+      </div>
+
+      {/* Overall Progress Bar */}
+      <div className="mb-4">
+        <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner relative">
           <div
-            className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full transition-all duration-500 ease-out flex items-center justify-end pr-2"
+            className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full transition-all duration-500 ease-out relative"
             style={{ width: `${progress}%` }}
           >
-            {progress > 10 && (
-              <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
-            )}
+            <div className="absolute right-0 top-0 bottom-0 w-1 bg-white opacity-50 animate-pulse"></div>
           </div>
         </div>
       </div>
 
-      {/* Stage Indicators */}
-      <div className="grid grid-cols-4 gap-2 mb-6">
-        {stages.slice(0, -1).map((s, idx) => (
-          <div
-            key={idx}
-            className={`text-center p-2 rounded-lg transition-all duration-300 ${
-              progress >= s.progress
-                ? "bg-blue-500 text-white shadow-md"
-                : "bg-gray-100 text-gray-400"
-            }`}
-          >
-            <div className="text-lg mb-1">
-              {progress >= s.progress ? "✓" : "○"}
-            </div>
-            <div className="text-xs font-medium truncate">
-              {s.name.replace(/^[🔮📋🧘‍♀️🏋️🥗✨📝]+\s/, "")}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Info Box */}
-      <div className="bg-blue-100 border border-blue-300 rounded-xl p-4">
-        <div className="flex items-start gap-3">
-          <span className="text-2xl flex-shrink-0">💡</span>
+      {/* Info Box - Compact Horizontal Layout */}
+      <div className="bg-blue-100 border border-blue-300 rounded-xl p-3">
+        <div className="flex items-center gap-3">
+          <span className="text-xl flex-shrink-0">💡</span>
           <div className="flex-1">
-            <p className="text-sm text-blue-800 font-semibold mb-2">
-              What's happening behind the scenes:
-            </p>
-            <ul className="text-xs text-blue-700 space-y-1">
-              <li>• Analyzing your profile, goals, and preferences</li>
-              <li>• Creating personalized yoga sequences with detailed steps</li>
-              <li>• Designing workouts tailored to your fitness level</li>
-              <li>• Generating complete recipes with ingredients and instructions</li>
-              <li>• Adding safety tips, modifications, and motivational guidance</li>
-            </ul>
-            <p className="text-xs text-blue-600 mt-3 font-medium">
-              ⚠️ Please don't close this window. Generation typically takes 60-90 seconds.
+            <p className="text-xs text-blue-800 leading-relaxed">
+              <strong>Behind the scenes:</strong> Analyzing your profile • Creating personalized sequences • 
+              Designing workouts • Generating recipes • Adding safety tips and guidance
             </p>
           </div>
+          <p className="text-xs text-blue-600 font-medium flex-shrink-0">
+            ⚠️ Don't close window
+          </p>
         </div>
-      </div>
-
-      {/* Animated Dots */}
-      <div className="mt-6 flex justify-center gap-2">
-        <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
-        <div className="w-3 h-3 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
-        <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
       </div>
     </div>
   );

@@ -243,235 +243,228 @@ export default function CreatePlan() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-10 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <header className="text-center mb-10">
-          <div className="text-7xl mb-4">🚀</div>
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            Create Your Personalized Wellness Plan
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Answer a few questions and our AI will craft a comprehensive health, yoga, diet, and fitness plan tailored just for you
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-6 px-4">
+      <div className="max-w-[1800px] mx-auto">
+        {/* Compact Header */}
+        <header className="text-center mb-6">
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <span className="text-5xl">🚀</span>
+            <h1 className="text-4xl font-bold text-gray-900">
+              Create Your Wellness Plan
+            </h1>
+          </div>
+          <p className="text-base text-gray-600 max-w-2xl mx-auto">
+            Fill the form and our AI will craft a comprehensive plan tailored just for you
           </p>
         </header>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Profile Selector */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-blue-200">
-            <div className="flex items-center gap-3 mb-6">
-              <span className="text-4xl">👤</span>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">Select Profile</h2>
-                <p className="text-gray-600">Use an existing profile or create a new one</p>
+        {/* Loading State with Real Progress - Full Width */}
+        {loading && (
+          <div className="mb-6">
+            <GenerationProgress onComplete={() => {
+              console.log('Progress complete - generation should be finishing soon');
+            }} />
+          </div>
+        )}
+
+        {/* Error Messages - Full Width */}
+        {Object.keys(formErrors).length > 0 && (
+          <div className="bg-red-50 border-2 border-red-400 rounded-2xl p-4 shadow-lg animate-pulse mb-6">
+            <div className="flex items-start gap-3">
+              <span className="text-3xl flex-shrink-0">⚠️</span>
+              <div className="flex-1">
+                <p className="font-bold text-red-800 text-lg mb-2">
+                  Please fix the following errors:
+                </p>
+                <ul className="space-y-1 text-red-700 text-sm">
+                  {Object.entries(formErrors).map(([field, error]) => (
+                    <li key={field} className="flex items-start gap-2">
+                      <span className="text-red-500 font-bold">•</span>
+                      <span className="font-medium">{error}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
-            
-            {loadingProfiles ? (
-              <div className="flex items-center gap-3 text-gray-600">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-                <span>Loading profiles...</span>
+          </div>
+        )}
+
+        {/* API Error - Full Width */}
+        {error && !loading && (
+          <div className="bg-red-50 border-2 border-red-400 rounded-2xl p-4 shadow-lg mb-6">
+            <div className="flex items-start gap-3">
+              <span className="text-3xl flex-shrink-0">❌</span>
+              <div className="flex-1">
+                <p className="font-bold text-red-800 text-lg mb-2">Generation Failed</p>
+                <p className="text-red-700 text-sm leading-relaxed">{error}</p>
               </div>
-            ) : (
-              <div className="space-y-4">
-                <label htmlFor="profile-select" className="block text-sm font-medium text-gray-700 mb-2">
-                  Choose Profile
-                </label>
-                <select
-                  id="profile-select"
-                  value={selectedProfileId}
-                  onChange={(e) => setSelectedProfileId(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-lg"
-                  aria-label="Select a profile"
-                >
-                  <option value="">-- Select a Profile --</option>
-                  {profiles.map((profile) => (
-                    <option key={profile.id} value={profile.id}>
-                      {profile.name} (Age: {profile.age}, {profile.gender})
-                    </option>
-                  ))}
-                  <option value="new">➕ Create New Profile</option>
-                </select>
+            </div>
+          </div>
+        )}
+
+        {/* Success Message - Full Width */}
+        {generatedPlanId && (
+          <div className="bg-green-50 border-2 border-green-400 rounded-2xl p-4 shadow-lg mb-6">
+            <div className="flex items-start gap-3">
+              <span className="text-3xl flex-shrink-0">✅</span>
+              <div className="flex-1">
+                <p className="font-bold text-green-800 text-lg mb-1">
+                  🎉 Plan Generated Successfully!
+                </p>
+                <p className="text-green-700 text-sm">
+                  Your personalized wellness plan is ready. Redirecting you now...
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Two Column Layout: Form (Left) + Summary (Right) */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column: Form Fields (2/3 width) */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Profile Selector - Compact */}
+              <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-blue-200">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-3xl">👤</span>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">Profile</h2>
+                    <p className="text-sm text-gray-600">Select or create new</p>
+                  </div>
+                </div>
                 
-                {selectedProfileId && selectedProfileId !== "new" && (
-                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                    <p className="text-sm text-blue-800">
-                      ✅ Profile loaded. You can modify the details below before generating your plan.
-                    </p>
+                {loadingProfiles ? (
+                  <div className="flex items-center gap-3 text-gray-600">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                    <span className="text-sm">Loading profiles...</span>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <select
+                      id="profile-select"
+                      value={selectedProfileId}
+                      onChange={(e) => setSelectedProfileId(e.target.value)}
+                      className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-base"
+                      aria-label="Select a profile"
+                    >
+                      <option value="">-- Select a Profile --</option>
+                      {profiles.map((profile) => (
+                        <option key={profile.id} value={profile.id}>
+                          {profile.name} (Age: {profile.age}, {profile.gender})
+                        </option>
+                      ))}
+                      <option value="new">➕ Create New Profile</option>
+                    </select>
+                    
+                    {selectedProfileId && selectedProfileId !== "new" && (
+                      <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-xs text-blue-800">
+                          ✅ Profile loaded. Modify details below if needed.
+                        </p>
+                      </div>
+                    )}
+                    
+                    {selectedProfileId === "new" && (
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <p className="text-xs text-green-800">
+                          ✨ Creating new profile. Fill in the details below.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
-                
-                {selectedProfileId === "new" && (
-                  <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl">
-                    <p className="text-sm text-green-800">
-                      ✨ Creating a new profile. Fill in the details below.
-                    </p>
+              </div>
+
+              {/* Unified Plan Form */}
+              <PlanForm formData={formData} setFormData={setFormData} errors={formErrors} />
+            </div>
+
+            {/* Right Column: Plan Summary (1/3 width, sticky) */}
+            {formData.planTypes.length > 0 && formData.fullName && (
+              <div className="lg:col-span-1">
+                <div className="sticky top-6 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-5 border-2 border-indigo-200 shadow-lg">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-2xl">📊</span>
+                    <h2 className="text-lg font-bold text-gray-800">Plan Summary</h2>
                   </div>
-                )}
+                  <div className="space-y-3">
+                    <div className="bg-white rounded-lg p-3 shadow-sm">
+                      <p className="text-xs font-semibold text-gray-600 mb-1">Name</p>
+                      <p className="text-sm font-bold text-gray-800">{formData.fullName}</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 shadow-sm">
+                      <p className="text-xs font-semibold text-gray-600 mb-1">Age & Gender</p>
+                      <p className="text-sm font-bold text-gray-800">{formData.age}y, {formData.gender}</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 shadow-sm">
+                      <p className="text-xs font-semibold text-gray-600 mb-1">Plan Types</p>
+                      <p className="text-xs font-bold text-gray-800">
+                        {formData.planTypes.map(pt => 
+                          PLAN_TYPE_OPTIONS.find(opt => opt.value === pt)?.label || pt
+                        ).join(", ")}
+                      </p>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 shadow-sm">
+                      <p className="text-xs font-semibold text-gray-600 mb-1">Duration</p>
+                      <p className="text-sm font-bold text-gray-800">
+                        {DURATION_OPTIONS.find(opt => opt.value === formData.duration)?.label}
+                      </p>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 shadow-sm">
+                      <p className="text-xs font-semibold text-gray-600 mb-1">Diet</p>
+                      <p className="text-xs font-bold text-gray-800">
+                        {getDietLabel(formData.dietType)}
+                      </p>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 shadow-sm">
+                      <p className="text-xs font-semibold text-gray-600 mb-1">Activity</p>
+                      <p className="text-sm font-bold text-gray-800 capitalize">{formData.activityLevel}</p>
+                    </div>
+                    {formData.goals.length > 0 && (
+                      <div className="bg-white rounded-lg p-3 shadow-sm">
+                        <p className="text-xs font-semibold text-gray-600 mb-1">Goals</p>
+                        <p className="text-xs font-bold text-gray-800">{formData.goals.join(", ")}</p>
+                      </div>
+                    )}
+                    {formData.chronicConditions.length > 0 && (
+                      <div className="bg-white rounded-lg p-3 shadow-sm">
+                        <p className="text-xs font-semibold text-gray-600 mb-1">Health</p>
+                        <p className="text-xs font-bold text-gray-800">{formData.chronicConditions.join(", ")}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Error Messages */}
-          {Object.keys(formErrors).length > 0 && (
-            <div className="bg-red-50 border-2 border-red-400 rounded-2xl p-6 shadow-lg animate-pulse">
-              <div className="flex items-start gap-4">
-                <span className="text-4xl flex-shrink-0">⚠️</span>
-                <div className="flex-1">
-                  <p className="font-bold text-red-800 text-xl mb-3">
-                    Please fix the following errors:
-                  </p>
-                  <ul className="space-y-2 text-red-700">
-                    {Object.entries(formErrors).map(([field, error]) => (
-                      <li key={field} className="flex items-start gap-2">
-                        <span className="text-red-500 font-bold">•</span>
-                        <span className="font-medium">{error}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* API Error */}
-          {error && !loading && (
-            <div className="bg-red-50 border-2 border-red-400 rounded-2xl p-6 shadow-lg">
-              <div className="flex items-start gap-4">
-                <span className="text-4xl flex-shrink-0">❌</span>
-                <div className="flex-1">
-                  <p className="font-bold text-red-800 text-xl mb-2">Generation Failed</p>
-                  <p className="text-red-700 leading-relaxed">{error}</p>
-                  <div className="mt-4 p-4 bg-red-100 rounded-lg">
-                    <p className="text-sm text-red-800 font-semibold mb-2">💡 Troubleshooting Tips:</p>
-                    <ul className="text-sm text-red-700 space-y-1">
-                      <li>• Check your internet connection</li>
-                      <li>• Verify your API key is configured correctly</li>
-                      <li>• Try reducing the plan duration or complexity</li>
-                      <li>• Contact support if the issue persists</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Success Message */}
-          {generatedPlanId && (
-            <div className="bg-green-50 border-2 border-green-400 rounded-2xl p-6 shadow-lg">
-              <div className="flex items-start gap-4">
-                <span className="text-4xl flex-shrink-0">✅</span>
-                <div className="flex-1">
-                  <p className="font-bold text-green-800 text-xl mb-2">
-                    🎉 Plan Generated Successfully!
-                  </p>
-                  <p className="text-green-700 text-lg">
-                    Your personalized wellness plan is ready. Redirecting you now...
-                  </p>
-                  <div className="mt-4">
-                    <div className="animate-pulse flex space-x-2">
-                      <div className="h-2 w-2 bg-green-500 rounded-full"></div>
-                      <div className="h-2 w-2 bg-green-500 rounded-full animation-delay-200"></div>
-                      <div className="h-2 w-2 bg-green-500 rounded-full animation-delay-400"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Loading State with Real Progress */}
-          {loading && (
-            <GenerationProgress onComplete={() => {
-              console.log('Progress complete - generation should be finishing soon');
-            }} />
-          )}
-
-          {/* Unified Plan Form */}
-          <PlanForm formData={formData} setFormData={setFormData} errors={formErrors} />
-
-          {/* Plan Summary */}
-          {formData.planTypes.length > 0 && formData.fullName && (
-            <section className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 border-2 border-indigo-200 shadow-lg">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-3xl">📊</span>
-                <h2 className="text-xl font-bold text-gray-800">Plan Summary</h2>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                <div className="bg-white rounded-xl p-4 shadow-sm">
-                  <p className="text-sm font-semibold text-gray-600 mb-1">Name</p>
-                  <p className="text-lg font-bold text-gray-800">{formData.fullName}</p>
-                </div>
-                <div className="bg-white rounded-xl p-4 shadow-sm">
-                  <p className="text-sm font-semibold text-gray-600 mb-1">Age & Gender</p>
-                  <p className="text-lg font-bold text-gray-800">{formData.age}y, {formData.gender}</p>
-                </div>
-                <div className="bg-white rounded-xl p-4 shadow-sm">
-                  <p className="text-sm font-semibold text-gray-600 mb-1">Plan Types</p>
-                  <p className="text-sm font-bold text-gray-800">
-                    {formData.planTypes.map(pt => 
-                      PLAN_TYPE_OPTIONS.find(opt => opt.value === pt)?.label || pt
-                    ).join(", ")}
-                  </p>
-                </div>
-                <div className="bg-white rounded-xl p-4 shadow-sm">
-                  <p className="text-sm font-semibold text-gray-600 mb-1">Duration</p>
-                  <p className="text-lg font-bold text-gray-800">
-                    {DURATION_OPTIONS.find(opt => opt.value === formData.duration)?.label}
-                  </p>
-                </div>
-                <div className="bg-white rounded-xl p-4 shadow-sm">
-                  <p className="text-sm font-semibold text-gray-600 mb-1">Diet Preference</p>
-                  <p className="text-sm font-bold text-gray-800">
-                    {getDietLabel(formData.dietType)}
-                  </p>
-                </div>
-                <div className="bg-white rounded-xl p-4 shadow-sm">
-                  <p className="text-sm font-semibold text-gray-600 mb-1">Activity Level</p>
-                  <p className="text-lg font-bold text-gray-800 capitalize">{formData.activityLevel}</p>
-                </div>
-                {formData.goals.length > 0 && (
-                  <div className="bg-white rounded-xl p-4 shadow-sm lg:col-span-2">
-                    <p className="text-sm font-semibold text-gray-600 mb-1">Goals</p>
-                    <p className="text-sm font-bold text-gray-800">{formData.goals.join(", ")}</p>
-                  </div>
-                )}
-                {formData.chronicConditions.length > 0 && (
-                  <div className="bg-white rounded-xl p-4 shadow-sm lg:col-span-2">
-                    <p className="text-sm font-semibold text-gray-600 mb-1">Health Considerations</p>
-                    <p className="text-sm font-bold text-gray-800">{formData.chronicConditions.join(", ")}</p>
-                  </div>
-                )}
-              </div>
-            </section>
-          )}
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6 pb-10">
+          {/* Action Buttons - Full Width */}
+          <div className="flex flex-wrap gap-3 justify-center items-center pt-4 pb-6 border-t-2 border-gray-200">
             <Button
               type="button"
               variant="ghost"
               onClick={() => router.back()}
               disabled={loading}
-              className="w-full sm:w-auto px-8 py-4 text-lg"
+              className="px-6 py-2.5 text-base"
             >
               ← Back
             </Button>
             <Button
               type="submit"
               disabled={loading || !formData.fullName || formData.planTypes.length === 0}
-              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-12 py-4 text-lg rounded-2xl shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-10 py-2.5 text-base rounded-xl shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
             >
               {loading ? (
-                <span className="flex items-center gap-3">
-                  <svg className="animate-spin h-6 w-6" viewBox="0 0 24 24">
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                   <span>Generating...</span>
                 </span>
               ) : (
-                "✨ Generate My Personalized Plan"
+                "✨ Generate My Plan"
               )}
             </Button>
             <Button
@@ -479,9 +472,9 @@ export default function CreatePlan() {
               variant="ghost"
               onClick={() => setFormData(defaultPlanFormData)}
               disabled={loading}
-              className="w-full sm:w-auto px-8 py-4 text-lg"
+              className="px-6 py-2.5 text-base"
             >
-              🔄 Reset Form
+              🔄 Reset
             </Button>
           </div>
         </form>
