@@ -14,13 +14,13 @@ export function GenerationProgress({ onComplete }: GenerationProgressProps) {
   const [elapsedTime, setElapsedTime] = useState(0);
 
   const stages = [
-    { name: "Analyzing", icon: "🔮", duration: 10, progress: 10, color: "from-purple-500 to-purple-600" },
-    { name: "Structuring", icon: "📋", duration: 8, progress: 20, color: "from-blue-500 to-blue-600" },
-    { name: "Yoga", icon: "🧘‍♀️", duration: 20, progress: 35, color: "from-green-500 to-green-600" },
-    { name: "Workouts", icon: "🏋️", duration: 20, progress: 50, color: "from-orange-500 to-orange-600" },
-    { name: "Recipes", icon: "🥗", duration: 30, progress: 70, color: "from-emerald-500 to-emerald-600" },
-    { name: "Details", icon: "✨", duration: 20, progress: 85, color: "from-yellow-500 to-yellow-600" },
-    { name: "Finalizing", icon: "📝", duration: 15, progress: 95, color: "from-indigo-500 to-indigo-600" },
+    { name: "Analyzing", icon: "🔮", duration: 15, progress: 10, color: "from-purple-500 to-purple-600" },
+    { name: "Structuring", icon: "📋", duration: 12, progress: 20, color: "from-blue-500 to-blue-600" },
+    { name: "Yoga", icon: "🧘‍♀️", duration: 25, progress: 35, color: "from-green-500 to-green-600" },
+    { name: "Workouts", icon: "🏋️", duration: 30, progress: 50, color: "from-orange-500 to-orange-600" },
+    { name: "Recipes", icon: "🥗", duration: 40, progress: 70, color: "from-emerald-500 to-emerald-600" },
+    { name: "Details", icon: "✨", duration: 25, progress: 85, color: "from-yellow-500 to-yellow-600" },
+    { name: "Finalizing", icon: "📝", duration: 18, progress: 95, color: "from-indigo-500 to-indigo-600" },
     { name: "Complete", icon: "✅", duration: 0, progress: 100, color: "from-green-500 to-green-600" },
   ];
 

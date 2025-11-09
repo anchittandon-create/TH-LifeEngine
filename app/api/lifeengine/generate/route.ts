@@ -455,10 +455,12 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
         daysCount = duration.value * 30;
       }
       
-      // Base timeout: 60 seconds
-      // Additional time: 10 seconds per day (up to 24 days to stay under 5 min cap)
-      const baseTimeout = 60000; // 1 minute
-      const additionalTime = daysCount * 10000; // 10s per day
+      // ✅ FIXED: More generous timeout calculation
+      // Base timeout: 90 seconds (was 60s - too short!)
+      // Additional time: 15 seconds per day (was 10s - not enough buffer)
+      // This gives plenty of buffer for API response time
+      const baseTimeout = 90000; // 1.5 minutes
+      const additionalTime = daysCount * 15000; // 15s per day
       
       const totalTimeout = baseTimeout + additionalTime;
       const maxTimeout = 300000; // Cap at 5 minutes (Vercel Pro plan limit)
