@@ -403,9 +403,9 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
     });
 
     // Add timeout to prevent hanging
-    const timeoutMs = 120000; // 2 minutes
+    const timeoutMs = 180000; // 3 minutes (increased from 2 minutes for v2.0 comprehensive prompts)
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Generation timeout: Request took longer than 2 minutes')), timeoutMs);
+      setTimeout(() => reject(new Error('Generation timeout: Request took longer than 3 minutes')), timeoutMs);
     });
 
     let result: any;

@@ -29,7 +29,7 @@ export interface CustomGPTResponse {
 async function fetchWithTimeout(
   url: string,
   options: RequestInit = {},
-  timeout: number = 60000 // 60 seconds default
+  timeout: number = 180000 // 3 minutes default (increased from 60s)
 ): Promise<Response> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -106,7 +106,7 @@ export async function generatePlan(payload: any): Promise<PlanGenerationResponse
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
-      }, 90000); // 90 second timeout for plan generation
+      }, 180000); // 3 minute timeout for plan generation (increased from 90s)
       
       const duration = Date.now() - startTime;
       console.log(`⏱️ [API] Request completed in ${duration}ms`);
@@ -155,7 +155,7 @@ export async function generatePlanWithGPT(payload: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
-      }, 120000); // 120 second timeout for GPT generation
+      }, 180000); // 3 minute timeout for GPT generation (increased from 120s)
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));

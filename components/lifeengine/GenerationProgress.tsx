@@ -13,13 +13,13 @@ export function GenerationProgress({ onComplete }: GenerationProgressProps) {
   const [elapsedTime, setElapsedTime] = useState(0);
 
   const stages = [
-    { name: "Analyzing", icon: "🔮", duration: 8, progress: 10 },
-    { name: "Structuring", icon: "📋", duration: 5, progress: 20 },
-    { name: "Yoga", icon: "🧘‍♀️", duration: 15, progress: 35 },
-    { name: "Workouts", icon: "🏋️", duration: 15, progress: 50 },
-    { name: "Recipes", icon: "🥗", duration: 20, progress: 70 },
-    { name: "Details", icon: "✨", duration: 15, progress: 85 },
-    { name: "Finalizing", icon: "📝", duration: 12, progress: 95 },
+    { name: "Analyzing", icon: "🔮", duration: 10, progress: 10 },
+    { name: "Structuring", icon: "📋", duration: 8, progress: 20 },
+    { name: "Yoga", icon: "🧘‍♀️", duration: 20, progress: 35 },
+    { name: "Workouts", icon: "🏋️", duration: 20, progress: 50 },
+    { name: "Recipes", icon: "🥗", duration: 30, progress: 70 },
+    { name: "Details", icon: "✨", duration: 20, progress: 85 },
+    { name: "Finalizing", icon: "📝", duration: 15, progress: 95 },
     { name: "Complete", icon: "✅", duration: 0, progress: 100 },
   ];
 
