@@ -141,27 +141,79 @@ export function GenerationProgress({ onComplete }: GenerationProgressProps) {
             </div>
           </div>
 
-          {/* Main Progress Bar - Large and Visual */}
+          {/* Main Progress Bar - Large Box Design */}
           <div className="mb-8">
-            <div className="relative h-8 bg-gray-200/80 rounded-full overflow-hidden shadow-inner backdrop-blur-sm">
-              {/* Animated gradient background */}
-              <div className={`absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 ${styles.animateShimmer}`}></div>
+            {/* Progress Label Above */}
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-bold text-gray-700 tracking-wide">GENERATION PROGRESS</h4>
+              <span className="text-sm font-bold text-gray-500">{progress}% Complete</span>
+            </div>
+            
+            {/* Modern Box-Shaped Progress Container */}
+            <div className="relative">
+              {/* Outer Glow Effect */}
+              <div className={`absolute -inset-1 bg-gradient-to-r ${stages[currentStageIndex].color} rounded-2xl opacity-30 blur-xl ${styles.animatePulse}`}></div>
               
-              {/* Progress Fill */}
-              <div
-                className={`relative h-full bg-gradient-to-r ${stages[currentStageIndex].color} rounded-full transition-all duration-700 ease-out shadow-lg`}
-                style={{ width: `${progress}%` }}
-              >
-                {/* Shine effect */}
-                <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent ${styles.animateShine}`}></div>
+              {/* Main Progress Box */}
+              <div className="relative h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl overflow-hidden shadow-xl border-2 border-gray-300/50">
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-20">
+                  <div className={`h-full w-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 ${styles.animateShimmer}`}></div>
+                </div>
                 
-                {/* Pulse effect at the end */}
-                <div className="absolute right-0 top-0 bottom-0 w-2 bg-white/50 animate-pulse"></div>
-              </div>
-              
-              {/* Percentage Label Inside Bar */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-sm font-bold text-gray-700 drop-shadow-lg">{progress}% Complete</span>
+                {/* Progress Fill Bar with 3D Effect */}
+                <div
+                  className={`relative h-full bg-gradient-to-r ${stages[currentStageIndex].color} transition-all duration-700 ease-out`}
+                  style={{ width: `${progress}%` }}
+                >
+                  {/* Top Highlight (3D Effect) */}
+                  <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-white/40 to-transparent"></div>
+                  
+                  {/* Animated Shine Sweep */}
+                  <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent ${styles.animateShine}`}></div>
+                  
+                  {/* Vertical Stripes Pattern */}
+                  <div className="absolute inset-0 opacity-10">
+                    <div className={styles.stripePattern}></div>
+                  </div>
+                  
+                  {/* Active Pulse at Progress Edge */}
+                  <div className="absolute right-0 top-0 bottom-0 w-1 bg-white shadow-lg">
+                    <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg animate-ping"></div>
+                  </div>
+                </div>
+                
+                {/* Center Content Overlay */}
+                <div className="absolute inset-0 flex items-center justify-between px-6">
+                  {/* Left Side: Current Stage */}
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stages[currentStageIndex].color} shadow-lg flex items-center justify-center`}>
+                      <span className="text-2xl">{stages[currentStageIndex].icon}</span>
+                    </div>
+                    <div>
+                      <div className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Current Stage</div>
+                      <div className="text-lg font-bold text-gray-800">{stages[currentStageIndex].name}</div>
+                    </div>
+                  </div>
+                  
+                  {/* Right Side: Large Percentage */}
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Progress</div>
+                      <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+                        {progress}%
+                      </div>
+                    </div>
+                    <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${stages[currentStageIndex].color} shadow-lg flex items-center justify-center animate-pulse`}>
+                      <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Bottom Shadow (3D Depth) */}
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-t from-black/20 to-transparent"></div>
               </div>
             </div>
           </div>
