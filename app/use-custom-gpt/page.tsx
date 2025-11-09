@@ -16,6 +16,7 @@ import {
 import { requestPlanFromCustomGPT, fallbackToRuleEngine } from "@/lib/lifeengine/customGptService";
 import { savePlanRecord } from "@/lib/lifeengine/storage";
 import { formatErrorMessage } from "@/lib/lifeengine/api";
+import { buildPromptFromForm, type PromptBuilderInput } from "@/lib/lifeengine/promptBuilder";
 
 const GPT_URL =
   process.env.NEXT_PUBLIC_LIFEENGINE_GPT_URL ||
@@ -31,6 +32,12 @@ export default function UseCustomGPTPage() {
   const [error, setError] = useState<string | null>(null);
   const [showJson, setShowJson] = useState(false);
   const planRef = useRef<HTMLDivElement>(null);
+  
+  // Editable prompt feature
+  const [showPromptEditor, setShowPromptEditor] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [systemPrompt, setSystemPrompt] = useState("");
+  const [editedPrompt, setEditedPrompt] = useState("");
 
   useEffect(() => {
     const loadProfiles = async () => {
@@ -47,6 +54,23 @@ export default function UseCustomGPTPage() {
 
   const selectedProfile = profiles.find((p) => p.id === selectedProfileId);
   const planBrief = describePlanBrief(selectedProfileId || "unknown", form);
+
+  // Generate the full system prompt for preview/editing
+  useEffect(() => {
+    if (selectedProfile) {
+      const promptInput: PromptBuilderInput = {
+        ...form,
+        profileName: selectedProfile.name,
+        age: selectedProfile.age,
+        gender: selectedProfile.gender,
+      };
+      const generatedPrompt = buildPromptFromForm(promptInput);
+      setSystemPrompt(generatedPrompt);
+      if (!editMode) {
+        setEditedPrompt(generatedPrompt);
+      }
+    }
+  }, [selectedProfile, form, editMode]);
 
   const openGPT = async () => {
     try {
@@ -68,12 +92,47 @@ export default function UseCustomGPTPage() {
     setShowJson(false);
 
     try {
-      const result = await requestPlanFromCustomGPT({
-        form,
-        profileId: selectedProfileId,
-        profile: selectedProfile,
-        model: process.env.NEXT_PUBLIC_LIFEENGINE_GPT_ID,
-      });
+      let result: any;
+      
+      // Use edited prompt if in edit mode, otherwise use the standard flow
+      if (editMode && editedPrompt.trim()) {
+        const response = await fetch("/api/lifeengine/custom-gpt-generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt: editedPrompt,
+            profileId: selectedProfileId,
+            model: process.env.NEXT_PUBLIC_LIFEENGINE_GPT_ID,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`API request failed: ${response.statusText}`);
+        }
+
+        const gptResponse = await response.json();
+        const planText = gptResponse.plan?.trim();
+
+        if (!planText) {
+          throw new Error("Custom GPT returned an empty response");
+        }
+
+        const parsed = JSON.parse(planText) as LifeEnginePlan;
+        result = {
+          plan: parsed,
+          rawText: planText,
+          prompt: editedPrompt,
+          metadata: gptResponse.metadata,
+        };
+      } else {
+        // Standard flow
+        result = await requestPlanFromCustomGPT({
+          form,
+          profileId: selectedProfileId,
+          profile: selectedProfile,
+          model: process.env.NEXT_PUBLIC_LIFEENGINE_GPT_ID,
+        });
+      }
 
       const planId = result.metadata?.planId || `local-${crypto.randomUUID()}`;
       
@@ -211,13 +270,147 @@ export default function UseCustomGPTPage() {
           />
           <div className="flex flex-wrap gap-4">
             <Button type="submit" disabled={loading || !selectedProfileId}>
-              {loading ? "Generating..." : "Generate with Custom GPT"}
+              {loading ? "Generating..." : editMode ? "Generate with Custom Prompt" : "Generate with Custom GPT"}
             </Button>
             <Button type="button" variant="ghost" onClick={openGPT}>
               Open GPT in Chat
             </Button>
           </div>
         </form>
+
+        {/* Editable Prompt Section */}
+        {selectedProfileId && systemPrompt && (
+          <div className="bg-indigo-50 border border-indigo-200 rounded-2xl p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">🔧</span>
+                <h3 className="text-lg font-semibold text-indigo-900">
+                  Advanced: System Prompt Editor
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPromptEditor(!showPromptEditor)}
+                className="text-sm text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1"
+              >
+                {showPromptEditor ? "▼ Hide" : "▶ Show"} Prompt
+              </button>
+            </div>
+
+            {showPromptEditor && (
+              <div className="space-y-4">
+                <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                  <p className="text-sm text-blue-800 mb-3">
+                    ✏️ <strong>Edit the system prompt</strong> below to customize the AI's instructions before generating your plan.
+                    This gives you full control over how the AI interprets your requirements.
+                  </p>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editMode}
+                      onChange={(e) => {
+                        setEditMode(e.target.checked);
+                        if (!e.target.checked) {
+                          setEditedPrompt(systemPrompt);
+                        }
+                      }}
+                      className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    />
+                    <span className="text-sm font-semibold text-blue-900">
+                      Enable Prompt Editing Mode
+                    </span>
+                  </label>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-semibold text-gray-700">
+                      System Prompt:
+                    </label>
+                    {editMode && editedPrompt !== systemPrompt && (
+                      <button
+                        type="button"
+                        onClick={() => setEditedPrompt(systemPrompt)}
+                        className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+                      >
+                        🔄 Reset to Default
+                      </button>
+                    )}
+                  </div>
+                  <textarea
+                    value={editedPrompt}
+                    onChange={(e) => setEditedPrompt(e.target.value)}
+                    disabled={!editMode}
+                    className={`w-full h-64 p-4 border rounded-xl font-mono text-sm transition-all ${
+                      editMode
+                        ? "bg-white border-indigo-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                        : "bg-gray-50 border-gray-200 text-gray-600 cursor-not-allowed"
+                    }`}
+                    placeholder="System prompt will appear here..."
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {editMode
+                      ? "✅ Editing enabled - Your changes will be used for generation"
+                      : "🔒 Read-only mode - Enable editing above to customize"}
+                  </p>
+                </div>
+
+                <div>
+                  <details className="group">
+                    <summary className="cursor-pointer text-sm font-semibold text-gray-700 hover:text-indigo-600 flex items-center gap-1">
+                      <span className="group-open:rotate-90 transition-transform">▶</span>
+                      Expected JSON Response Format
+                    </summary>
+                    <pre className="mt-3 bg-gray-900 text-green-300 p-4 rounded-xl text-xs overflow-auto max-h-64 border border-gray-700">
+{`{
+  "plan_name": "7-Day Personalized Wellness Plan",
+  "weekly_schedule": {
+    "monday": {
+      "yoga": {
+        "sequence": [
+          {
+            "name": "Mountain Pose",
+            "sanskrit_name": "Tadasana",
+            "duration_min": 2,
+            "benefits": "...",
+            "steps": ["Step 1...", "Step 2..."],
+            "breathing_instructions": "..."
+          }
+        ]
+      },
+      "exercises": [
+        {
+          "name": "Push-ups",
+          "category": "strength",
+          "sets": 3,
+          "reps": 10,
+          "steps": ["Step 1...", "Step 2..."],
+          "form_cues": ["Keep back straight", "..."]
+        }
+      ],
+      "meals": {
+        "breakfast": {
+          "name": "Oatmeal Bowl",
+          "ingredients": [...],
+          "instructions": ["Step 1...", "Step 2..."],
+          "nutrition": {...}
+        }
+      }
+    }
+  },
+  "metadata": {
+    "profile_id": "...",
+    "duration_days": 7,
+    "language": "English"
+  }
+}`}
+                    </pre>
+                  </details>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <PlanBrief block={planBrief} copyBrief={() => navigator.clipboard.writeText(planBrief)} />
 
