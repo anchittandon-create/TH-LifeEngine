@@ -52,12 +52,16 @@ export default function DashboardPage() {
   const [filterSource, setFilterSource] = useState<string>("all");
   const [filterDateFrom, setFilterDateFrom] = useState<string>("");
   const [filterDateTo, setFilterDateTo] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
   }, []);
 
   const loadDashboardData = async () => {
+    setSyncing(true);
+    setError(null);
     try {
       // Load plans
       const plansResponse = await fetch("/api/lifeengine/listPlans");
@@ -66,6 +70,9 @@ export default function DashboardPage() {
       // Load profiles
       const profilesResponse = await fetch("/api/lifeengine/profiles");
       const profilesData = profilesResponse.ok ? await profilesResponse.json() : { profiles: [] };
+
+      console.log('[Dashboard] Loaded plans:', plansData.plans?.length || 0);
+      console.log('[Dashboard] Loaded profiles:', profilesData.profiles?.length || 0);
 
       setPlans(plansData.plans || []);
       setProfiles(profilesData.profiles || []);
@@ -101,14 +108,16 @@ export default function DashboardPage() {
 
     } catch (err: any) {
       setError(err.message);
+      console.error('[Dashboard] Failed to load data:', err);
     } finally {
       setLoading(false);
+      setSyncing(false);
     }
   };
 
   const getProfileName = (profileId: string) => {
     const profile = profiles.find(p => p.id === profileId);
-    return profile?.name || "Unknown User";
+    return profile?.name || "Deleted Profile";
   };
 
   const togglePlanSelection = (planId: string) => {
@@ -257,18 +266,32 @@ export default function DashboardPage() {
         }
       }
       
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesName = plan.planName?.toLowerCase().includes(query);
+        const matchesProfile = getProfileName(plan.profileId).toLowerCase().includes(query);
+        const matchesGoals = plan.goals.some(g => g.toLowerCase().includes(query));
+        const matchesId = plan.id.toLowerCase().includes(query);
+        
+        if (!matchesName && !matchesProfile && !matchesGoals && !matchesId) {
+          return false;
+        }
+      }
+      
       return true;
     });
   };
 
   const filteredPlans = getFilteredPlans();
-  const hasActiveFilters = filterProfile !== "all" || filterSource !== "all" || filterDateFrom !== "" || filterDateTo !== "";
+  const hasActiveFilters = filterProfile !== "all" || filterSource !== "all" || filterDateFrom !== "" || filterDateTo !== "" || searchQuery !== "";
 
   const clearFilters = () => {
     setFilterProfile("all");
     setFilterSource("all");
     setFilterDateFrom("");
     setFilterDateTo("");
+    setSearchQuery("");
   };
 
   // Calculate metrics
@@ -438,6 +461,38 @@ export default function DashboardPage() {
 
           {/* Filter Section */}
           <div className={styles.filterSection}>
+            {/* Search and Refresh Bar */}
+            <div className={styles.searchBar}>
+              <div className={styles.searchInputWrapper}>
+                <span className={styles.searchIcon}>🔍</span>
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search plans by name, profile, goals, or ID..."
+                  className={styles.searchInput}
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className={styles.clearSearchBtn}
+                    aria-label="Clear search"
+                  >
+                    ✖️
+                  </button>
+                )}
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={loadDashboardData} 
+                disabled={syncing || loading}
+                className={styles.refreshButton}
+              >
+                {syncing ? "🔄 Syncing..." : "🔄 Refresh"}
+              </Button>
+            </div>
+
             <div className={styles.filterRow}>
               <div className={styles.filterGroup}>
                 <label htmlFor="filterProfile" className={styles.filterLabel}>Filter by Profile:</label>
