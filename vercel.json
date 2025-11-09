@@ -5,10 +5,10 @@
   "framework": "nextjs",
   "functions": {
     "app/api/lifeengine/generate/route.ts": {
-      "maxDuration": 180
+      "maxDuration": 300
     },
     "app/api/lifeengine/custom-gpt-generate/route.ts": {
-      "maxDuration": 180
+      "maxDuration": 300
     },
     "app/api/**/*.ts": {
       "maxDuration": 60
