@@ -75,10 +75,19 @@ const MAX_DAILY_BUDGET_USD = 0.50; // Hard stop at $0.50/day (~₹42)
 // Pro plan allows up to 300s (5 minutes) - required for plan generation
 export const maxDuration = 300; // 5 minutes (Pro plan maximum)
 
+// 📊 Track generation stages for better debugging and error messages
+type GenerationStage = 'validation' | 'preparation' | 'generation' | 'parsing' | 'storage';
+let currentStage: GenerationStage = 'validation';
+
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
   
   try {
+    // ⏱️ STAGE 1/5: Request Validation
+    currentStage = 'validation';
+    console.log('⏱️ [STAGE 1/5: validation] Validating and normalizing request...');
+    const stage1Start = Date.now();
+    
     const body = await req.json();
     console.log('🔍 [GENERATE] Received request body:', JSON.stringify(body, null, 2));
     
@@ -129,6 +138,13 @@ export async function POST(req: NextRequest) {
 
     const cacheKey = `${input.profileId}-${input.plan_type.primary}-${JSON.stringify(input.goals)}`;
     
+    console.log(`✅ [STAGE 1/5: validation] Completed in ${Math.ceil((Date.now() - stage1Start)/1000)}s`);
+    
+    // ⏱️ STAGE 2/5: Cache Check & Preparation
+    currentStage = 'preparation';
+    console.log('⏱️ [STAGE 2/5: preparation] Checking cache and preparing API call...');
+    const stage2Start = Date.now();
+    
     if (PLAN_CACHE_ENABLED) {
       const cached = requestCache.get(cacheKey);
       if (cached && (Date.now() - cached.timestamp) < CACHE_TTL_MS) {
@@ -161,6 +177,8 @@ export async function POST(req: NextRequest) {
         maxOutputTokens: 16384, // Allow comprehensive plans
       },
     });
+    
+    console.log(`✅ [STAGE 2/5: preparation] Completed in ${Math.ceil((Date.now() - stage2Start)/1000)}s`);
 
     // TH-LifeEngine v2.0 System Prompt - Comprehensive Wellness Coach
     const systemPrompt = `# 🧠 TH‑LifeEngine — Complete Plan Generation System (v2.0)
@@ -438,6 +456,11 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
     
     console.log(`⏱️ [GENERATE] Dynamic timeout: ${timeoutMinutes} minutes (max 5 min on Vercel Pro) for ${input.duration.value} ${input.duration.unit} plan`);
     
+    // ⏱️ STAGE 3/5: AI Content Generation (Main Stage)
+    currentStage = 'generation';
+    console.log(`⏱️ [STAGE 3/5: generation] Calling Gemini API with ${timeoutMinutes}min timeout...`);
+    const stage3Start = Date.now();
+    
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => reject(new Error(`Generation timeout: Request took longer than ${timeoutMinutes} minutes. For longer plans, please try reducing the duration or contact support.`)), timeoutMs);
     });
@@ -451,11 +474,19 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       ]);
       console.log('✅ [GENERATE] Gemini API call completed');
     } catch (timeoutError: any) {
-      console.error('⏰ [GENERATE] Gemini API timeout:', timeoutError.message);
-      throw new Error('Generation timed out. The AI took too long to respond. Please try again with a shorter plan duration.');
+      const elapsedAtFailure = Math.ceil((Date.now() - startTime) / 1000);
+      console.error(`⏰ [STAGE 3/5: generation] FAILED after ${elapsedAtFailure}s:`, timeoutError.message);
+      throw new Error(`Generation timed out at stage "generation" after ${elapsedAtFailure}s. The AI took too long to respond. Please try again with a shorter plan duration.`);
     }
     
     const response = await result.response;
+    
+    console.log(`✅ [STAGE 3/5: generation] Completed in ${Math.ceil((Date.now() - stage3Start)/1000)}s`);
+    
+    // ⏱️ STAGE 4/5: Response Parsing & Validation
+    currentStage = 'parsing';
+    console.log('⏱️ [STAGE 4/5: parsing] Parsing JSON response and validating...');
+    const stage4Start = Date.now();
     
     // Track token usage for cost monitoring
     const usageMetadata = response.usageMetadata;
@@ -528,6 +559,13 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
     // Store in memory cache
     TH_PLANS.set(planId, planData);
     
+    console.log(`✅ [STAGE 4/5: parsing] Completed in ${Math.ceil((Date.now() - stage4Start)/1000)}s`);
+    
+    // ⏱️ STAGE 5/5: Database Storage
+    currentStage = 'storage';
+    console.log('⏱️ [STAGE 5/5: storage] Saving plan to database...');
+    const stage5Start = Date.now();
+    
     // ✅ PERSIST TO DATABASE - This ensures plans appear in dashboard and can be loaded later
     try {
       const profileName = input.profileSnapshot?.name || "User";
@@ -568,7 +606,15 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       // Continue anyway - plan is still in memory cache
     }
 
+    console.log(`✅ [STAGE 5/5: storage] Completed in ${Math.ceil((Date.now() - stage5Start)/1000)}s`);
+
     const duration = Date.now() - startTime;
+    console.log(`\n🎉 [COMPLETE] All stages completed successfully in ${Math.ceil(duration/1000)}s total`);
+    console.log(`   Stage 1 (validation): ${Math.ceil((Date.now() - stage1Start)/1000)}s`);
+    console.log(`   Stage 2 (preparation): Time included in Stage 1`);
+    console.log(`   Stage 3 (generation): ${Math.ceil((Date.now() - stage3Start)/1000)}s`);
+    console.log(`   Stage 4 (parsing): ${Math.ceil((Date.now() - stage4Start)/1000)}s`);
+    console.log(`   Stage 5 (storage): ${Math.ceil((Date.now() - stage5Start)/1000)}s\n`);
     
     // 💰 Update global daily spend tracking
     const currentGlobalSpend = globalDailySpend.get(today) || { date: today, totalCost: 0 };
@@ -627,16 +673,21 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
     });
   } catch (error: any) {
     const duration = Date.now() - startTime;
-    console.error('❌ [GENERATE] Plan generation failed:', error);
-    console.error('❌ [GENERATE] Error stack:', error.stack);
+    const durationSec = Math.ceil(duration / 1000);
+    console.error(`❌ [STAGE: ${currentStage}] Plan generation failed after ${durationSec}s:`, error);
+    console.error(`❌ [STAGE: ${currentStage}] Error stack:`, error.stack);
     logger.error('Plan generation failed', { 
+      stage: currentStage,
       error: error.message,
       duration: `${duration}ms`,
+      durationSec: `${durationSec}s`,
       stack: error.stack
     });
     return NextResponse.json({ 
-      error: error.message || 'Failed to generate plan',
-      details: error.stack
+      error: `Generation failed at stage "${currentStage}" after ${durationSec}s: ${error.message}`,
+      details: error.stack,
+      stage: currentStage,
+      durationSec
     }, { status: 500 });
   }
 }
