@@ -1,0 +1,52 @@
+@keyframes gradient {
+  0%, 100% { 
+    background-position: 0% 50%; 
+  }
+  50% { 
+    background-position: 100% 50%; 
+  }
+}
+
+@keyframes shimmer {
+  0% { 
+    transform: translateX(-100%); 
+  }
+  100% { 
+    transform: translateX(100%); 
+  }
+}
+
+@keyframes shine {
+  0% { 
+    transform: translateX(-100%); 
+  }
+  100% { 
+    transform: translateX(100%); 
+  }
+}
+
+@keyframes bounce-slow {
+  0%, 100% { 
+    transform: translateY(0) scale(1.1); 
+  }
+  50% { 
+    transform: translateY(-8px) scale(1.15); 
+  }
+}
+
+.animateGradient {
+  background-size: 200% 200%;
+  animation: gradient 8s ease infinite;
+}
+
+.animateShimmer {
+  animation: shimmer 2s infinite;
+}
+
+.animateShine {
+  animation: shine 2s infinite;
+}
+
+.animateBounceSlow {
+  animation: bounce-slow 2s ease-in-out infinite;
+}
