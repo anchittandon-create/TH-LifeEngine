@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Label } from "@/components/ui/Label";
 import { Field } from "@/components/ui/Field";
 import { Actions } from "@/components/ui/Actions";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 const DEFAULT_PROFILE: Partial<Profile> = {
   name: "",
@@ -29,12 +30,25 @@ function toFormState(profile: Profile) {
   };
 }
 
+interface DeleteConfirmState {
+  isOpen: boolean;
+  profileId: string;
+  profileName: string;
+  planCount: number;
+}
+
 export default function ProfilesPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(toFormState(DEFAULT_PROFILE as Profile));
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirmState>({
+    isOpen: false,
+    profileId: "",
+    profileName: "",
+    planCount: 0,
+  });
 
   useEffect(() => {
     fetchProfiles();
@@ -109,22 +123,46 @@ export default function ProfilesPage() {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!window.confirm(`Delete profile "${name}"? This action cannot be undone.`)) {
-      return;
-    }
-
+    // Fetch plan count for this profile
     try {
-      const response = await fetch(`/api/lifeengine/profiles?id=${id}`, {
+      const plansResponse = await fetch('/api/lifeengine/plans');
+      const plansData = await plansResponse.json();
+      const planCount = plansData.plans?.filter((plan: any) => plan.profileId === id).length || 0;
+      
+      // Open confirmation dialog
+      setDeleteConfirm({
+        isOpen: true,
+        profileId: id,
+        profileName: name,
+        planCount,
+      });
+    } catch (error) {
+      console.error('Failed to fetch plan count:', error);
+      // Still show dialog even if we couldn't get plan count
+      setDeleteConfirm({
+        isOpen: true,
+        profileId: id,
+        profileName: name,
+        planCount: 0,
+      });
+    }
+  };
+
+  const confirmDelete = async () => {
+    const { profileId, profileName } = deleteConfirm;
+    
+    try {
+      const response = await fetch(`/api/lifeengine/profiles?id=${profileId}`, {
         method: 'DELETE',
       });
       
       if (response.ok) {
         await fetchProfiles();
-        if (editingId === id) {
+        if (editingId === profileId) {
           setEditingId(null);
           setForm(toFormState({ ...DEFAULT_PROFILE, id: "" } as Profile));
         }
-        setFeedback({ type: "success", message: `Profile "${name}" deleted.` });
+        setFeedback({ type: "success", message: `Profile "${profileName}" and all associated plans deleted.` });
       } else {
         const errorData = await response.json();
         setFeedback({ type: "error", message: errorData.error || "Failed to delete profile." });
@@ -343,6 +381,33 @@ export default function ProfilesPage() {
           </Actions>
         </form>
       </section>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({ ...deleteConfirm, isOpen: false })}
+        onConfirm={confirmDelete}
+        title="Delete Profile?"
+        message={`Are you sure you want to delete the profile "${deleteConfirm.profileName}"? This action cannot be undone.`}
+        confirmText="Delete Profile"
+        cancelText="Cancel"
+        variant="danger"
+        details={
+          deleteConfirm.planCount > 0 ? (
+            <div className={styles.warningBox}>
+              <div className={styles.warningIcon}>⚠️</div>
+              <div>
+                <div className={styles.warningTitle}>
+                  {deleteConfirm.planCount} associated {deleteConfirm.planCount === 1 ? 'plan' : 'plans'} will be deleted
+                </div>
+                <div className={styles.warningText}>
+                  All wellness plans created for this profile will be permanently removed.
+                </div>
+              </div>
+            </div>
+          ) : undefined
+        }
+      />
     </div>
   );
 }

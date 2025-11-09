@@ -156,3 +156,32 @@
   height: 16px;
   margin-right: var(--space-2);
 }
+
+/* Delete Confirmation Warning */
+.warningBox {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-4);
+  background: linear-gradient(to bottom right, #fef3c7, #fde68a);
+  border: 2px solid #fbbf24;
+  border-radius: var(--radius-md);
+}
+
+.warningIcon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.warningTitle {
+  font-weight: 700;
+  font-size: 15px;
+  color: #92400e;
+  margin-bottom: var(--space-1);
+}
+
+.warningText {
+  font-size: 13px;
+  color: #78350f;
+  line-height: 1.5;
+}
