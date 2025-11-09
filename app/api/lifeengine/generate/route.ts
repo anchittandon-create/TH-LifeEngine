@@ -70,9 +70,9 @@ const dailyRequestCount = new Map<string, { date: string; count: number }>();
 const globalDailySpend = new Map<string, { date: string; totalCost: number }>();
 const MAX_DAILY_BUDGET_USD = 0.50; // Hard stop at $0.50/day (~₹42)
 
-// ⏱️ Set maximum execution time for this API route
-// For long-duration plans, we need extended time
-export const maxDuration = 600; // 10 minutes (Vercel Pro plan allows up to 300s, Enterprise allows more)
+// ⏱️ Note: Vercel Hobby plan has 10s timeout, Pro has up to 300s (5 minutes)
+// For longer plans, users may need to upgrade to Pro plan
+// Dynamic timeout calculation still used for better error messages
 
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
@@ -408,6 +408,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
 
     // ⏱️ Dynamic timeout based on plan duration
     // Longer plans need more time for AI to generate comprehensive content
+    // Note: Capped at 5 minutes to work with Vercel Pro plan (300s limit)
     const calculateTimeout = (duration: { unit: string; value: number }) => {
       let daysCount = 0;
       
@@ -421,14 +422,12 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       }
       
       // Base timeout: 60 seconds
-      // Additional time: 15 seconds per day (up to 30 days)
-      // For longer plans: 10 seconds per day beyond 30 days
+      // Additional time: 10 seconds per day (up to 24 days to stay under 5 min cap)
       const baseTimeout = 60000; // 1 minute
-      const timePerDay = daysCount <= 30 ? 15000 : 10000; // 15s or 10s per day
-      const additionalTime = Math.min(daysCount, 30) * 15000 + Math.max(0, daysCount - 30) * 10000;
+      const additionalTime = daysCount * 10000; // 10s per day
       
       const totalTimeout = baseTimeout + additionalTime;
-      const maxTimeout = 600000; // Cap at 10 minutes for very long plans
+      const maxTimeout = 300000; // Cap at 5 minutes (Vercel Pro plan limit)
       
       return Math.min(totalTimeout, maxTimeout);
     };
@@ -436,10 +435,10 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
     const timeoutMs = calculateTimeout(input.duration);
     const timeoutMinutes = Math.ceil(timeoutMs / 60000);
     
-    console.log(`⏱️ [GENERATE] Dynamic timeout: ${timeoutMinutes} minutes for ${input.duration.value} ${input.duration.unit} plan`);
+    console.log(`⏱️ [GENERATE] Dynamic timeout: ${timeoutMinutes} minutes (max 5 min on Vercel Pro) for ${input.duration.value} ${input.duration.unit} plan`);
     
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error(`Generation timeout: Request took longer than ${timeoutMinutes} minutes`)), timeoutMs);
+      setTimeout(() => reject(new Error(`Generation timeout: Request took longer than ${timeoutMinutes} minutes. For longer plans, please try reducing the duration or contact support.`)), timeoutMs);
     });
 
     let result: any;
