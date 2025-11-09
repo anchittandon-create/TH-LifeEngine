@@ -243,44 +243,64 @@ export default function CreatePlan() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-6 px-4">
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-10 px-4">
       <div className="max-w-[1800px] mx-auto">
-        {/* Compact Header */}
-        <header className="text-center mb-6">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <span className="text-5xl">🚀</span>
-            <h1 className="text-4xl font-bold text-gray-900">
+        {/* Enhanced Header with Gradient Text */}
+        <header className="text-center mb-10">
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-2xl transform hover:scale-110 transition-transform duration-300">
+              <span className="text-4xl">🚀</span>
+            </div>
+            <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
               Create Your Wellness Plan
             </h1>
           </div>
-          <p className="text-base text-gray-600 max-w-2xl mx-auto">
-            Fill the form and our AI will craft a comprehensive plan tailored just for you
+          <p className="text-lg text-gray-700 max-w-3xl mx-auto font-medium">
+            Fill the form below and our AI will craft a comprehensive, personalized wellness plan tailored just for you
           </p>
+          
+          {/* Feature Pills */}
+          <div className="flex items-center justify-center gap-3 mt-6 flex-wrap">
+            <span className="px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-sm font-semibold text-gray-700 shadow-md border border-gray-200">
+              ✨ AI-Powered
+            </span>
+            <span className="px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-sm font-semibold text-gray-700 shadow-md border border-gray-200">
+              🎯 Personalized
+            </span>
+            <span className="px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-sm font-semibold text-gray-700 shadow-md border border-gray-200">
+              📊 Comprehensive
+            </span>
+            <span className="px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-sm font-semibold text-gray-700 shadow-md border border-gray-200">
+              ⚡ Instant
+            </span>
+          </div>
         </header>
 
-        {/* Loading State with Real Progress - Full Width */}
+        {/* Loading State with Real Progress - Full Width with Animation */}
         {loading && (
-          <div className="mb-6">
+          <div className="mb-10 animate-fade-in">
             <GenerationProgress onComplete={() => {
               console.log('Progress complete - generation should be finishing soon');
             }} />
           </div>
         )}
 
-        {/* Error Messages - Full Width */}
+        {/* Error Messages - Enhanced Design */}
         {Object.keys(formErrors).length > 0 && (
-          <div className="bg-red-50 border-2 border-red-400 rounded-2xl p-4 shadow-lg animate-pulse mb-6">
-            <div className="flex items-start gap-3">
-              <span className="text-3xl flex-shrink-0">⚠️</span>
+          <div className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-400 rounded-2xl p-6 shadow-2xl mb-8 animate-shake">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-red-500 flex items-center justify-center shadow-lg">
+                <span className="text-3xl">⚠️</span>
+              </div>
               <div className="flex-1">
-                <p className="font-bold text-red-800 text-lg mb-2">
-                  Please fix the following errors:
+                <p className="font-black text-red-900 text-xl mb-3">
+                  Please Fix the Following Errors
                 </p>
-                <ul className="space-y-1 text-red-700 text-sm">
+                <ul className="space-y-2">
                   {Object.entries(formErrors).map(([field, error]) => (
-                    <li key={field} className="flex items-start gap-2">
-                      <span className="text-red-500 font-bold">•</span>
-                      <span className="font-medium">{error}</span>
+                    <li key={field} className="flex items-start gap-3 bg-white/70 rounded-lg p-3 shadow-sm">
+                      <span className="text-red-600 font-bold text-lg flex-shrink-0">•</span>
+                      <span className="font-semibold text-red-800">{error}</span>
                     </li>
                   ))}
                 </ul>
@@ -289,29 +309,33 @@ export default function CreatePlan() {
           </div>
         )}
 
-        {/* API Error - Full Width */}
+        {/* API Error - Enhanced Design */}
         {error && !loading && (
-          <div className="bg-red-50 border-2 border-red-400 rounded-2xl p-4 shadow-lg mb-6">
-            <div className="flex items-start gap-3">
-              <span className="text-3xl flex-shrink-0">❌</span>
+          <div className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-400 rounded-2xl p-6 shadow-2xl mb-8">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-red-500 flex items-center justify-center shadow-lg">
+                <span className="text-3xl">❌</span>
+              </div>
               <div className="flex-1">
-                <p className="font-bold text-red-800 text-lg mb-2">Generation Failed</p>
-                <p className="text-red-700 text-sm leading-relaxed">{error}</p>
+                <p className="font-black text-red-900 text-xl mb-2">Generation Failed</p>
+                <p className="text-red-800 font-medium leading-relaxed bg-white/70 rounded-lg p-4">{error}</p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Success Message - Full Width */}
+        {/* Success Message - Enhanced Design */}
         {generatedPlanId && (
-          <div className="bg-green-50 border-2 border-green-400 rounded-2xl p-4 shadow-lg mb-6">
-            <div className="flex items-start gap-3">
-              <span className="text-3xl flex-shrink-0">✅</span>
+          <div className="bg-gradient-to-br from-green-50 to-emerald-100 border-2 border-green-400 rounded-2xl p-6 shadow-2xl mb-8 animate-bounce-in">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center shadow-lg animate-pulse">
+                <span className="text-3xl">✅</span>
+              </div>
               <div className="flex-1">
-                <p className="font-bold text-green-800 text-lg mb-1">
+                <p className="font-black text-green-900 text-xl mb-2">
                   🎉 Plan Generated Successfully!
                 </p>
-                <p className="text-green-700 text-sm">
+                <p className="text-green-800 font-medium">
                   Your personalized wellness plan is ready. Redirecting you now...
                 </p>
               </div>
@@ -324,28 +348,35 @@ export default function CreatePlan() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column: Form Fields (2/3 width) */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Profile Selector - Compact */}
-              <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-blue-200">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-3xl">👤</span>
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900">Profile</h2>
-                    <p className="text-sm text-gray-600">Select or create new</p>
+              {/* Profile Selector - Enhanced Card Design */}
+              <div className="bg-gradient-to-br from-white to-blue-50/30 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border-2 border-blue-200/50 hover:shadow-3xl transition-all duration-300">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                    <span className="text-3xl">👤</span>
                   </div>
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-gray-900">Select Profile</h2>
+                    <p className="text-sm text-gray-600 font-medium">Choose existing or create new</p>
+                  </div>
+                  {selectedProfileId && selectedProfileId !== "new" && (
+                    <div className="px-4 py-2 bg-green-100 border border-green-300 rounded-xl">
+                      <span className="text-sm font-bold text-green-700">✓ Loaded</span>
+                    </div>
+                  )}
                 </div>
                 
                 {loadingProfiles ? (
-                  <div className="flex items-center gap-3 text-gray-600">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
-                    <span className="text-sm">Loading profiles...</span>
+                  <div className="flex items-center gap-3 text-gray-600 bg-blue-50 rounded-xl p-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-3 border-b-blue-600 border-t-transparent border-l-transparent border-r-transparent"></div>
+                    <span className="font-medium">Loading profiles...</span>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <select
                       id="profile-select"
                       value={selectedProfileId}
                       onChange={(e) => setSelectedProfileId(e.target.value)}
-                      className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-base"
+                      className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-200 transition-all text-base font-medium bg-white shadow-sm hover:border-blue-400"
                       aria-label="Select a profile"
                     >
                       <option value="">-- Select a Profile --</option>
@@ -358,17 +389,19 @@ export default function CreatePlan() {
                     </select>
                     
                     {selectedProfileId && selectedProfileId !== "new" && (
-                      <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                        <p className="text-xs text-blue-800">
-                          ✅ Profile loaded. Modify details below if needed.
+                      <div className="p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
+                        <p className="text-sm text-blue-800 font-semibold flex items-center gap-2">
+                          <span className="text-xl">✅</span>
+                          Profile loaded successfully. Modify details below if needed.
                         </p>
                       </div>
                     )}
                     
                     {selectedProfileId === "new" && (
-                      <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                        <p className="text-xs text-green-800">
-                          ✨ Creating new profile. Fill in the details below.
+                      <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl">
+                        <p className="text-sm text-green-800 font-semibold flex items-center gap-2">
+                          <span className="text-xl">✨</span>
+                          Creating new profile. Fill in all the details below.
                         </p>
                       </div>
                     )}
@@ -380,57 +413,59 @@ export default function CreatePlan() {
               <PlanForm formData={formData} setFormData={setFormData} errors={formErrors} />
             </div>
 
-            {/* Right Column: Plan Summary (1/3 width, sticky) */}
+            {/* Right Column: Plan Summary (1/3 width, sticky) - Enhanced Design */}
             {formData.planTypes.length > 0 && formData.fullName && (
               <div className="lg:col-span-1">
-                <div className="sticky top-6 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-5 border-2 border-indigo-200 shadow-lg">
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-2xl">📊</span>
-                    <h2 className="text-lg font-bold text-gray-800">Plan Summary</h2>
+                <div className="sticky top-6 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-2xl p-6 border-2 border-indigo-200 shadow-2xl backdrop-blur-sm">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                      <span className="text-2xl">📊</span>
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-900">Plan Summary</h2>
                   </div>
                   <div className="space-y-3">
-                    <div className="bg-white rounded-lg p-3 shadow-sm">
-                      <p className="text-xs font-semibold text-gray-600 mb-1">Name</p>
-                      <p className="text-sm font-bold text-gray-800">{formData.fullName}</p>
+                    <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-200">
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Name</p>
+                      <p className="text-base font-bold text-gray-900">{formData.fullName}</p>
                     </div>
-                    <div className="bg-white rounded-lg p-3 shadow-sm">
-                      <p className="text-xs font-semibold text-gray-600 mb-1">Age & Gender</p>
-                      <p className="text-sm font-bold text-gray-800">{formData.age}y, {formData.gender}</p>
+                    <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-200">
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Age & Gender</p>
+                      <p className="text-base font-bold text-gray-900">{formData.age}y, {formData.gender}</p>
                     </div>
-                    <div className="bg-white rounded-lg p-3 shadow-sm">
-                      <p className="text-xs font-semibold text-gray-600 mb-1">Plan Types</p>
-                      <p className="text-xs font-bold text-gray-800">
+                    <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-200">
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Plan Types</p>
+                      <p className="text-sm font-bold text-gray-900">
                         {formData.planTypes.map(pt => 
                           PLAN_TYPE_OPTIONS.find(opt => opt.value === pt)?.label || pt
                         ).join(", ")}
                       </p>
                     </div>
-                    <div className="bg-white rounded-lg p-3 shadow-sm">
-                      <p className="text-xs font-semibold text-gray-600 mb-1">Duration</p>
-                      <p className="text-sm font-bold text-gray-800">
+                    <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-200">
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Duration</p>
+                      <p className="text-base font-bold text-gray-900">
                         {DURATION_OPTIONS.find(opt => opt.value === formData.duration)?.label}
                       </p>
                     </div>
-                    <div className="bg-white rounded-lg p-3 shadow-sm">
-                      <p className="text-xs font-semibold text-gray-600 mb-1">Diet</p>
-                      <p className="text-xs font-bold text-gray-800">
+                    <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-200">
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Diet</p>
+                      <p className="text-sm font-bold text-gray-900">
                         {getDietLabel(formData.dietType)}
                       </p>
                     </div>
-                    <div className="bg-white rounded-lg p-3 shadow-sm">
-                      <p className="text-xs font-semibold text-gray-600 mb-1">Activity</p>
-                      <p className="text-sm font-bold text-gray-800 capitalize">{formData.activityLevel}</p>
+                    <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-200">
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Activity</p>
+                      <p className="text-base font-bold text-gray-900 capitalize">{formData.activityLevel}</p>
                     </div>
                     {formData.goals.length > 0 && (
-                      <div className="bg-white rounded-lg p-3 shadow-sm">
-                        <p className="text-xs font-semibold text-gray-600 mb-1">Goals</p>
-                        <p className="text-xs font-bold text-gray-800">{formData.goals.join(", ")}</p>
+                      <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-200">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Goals</p>
+                        <p className="text-sm font-bold text-gray-900">{formData.goals.join(", ")}</p>
                       </div>
                     )}
                     {formData.chronicConditions.length > 0 && (
-                      <div className="bg-white rounded-lg p-3 shadow-sm">
-                        <p className="text-xs font-semibold text-gray-600 mb-1">Health</p>
-                        <p className="text-xs font-bold text-gray-800">{formData.chronicConditions.join(", ")}</p>
+                      <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-200">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Health Conditions</p>
+                        <p className="text-sm font-bold text-gray-900">{formData.chronicConditions.join(", ")}</p>
                       </div>
                     )}
                   </div>
@@ -439,32 +474,36 @@ export default function CreatePlan() {
             )}
           </div>
 
-          {/* Action Buttons - Full Width */}
-          <div className="flex flex-wrap gap-3 justify-center items-center pt-4 pb-6 border-t-2 border-gray-200">
+          {/* Action Buttons - Enhanced Design with Better Styling */}
+          <div className="flex flex-wrap gap-4 justify-center items-center pt-8 pb-10 border-t-2 border-gray-200 bg-gradient-to-r from-gray-50 to-transparent rounded-2xl px-6">
             <Button
               type="button"
               variant="ghost"
               onClick={() => router.back()}
               disabled={loading}
-              className="px-6 py-2.5 text-base"
+              className="px-8 py-4 text-base font-semibold rounded-xl hover:bg-gray-100 transition-all duration-200"
             >
               ← Back
             </Button>
             <Button
               type="submit"
               disabled={loading || !formData.fullName || formData.planTypes.length === 0}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-10 py-2.5 text-base rounded-xl shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
+              className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white font-black px-12 py-4 text-lg rounded-2xl shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:shadow-3xl"
             >
               {loading ? (
-                <span className="flex items-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                <span className="flex items-center gap-3">
+                  <svg className="animate-spin h-6 w-6" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  <span>Generating...</span>
+                  <span>Generating Your Plan...</span>
                 </span>
               ) : (
-                "✨ Generate My Plan"
+                <span className="flex items-center gap-2">
+                  <span>✨</span>
+                  <span>Generate My Perfect Plan</span>
+                  <span>🚀</span>
+                </span>
               )}
             </Button>
             <Button
@@ -472,9 +511,9 @@ export default function CreatePlan() {
               variant="ghost"
               onClick={() => setFormData(defaultPlanFormData)}
               disabled={loading}
-              className="px-6 py-2.5 text-base"
+              className="px-8 py-4 text-base font-semibold rounded-xl hover:bg-gray-100 transition-all duration-200"
             >
-              🔄 Reset
+              🔄 Reset Form
             </Button>
           </div>
         </form>
