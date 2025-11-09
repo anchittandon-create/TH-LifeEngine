@@ -70,9 +70,10 @@ const dailyRequestCount = new Map<string, { date: string; count: number }>();
 const globalDailySpend = new Map<string, { date: string; totalCost: number }>();
 const MAX_DAILY_BUDGET_USD = 0.50; // Hard stop at $0.50/day (~₹42)
 
-// ⏱️ Note: Vercel Hobby plan has 10s timeout, Pro has up to 300s (5 minutes)
-// For longer plans, users may need to upgrade to Pro plan
-// Dynamic timeout calculation still used for better error messages
+// ⏱️ CRITICAL: Set Vercel function timeout to maximum for Pro plan
+// Without this, Vercel uses default 60s timeout which is too short!
+// Pro plan allows up to 300s (5 minutes) - required for plan generation
+export const maxDuration = 300; // 5 minutes (Pro plan maximum)
 
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
