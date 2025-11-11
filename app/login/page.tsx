@@ -116,12 +116,44 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-3 flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 focus:outline-none"
+                  className="absolute inset-y-0 right-3 flex items-center text-blue-600 hover:text-blue-700 focus:outline-none"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                   aria-pressed={showPassword}
                   disabled={isLoading}
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  {showPassword ? (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-7 0-11-7-11-7a21.802 21.802 0 014.194-4.993M9.878 9.878a3 3 0 104.243 4.243M6.1 6.1L17.9 17.9M19.806 13.315A21.852 21.852 0 0023 12s-4-7-11-7c-.62 0-1.226.047-1.816.138"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"
+                      />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                  <span className="sr-only">
+                    {showPassword ? 'Hide password' : 'Show password'}
+                  </span>
                 </button>
               </div>
             </div>

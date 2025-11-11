@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import NavLink from "./NavLink";
+import LogoutButton from "@/components/LogoutButton";
 
 const NAV:[string,string][]= [
   ["/lifeengine","Home"],
@@ -69,7 +70,10 @@ export default function Sidebar() {
         borderTop: '1px solid #E5E7EB',
         backgroundColor: '#F9FAFB',
         fontSize: '12px',
-        color: '#6B7280'
+        color: '#6B7280',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '6px'
       }}>
         <div style={{ fontWeight: '600', color: '#111827', marginBottom: '4px', fontSize: '13px' }}>
           👤 {rootUser?.username || 'Loading...'}
@@ -85,6 +89,9 @@ export default function Sidebar() {
             Last login: {new Date(rootUser.lastLogin).toLocaleTimeString()}
           </div>
         )}
+        <div style={{ marginTop: '8px' }}>
+          <LogoutButton />
+        </div>
       </div>
     </aside>
   );
