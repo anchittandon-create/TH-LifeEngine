@@ -82,6 +82,13 @@ let currentStage: GenerationStage = 'validation';
 
 type GenerationMode = 'full' | 'compact';
 
+const SHORT_PLAN_FAST_LANE_DAYS = 5;
+const SHORT_PLAN_FAST_LANE_MODEL = 'gemini-1.5-flash';
+const STANDARD_PLAN_MODEL = 'gemini-2.5-pro';
+const DEFAULT_BASE_TIMEOUT_MS = 90000;
+const PER_DAY_TIMEOUT_MS = 15000;
+const MAX_TIMEOUT_MS = 300000;
+
 class GenerationTimeoutError extends Error {
   timeoutMs: number;
 
@@ -125,6 +132,7 @@ export async function POST(req: NextRequest) {
     
     const input = await normalizeGenerationRequest(body);
     console.log('✅ [GENERATE] Normalized input:', JSON.stringify(input, null, 2));
+    console.log('🩺 [GENERATE] Normalized duration payload:', input.duration);
 
     const today = new Date().toISOString().split('T')[0];
 
@@ -202,10 +210,8 @@ export async function POST(req: NextRequest) {
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
     
     // Calculate appropriate token limit based on plan duration
-    let daysCount = 0;
-    if (input.duration.unit === 'days') daysCount = input.duration.value;
-    else if (input.duration.unit === 'weeks') daysCount = input.duration.value * 7;
-    else if (input.duration.unit === 'months') daysCount = input.duration.value * 30;
+    const daysCount = Math.max(1, normalizeDurationToDays(input.duration));
+    const isShortPlanFastLane = daysCount <= SHORT_PLAN_FAST_LANE_DAYS;
     
     // Dynamic token allocation: ~2000 tokens per day + 4000 base overhead
     const estimatedTokensNeeded = Math.min(
@@ -215,13 +221,28 @@ export async function POST(req: NextRequest) {
     
     console.log(`📊 [GENERATE] Allocating ${estimatedTokensNeeded} tokens for ${daysCount}-day plan`);
     
+    const selectedModelName = isShortPlanFastLane ? SHORT_PLAN_FAST_LANE_MODEL : STANDARD_PLAN_MODEL;
+    const selectedTemperature = isShortPlanFastLane ? 0.6 : 0.7;
+    const selectedTopP = isShortPlanFastLane ? 0.7 : 0.8;
+    const selectedTopK = isShortPlanFastLane ? 10 : 20;
+    const shortPlanTokenCap = Math.min(estimatedTokensNeeded, 12000);
+    const selectedMaxTokens = isShortPlanFastLane ? shortPlanTokenCap : estimatedTokensNeeded;
+    
+    if (isShortPlanFastLane) {
+      console.log('⚡ [GENERATE] Short-plan fast lane enabled: routing through Gemini Flash for speed.', {
+        daysCount,
+        model: selectedModelName,
+        maxTokens: selectedMaxTokens,
+      });
+    }
+    
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.5-pro', // Using Pro model for detailed output
+      model: selectedModelName,
       generationConfig: {
-        temperature: 0.7, // Increased for more natural, coach-like responses
-        topP: 0.8,
-        topK: 20,
-        maxOutputTokens: estimatedTokensNeeded, // Dynamic allocation based on plan length
+        temperature: selectedTemperature,
+        topP: selectedTopP,
+        topK: selectedTopK,
+        maxOutputTokens: selectedMaxTokens,
       },
     });
     
@@ -487,25 +508,25 @@ Generate a complete day-by-day plan following ALL requirements above. Return as 
 IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and detailed.`;
 
     const calculateTimeout = (duration: { unit: string; value: number }) => {
-      let totalDays = 0;
+      const totalDays = Math.max(1, normalizeDurationToDays(duration));
+      let totalTimeout = DEFAULT_BASE_TIMEOUT_MS + totalDays * PER_DAY_TIMEOUT_MS;
       
-      if (duration.unit === 'days') {
-        totalDays = duration.value;
-      } else if (duration.unit === 'weeks') {
-        totalDays = duration.value * 7;
-      } else if (duration.unit === 'months') {
-        totalDays = duration.value * 30;
+      if (!Number.isFinite(totalTimeout) || totalTimeout <= 0) {
+        console.warn('⚠️ [GENERATE] Invalid timeout calculation. Falling back to default.', {
+          duration,
+          totalDays,
+          totalTimeout,
+        });
+        totalTimeout = DEFAULT_BASE_TIMEOUT_MS;
       }
       
-      const baseTimeout = 90000; // 1.5 minutes
-      const additionalTime = totalDays * 15000; // 15s per day
-      const totalTimeout = baseTimeout + additionalTime;
-      const maxTimeout = 300000; // Cap at 5 minutes (Vercel Pro plan limit)
-      
-      return Math.min(totalTimeout, maxTimeout);
+      return Math.min(totalTimeout, MAX_TIMEOUT_MS);
     };
     
     const runtimeWarnings: string[] = [];
+    if (isShortPlanFastLane) {
+      runtimeWarnings.push('Fast lane: Used Gemini 1.5 Flash to accelerate short plan generation.');
+    }
     const defaultMode: GenerationMode = daysCount > LONG_PLAN_COMPACT_THRESHOLD_DAYS ? 'compact' : 'full';
     const attemptModes: GenerationMode[] = defaultMode === 'compact' ? ['compact'] : ['full', 'compact'];
     let result: any = null;
@@ -528,6 +549,14 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
 
       const timeoutMs = calculateTimeout(input.duration);
       const timeoutMinutes = Math.ceil(timeoutMs / 60000);
+      console.log('🩺 [GENERATE] Duration diagnostics', {
+        requestedDuration: input.duration,
+        daysCount,
+        timeoutMs,
+        timeoutMinutes,
+        mode,
+        model: selectedModelName,
+      });
       
       console.log(`⏱️ [GENERATE] (${mode.toUpperCase()} MODE) Dynamic timeout: ${timeoutMinutes} minutes (max 5 min on Vercel Pro) for ${input.duration.value} ${input.duration.unit} plan`);
       
@@ -884,6 +913,23 @@ function calculateHydration(profile: any) {
 }
 
 // ❌ REMOVED: getYogaFlows() and getMeals() - no longer sending catalogs to save tokens
+
+function normalizeDurationToDays(duration: { unit?: string; value?: number } | undefined): number {
+  if (!duration || typeof duration.value !== 'number' || !Number.isFinite(duration.value)) {
+    return 7; // default to 1 week if missing
+  }
+  
+  const value = Math.max(1, duration.value);
+  const unit = (duration.unit || 'days').toLowerCase();
+  
+  if (unit.includes('week')) {
+    return value * 7;
+  }
+  if (unit.includes('month')) {
+    return value * 30;
+  }
+  return value;
+}
 
 function verifyPlan(planJson: any, input: any) {
   // Implement verifier logic as per prompt
