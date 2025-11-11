@@ -249,12 +249,6 @@ html, body {
   page-break-after: always;
 }
 
-/* Hide sidebar on mobile, show via drawer */
-@media (max-width: 767px) {
-  .sidebar {
-    display: none;
-  }
-}
 .sidebar a {
   display: flex;
   gap: var(--space-3);

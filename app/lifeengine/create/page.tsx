@@ -7,6 +7,7 @@ import { PlanForm, PlanFormData, defaultPlanFormData, validatePlanFormData } fro
 import { generatePlan, formatErrorMessage } from "@/lib/lifeengine/api";
 import { PLAN_TYPE_OPTIONS, DURATION_OPTIONS, getDietLabel } from "@/lib/lifeengine/planConfig";
 import { GenerationProgress } from "@/components/lifeengine/GenerationProgress";
+import { useAppVersion } from "@/components/providers/AppVersionProvider";
 
 const GENDER_MAP: Record<string, "M" | "F" | "Other"> = {
   male: "M",
@@ -45,6 +46,7 @@ interface Profile {
 
 export default function CreatePlan() {
   const router = useRouter();
+  const { version: appVersion } = useAppVersion();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState<string>("");
   const [loadingProfiles, setLoadingProfiles] = useState(true);
@@ -143,6 +145,7 @@ export default function CreatePlan() {
       // Convert PlanFormData to API format
       const payload = {
         profileId,
+        appVersion,
         profileSnapshot: {
           id: profileId,
           name: formData.fullName,

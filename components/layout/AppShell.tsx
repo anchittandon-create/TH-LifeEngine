@@ -39,7 +39,7 @@ export default function AppShell({children}:{children:React.ReactNode}){
       </header>
       
       {/* Main Layout with Persistent Sidebar */}
-      <div className="layout" style={{ flex: 1, display: 'flex' }}>
+      <div className="layout" style={{ flex: 1 }}>
         {/* Desktop Sidebar - Always Visible */}
         <Sidebar/>
         

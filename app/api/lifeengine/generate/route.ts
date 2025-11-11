@@ -128,6 +128,7 @@ export async function POST(req: NextRequest) {
     const stage1Start = Date.now();
     
     const body = await req.json();
+    const appVersion: 'current' | 'oss' = body?.appVersion === 'oss' ? 'oss' : 'current';
     console.log('🔍 [GENERATE] Received request body:', JSON.stringify(body, null, 2));
     
     const input = await normalizeGenerationRequest(body);
@@ -162,7 +163,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 🔒 GLOBAL DAILY GENERATION CAP (cost-optimized): limit completed requests per day
-    if (MAX_DAILY_PLAN_RUNS > 0) {
+    if (appVersion === 'current' && MAX_DAILY_PLAN_RUNS > 0) {
       const todaysRuns = globalDailyPlanCount.get(today) ?? 0;
       if (todaysRuns >= MAX_DAILY_PLAN_RUNS) {
         logger.error('🚫 DAILY GENERATION CAP HIT', {
@@ -208,54 +209,73 @@ export async function POST(req: NextRequest) {
       duration: input.duration
     });
 
-    if (!process.env.GOOGLE_API_KEY) {
-      logger.error('GOOGLE_API_KEY not configured');
-      return NextResponse.json({ error: 'GOOGLE_API_KEY not configured' }, { status: 500 });
-    }
+    let selectedModelName = STANDARD_PLAN_MODEL;
+    let isShortPlanFastLane = false;
+    let model: ReturnType<GoogleGenerativeAI['getGenerativeModel']> | null = null;
 
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-    
-    // Calculate appropriate token limit based on plan duration
-    const daysCount = Math.max(1, normalizeDurationToDays(input.duration));
-    const isShortPlanFastLane = daysCount <= SHORT_PLAN_FAST_LANE_DAYS;
-    
-    // Dynamic token allocation: ~2000 tokens per day + 4000 base overhead
-    const estimatedTokensNeeded = Math.min(
-      4000 + (daysCount * 2000), // Base + per-day allocation
-      32768 // Gemini 2.5 Pro maximum (increased from 16384)
-    );
-    
-    console.log(`📊 [GENERATE] Allocating ${estimatedTokensNeeded} tokens for ${daysCount}-day plan`);
-    
-    const selectedModelName = isShortPlanFastLane ? SHORT_PLAN_FAST_LANE_MODEL : STANDARD_PLAN_MODEL;
-    const selectedTemperature = isShortPlanFastLane ? 0.6 : 0.7;
-    const selectedTopP = isShortPlanFastLane ? 0.7 : 0.8;
-    const selectedTopK = isShortPlanFastLane ? 10 : 20;
-    const shortPlanTokenCap = Math.min(estimatedTokensNeeded, 12000);
-    const selectedMaxTokens = isShortPlanFastLane ? shortPlanTokenCap : estimatedTokensNeeded;
-    
-    if (isShortPlanFastLane) {
-      console.log('⚡ [GENERATE] Short-plan fast lane enabled: routing through Gemini Flash for speed.', {
-        daysCount,
+    if (appVersion === 'current') {
+      if (!process.env.GOOGLE_API_KEY) {
+        logger.error('GOOGLE_API_KEY not configured');
+        return NextResponse.json({ error: 'GOOGLE_API_KEY not configured' }, { status: 500 });
+      }
+
+      const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+      const daysCount = Math.max(1, normalizeDurationToDays(input.duration));
+      isShortPlanFastLane = daysCount <= SHORT_PLAN_FAST_LANE_DAYS;
+      
+      const estimatedTokensNeeded = Math.min(
+        4000 + (daysCount * 2000),
+        32768
+      );
+      
+      console.log(`📊 [GENERATE] Allocating ${estimatedTokensNeeded} tokens for ${daysCount}-day plan`);
+      
+      selectedModelName = isShortPlanFastLane ? SHORT_PLAN_FAST_LANE_MODEL : STANDARD_PLAN_MODEL;
+      const selectedTemperature = isShortPlanFastLane ? 0.6 : 0.7;
+      const selectedTopP = isShortPlanFastLane ? 0.7 : 0.8;
+      const selectedTopK = isShortPlanFastLane ? 10 : 20;
+      const shortPlanTokenCap = Math.min(estimatedTokensNeeded, 12000);
+      const selectedMaxTokens = isShortPlanFastLane ? shortPlanTokenCap : estimatedTokensNeeded;
+      
+      if (isShortPlanFastLane) {
+        console.log('⚡ [GENERATE] Short-plan fast lane enabled: routing through Gemini Flash for speed.', {
+          daysCount,
+          model: selectedModelName,
+          maxTokens: selectedMaxTokens,
+        });
+      }
+      
+      model = genAI.getGenerativeModel({ 
         model: selectedModelName,
-        maxTokens: selectedMaxTokens,
+        generationConfig: {
+          temperature: selectedTemperature,
+          topP: selectedTopP,
+          topK: selectedTopK,
+          maxOutputTokens: selectedMaxTokens,
+        },
       });
+    } else {
+      console.log('⏱️ [STAGE 2/5: preparation] OSS mode selected - skipping Gemini preparation.');
     }
-    
-    const model = genAI.getGenerativeModel({ 
-      model: selectedModelName,
-      generationConfig: {
-        temperature: selectedTemperature,
-        topP: selectedTopP,
-        topK: selectedTopK,
-        maxOutputTokens: selectedMaxTokens,
-      },
-    });
     
     console.log(`✅ [STAGE 2/5: preparation] Completed in ${Math.ceil((Date.now() - stage2Start)/1000)}s`);
 
-    // TH-LifeEngine v2.0 System Prompt - Comprehensive Wellness Coach
-    const BASE_SYSTEM_PROMPT = `# 🧠 TH‑LifeEngine — Complete Plan Generation System (v2.0)
+    const normalizedDays = Math.max(1, normalizeDurationToDays(input.duration));
+    const runtimeWarnings: string[] = [];
+    let planJson: any = null;
+    let inputTokens = 0;
+    let outputTokens = 0;
+    let totalTokens = 0;
+    let estimatedCost = 0;
+    let planCostMetadata: Record<string, any> = {};
+
+    if (appVersion === 'current') {
+      if (!model) {
+        throw new Error('Gemini model not initialized');
+      }
+      const geminiModel = model;
+      // TH-LifeEngine v2.0 System Prompt - Comprehensive Wellness Coach
+      const BASE_SYSTEM_PROMPT = `# 🧠 TH‑LifeEngine — Complete Plan Generation System (v2.0)
 
 You are **TH‑LifeEngine**, an advanced AI wellness planner that acts as a certified personal coach for **fitness, yoga, diet, mental health, sleep, and holistic living**.
 
@@ -367,32 +387,32 @@ EVERY meal must include:
 5. Adapt to user's diet, conditions, goals, and schedule
 6. Output as valid JSON matching the required structure`;
 
-    const buildSystemPrompt = (mode: GenerationMode, daysCount: number) => {
-      let prompt = BASE_SYSTEM_PROMPT;
-      
-      if (mode === 'compact') {
-        prompt += `
+      const buildSystemPrompt = (mode: GenerationMode, daysCount: number) => {
+        let prompt = BASE_SYSTEM_PROMPT;
+        
+        if (mode === 'compact') {
+          prompt += `
 
 ## ⚡ Compact Mode (Auto Retry)
 - Keep JSON lean but fully actionable; prefer concise bullet instructions over paragraphs
 - Reuse repeating meals or workouts with a short note (e.g., "repeat_of": "Day 2") instead of rewriting long blocks
 - Highlight weekly patterns and progression in "weekly_guidance"
 - Always keep safety notes, macros, and timers even when summarizing`;
-      }
+        }
 
-      if (daysCount <= SHORT_PLAN_HINT_DAYS) {
-        prompt += `
+        if (daysCount <= SHORT_PLAN_HINT_DAYS) {
+          prompt += `
 
 ## 🚀 Short Sprint Focus (${daysCount} day${daysCount === 1 ? "" : "s"})
 - Prioritize rapid-reset routines with measurable wins each day
 - Keep instructions high-energy and time-efficient so users can complete everything within the allotted schedule`;
-      }
+        }
 
-      return prompt;
-    };
+        return prompt;
+      };
 
-    // User-specific prompt with profile data
-    const userPrompt = `Create a comprehensive wellness plan for:
+      // User-specific prompt with profile data
+      const userPrompt = `Create a comprehensive wellness plan for:
 
 **User Profile:**
 - Gender: ${input.profileSnapshot.gender}, Age: ${input.profileSnapshot.age}
@@ -513,196 +533,233 @@ Generate a complete day-by-day plan following ALL requirements above. Return as 
 
 IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and detailed.`;
 
-    const calculateTimeout = (duration: { unit: string; value: number }) => {
-      const totalDays = Math.max(1, normalizeDurationToDays(duration));
-      let totalTimeout = DEFAULT_BASE_TIMEOUT_MS + totalDays * PER_DAY_TIMEOUT_MS;
+      const calculateTimeout = (duration: { unit: string; value: number }) => {
+        const totalDays = Math.max(1, normalizeDurationToDays(duration));
+        let totalTimeout = DEFAULT_BASE_TIMEOUT_MS + totalDays * PER_DAY_TIMEOUT_MS;
+        
+        if (!Number.isFinite(totalTimeout) || totalTimeout <= 0) {
+          console.warn('⚠️ [GENERATE] Invalid timeout calculation. Falling back to default.', {
+            duration,
+            totalDays,
+            totalTimeout,
+          });
+          totalTimeout = DEFAULT_BASE_TIMEOUT_MS;
+        }
+        
+        return Math.min(totalTimeout, MAX_TIMEOUT_MS);
+      };
       
-      if (!Number.isFinite(totalTimeout) || totalTimeout <= 0) {
-        console.warn('⚠️ [GENERATE] Invalid timeout calculation. Falling back to default.', {
-          duration,
-          totalDays,
-          totalTimeout,
+      const daysCount = normalizedDays;
+      if (isShortPlanFastLane) {
+        runtimeWarnings.push('Fast lane: Used Gemini 1.5 Flash to accelerate short plan generation.');
+      }
+      const defaultMode: GenerationMode = daysCount > LONG_PLAN_COMPACT_THRESHOLD_DAYS ? 'compact' : 'full';
+      const attemptModes: GenerationMode[] = defaultMode === 'compact' ? ['compact'] : ['full', 'compact'];
+      let result: any = null;
+      let usedMode: GenerationMode = defaultMode;
+      let lastGenerationError: any = null;
+      let stage3Start = startTime;
+      
+      for (const mode of attemptModes) {
+        const systemPrompt = buildSystemPrompt(mode, daysCount);
+        const fullPrompt = `${systemPrompt}\n\n---\n\n${userPrompt}`;
+        const estimatedInputTokens = Math.ceil(fullPrompt.length / 4);
+        
+        logger.debug('Sending v2.0 detailed prompt to Gemini', { 
+          model: 'gemini-2.5-pro',
+          promptLength: fullPrompt.length,
+          estimatedInputTokens,
+          version: 'TH-LifeEngine v2.0',
+          mode,
         });
-        totalTimeout = DEFAULT_BASE_TIMEOUT_MS;
+
+        const timeoutMs = calculateTimeout(input.duration);
+        const timeoutMinutes = Math.ceil(timeoutMs / 60000);
+        console.log('🩺 [GENERATE] Duration diagnostics', {
+          requestedDuration: input.duration,
+          daysCount,
+          timeoutMs,
+          timeoutMinutes,
+          mode,
+          model: selectedModelName,
+        });
+        
+        console.log(`⏱️ [GENERATE] (${mode.toUpperCase()} MODE) Dynamic timeout: ${timeoutMinutes} minutes (max 5 min on Vercel Pro) for ${input.duration.value} ${input.duration.unit} plan`);
+        
+        currentStage = 'generation';
+        console.log(`⏱️ [STAGE 3/5: generation] Calling Gemini API with ${timeoutMinutes}min timeout...`);
+        stage3Start = Date.now();
+        
+        try {
+          console.log('🚀 [GENERATE] Starting Gemini API call...');
+          result = await withTimeout(geminiModel.generateContent(fullPrompt), timeoutMs);
+          usedMode = mode;
+          console.log(`✅ [STAGE 3/5: generation] Completed in ${Math.ceil((Date.now() - stage3Start)/1000)}s`);
+          break;
+        } catch (error: any) {
+          lastGenerationError = error;
+          const elapsedAtFailure = Math.ceil((Date.now() - startTime) / 1000);
+          
+          if (error instanceof GenerationTimeoutError) {
+            console.error(`⏰ [STAGE 3/5: generation] ${mode.toUpperCase()} MODE timed out after ${elapsedAtFailure}s`);
+            if (mode === 'compact') {
+              throw new Error(`Generation timed out at stage "generation" after ${elapsedAtFailure}s. The AI took too long even in compact mode. Please try again with a shorter plan duration (1, 3, or 5 days) or retry later.`);
+            }
+            runtimeWarnings.push("Initial detailed generation timed out; automatically retried with compact mode.");
+            continue;
+          }
+          
+          if (isRetryableGeminiError(error) && mode !== 'compact') {
+            console.warn(`⚠️ [GENERATE] Gemini error detected (${error.message}). Retrying with compact mode...`);
+            runtimeWarnings.push("Gemini temporarily unavailable; switched to compact mode automatically.");
+            continue;
+          }
+          
+          throw new Error(error?.message || 'Gemini generation failed.');
+        }
       }
       
-      return Math.min(totalTimeout, MAX_TIMEOUT_MS);
-    };
-    
-    const runtimeWarnings: string[] = [];
-    if (isShortPlanFastLane) {
-      runtimeWarnings.push('Fast lane: Used Gemini 1.5 Flash to accelerate short plan generation.');
-    }
-    const defaultMode: GenerationMode = daysCount > LONG_PLAN_COMPACT_THRESHOLD_DAYS ? 'compact' : 'full';
-    const attemptModes: GenerationMode[] = defaultMode === 'compact' ? ['compact'] : ['full', 'compact'];
-    let result: any = null;
-    let usedMode: GenerationMode = defaultMode;
-    let lastGenerationError: any = null;
-    let stage3Start = startTime;
-    
-    for (const mode of attemptModes) {
-      const systemPrompt = buildSystemPrompt(mode, daysCount);
-      const fullPrompt = `${systemPrompt}\n\n---\n\n${userPrompt}`;
-      const estimatedInputTokens = Math.ceil(fullPrompt.length / 4);
+      if (usedMode === 'compact' && !runtimeWarnings.some((warn) => warn.toLowerCase().includes('compact'))) {
+        runtimeWarnings.push('Compact mode used to keep the plan within AI response limits. Repeated meals or workouts may reference earlier days for efficiency.');
+      }
       
-      logger.debug('Sending v2.0 detailed prompt to Gemini', { 
-        model: 'gemini-2.5-pro',
-        promptLength: fullPrompt.length,
-        estimatedInputTokens,
-        version: 'TH-LifeEngine v2.0',
-        mode,
-      });
+      if (!result) {
+        throw lastGenerationError || new Error('Gemini did not return a response.');
+      }
+      
+      const response = await result.response;
+      
+      // Track token usage for cost monitoring
+      const usageMetadata = response.usageMetadata;
+      inputTokens = usageMetadata?.promptTokenCount || 0;
+      outputTokens = usageMetadata?.candidatesTokenCount || 0;
+      totalTokens = usageMetadata?.totalTokenCount || 0;
+      estimatedCost = ((inputTokens / 1000000) * 0.075) + ((outputTokens / 1000000) * 0.30);
 
-      const timeoutMs = calculateTimeout(input.duration);
-      const timeoutMinutes = Math.ceil(timeoutMs / 60000);
-      console.log('🩺 [GENERATE] Duration diagnostics', {
-        requestedDuration: input.duration,
-        daysCount,
-        timeoutMs,
-        timeoutMinutes,
-        mode,
-        model: selectedModelName,
+      logger.info('✅ Cost-optimized mode: Gemini API usage', {
+        model: 'gemini-2.5-pro',
+        inputTokens: `${inputTokens} tokens (saved ~${Math.max(0, 1200 - inputTokens)} tokens!)`,
+        outputTokens: `${outputTokens} tokens (max: 16384)`,
+        totalTokens,
+        estimatedCost: `$${estimatedCost.toFixed(6)}`,
+        estimatedCostINR: `₹${(estimatedCost * 84).toFixed(4)}`,
       });
       
-      console.log(`⏱️ [GENERATE] (${mode.toUpperCase()} MODE) Dynamic timeout: ${timeoutMinutes} minutes (max 5 min on Vercel Pro) for ${input.duration.value} ${input.duration.unit} plan`);
+      let responseText = response.text().trim();
       
-      currentStage = 'generation';
-      console.log(`⏱️ [STAGE 3/5: generation] Calling Gemini API with ${timeoutMinutes}min timeout...`);
-      stage3Start = Date.now();
+      // Log response for debugging
+      console.log('📦 [RAW RESPONSE]:', responseText.substring(0, 500));
+      console.log('📦 [RESPONSE LENGTH]:', responseText.length);
+      console.log('📦 [LAST 200 CHARS]:', responseText.substring(responseText.length - 200));
+      
+      // Check if response was truncated (incomplete JSON)
+      const lastChar = responseText[responseText.length - 1];
+      const isLikelyTruncated = lastChar !== '}' && lastChar !== ']';
+      
+      if (isLikelyTruncated) {
+        console.warn('⚠️ [GENERATE] Response may be truncated - last char is not } or ]');
+        console.warn('⚠️ [GENERATE] Consider increasing maxOutputTokens or using shorter plan duration');
+      }
+      
+      // Strip markdown code blocks if present
+      if (responseText.startsWith('```json')) {
+        responseText = responseText.replace(/^```json\n/, '').replace(/\n```$/, '');
+      } else if (responseText.startsWith('```')) {
+        responseText = responseText.replace(/^```\n/, '').replace(/\n```$/, '');
+      }
+      
+      if (isLikelyTruncated) {
+        const lastValidBrace = responseText.lastIndexOf('}');
+        const lastValidBracket = responseText.lastIndexOf(']');
+        const lastValidPos = Math.max(lastValidBrace, lastValidBracket);
+        
+        if (lastValidPos > responseText.length * 0.8) {
+          console.log(`⚙️ [GENERATE] Attempting to salvage truncated JSON by trimming to position ${lastValidPos}`);
+          responseText = responseText.substring(0, lastValidPos + 1);
+        }
+      }
       
       try {
-        console.log('🚀 [GENERATE] Starting Gemini API call...');
-        result = await withTimeout(model.generateContent(fullPrompt), timeoutMs);
-        usedMode = mode;
-        console.log(`✅ [STAGE 3/5: generation] Completed in ${Math.ceil((Date.now() - stage3Start)/1000)}s`);
-        break;
-      } catch (error: any) {
-        lastGenerationError = error;
-        const elapsedAtFailure = Math.ceil((Date.now() - startTime) / 1000);
+        planJson = JSON.parse(responseText);
+        logger.info('✅ Plan JSON parsed successfully', {
+          responseLength: responseText.length,
+          wasTruncated: isLikelyTruncated
+        });
+      } catch (parseError: any) {
+        logger.error('❌ JSON parse failed', { 
+          error: parseError.message,
+          errorPosition: parseError.message.match(/position (\d+)/)?.[1],
+          responseLength: responseText.length,
+          responsePreview: responseText.substring(0, 500),
+          responseTail: responseText.substring(Math.max(0, responseText.length - 500)),
+          truncated: isLikelyTruncated
+        });
         
-        if (error instanceof GenerationTimeoutError) {
-          console.error(`⏰ [STAGE 3/5: generation] ${mode.toUpperCase()} MODE timed out after ${elapsedAtFailure}s`);
-          if (mode === 'compact') {
-            throw new Error(`Generation timed out at stage "generation" after ${elapsedAtFailure}s. The AI took too long even in compact mode. Please try again with a shorter plan duration (1, 3, or 5 days) or retry later.`);
-          }
-          runtimeWarnings.push("Initial detailed generation timed out; automatically retried with compact mode.");
-          continue;
+        let errorMessage = 'Failed to generate valid plan. ';
+        if (isLikelyTruncated) {
+          errorMessage += `Response was truncated at ${responseText.length} characters. Try a shorter plan duration or split into multiple plans.`;
+        } else {
+          errorMessage += `JSON parsing failed: ${parseError.message}`;
         }
         
-        if (isRetryableGeminiError(error) && mode !== 'compact') {
-          console.warn(`⚠️ [GENERATE] Gemini error detected (${error.message}). Retrying with compact mode...`);
-          runtimeWarnings.push("Gemini temporarily unavailable; switched to compact mode automatically.");
-          continue;
-        }
-        
-        throw new Error(error?.message || 'Gemini generation failed.');
+        return NextResponse.json({ 
+          error: errorMessage,
+          details: parseError.message,
+          responseLength: responseText.length,
+          truncated: isLikelyTruncated,
+          suggestion: isLikelyTruncated ? 'Try reducing plan duration (e.g., 3-5 days instead of 7+)' : 'Please try again'
+        }, { status: 500 });
       }
+
+      planCostMetadata = {
+        provider: 'google-generative-ai',
+        model: selectedModelName,
+        mode: usedMode,
+        fastLane: isShortPlanFastLane,
+      };
+    } else {
+      currentStage = 'generation';
+      console.log('⏱️ [STAGE 3/5: generation] Using open-source (OSS) plan generator...');
+      const stage3Start = Date.now();
+      const ossResult = await generatePlanWithOssModel(input, normalizedDays);
+      planJson = ossResult.plan;
+      runtimeWarnings.push(...(ossResult.warnings || []));
+      inputTokens = ossResult.inputTokens ?? 0;
+      outputTokens = ossResult.outputTokens ?? 0;
+      totalTokens = ossResult.totalTokens ?? 0;
+      estimatedCost = ossResult.estimatedCost ?? 0;
+      planCostMetadata = ossResult.costMetrics ?? { provider: 'oss-template', model: 'rule-based' };
+      console.log(`✅ [STAGE 3/5: generation] Completed in ${Math.ceil((Date.now() - stage3Start)/1000)}s`);
     }
-    
-    if (usedMode === 'compact' && !runtimeWarnings.some((warn) => warn.toLowerCase().includes('compact'))) {
-      runtimeWarnings.push('Compact mode used to keep the plan within AI response limits. Repeated meals or workouts may reference earlier days for efficiency.');
-    }
-    
-    if (!result) {
-      throw lastGenerationError || new Error('Gemini did not return a response.');
-    }
-    
-    const response = await result.response;
-    
-    // ⏱️ STAGE 4/5: Response Parsing & Validation
+
+    // ⏱️ STAGE 4/5: Response Normalization & Validation
     currentStage = 'parsing';
-    console.log('⏱️ [STAGE 4/5: parsing] Parsing JSON response and validating...');
+    console.log('⏱️ [STAGE 4/5: parsing] Normalizing JSON response and validating...');
     const stage4Start = Date.now();
-    
-    // Track token usage for cost monitoring
-    const usageMetadata = response.usageMetadata;
-    const inputTokens = usageMetadata?.promptTokenCount || 0;
-    const outputTokens = usageMetadata?.candidatesTokenCount || 0;
-    const totalTokens = usageMetadata?.totalTokenCount || 0;
-    const estimatedCost = ((inputTokens / 1000000) * 0.075) + ((outputTokens / 1000000) * 0.30);
 
-    logger.info('✅ Cost-optimized mode: Gemini API usage', {
-      model: 'gemini-2.5-pro',
-      inputTokens: `${inputTokens} tokens (saved ~${Math.max(0, 1200 - inputTokens)} tokens!)`,
-      outputTokens: `${outputTokens} tokens (max: 16384)`,
-      totalTokens,
-      estimatedCost: `$${estimatedCost.toFixed(6)}`,
-      estimatedCostINR: `₹${(estimatedCost * 84).toFixed(4)}`,
-    });
-    
-    let planJson;
-    let responseText = response.text().trim()
-    
-    // Log response for debugging
-    console.log('📦 [RAW RESPONSE]:', responseText.substring(0, 500));
-    console.log('📦 [RESPONSE LENGTH]:', responseText.length);
-    console.log('📦 [LAST 200 CHARS]:', responseText.substring(responseText.length - 200));
-    
-    // Check if response was truncated (incomplete JSON)
-    const lastChar = responseText[responseText.length - 1];
-    const isLikelyTruncated = lastChar !== '}' && lastChar !== ']';
-    
-    if (isLikelyTruncated) {
-      console.warn('⚠️ [GENERATE] Response may be truncated - last char is not } or ]');
-      console.warn('⚠️ [GENERATE] Consider increasing maxOutputTokens or using shorter plan duration');
-    }
-    
-    // Strip markdown code blocks if present
-    if (responseText.startsWith('```json')) {
-      responseText = responseText.replace(/^```json\n/, '').replace(/\n```$/, '');
-    } else if (responseText.startsWith('```')) {
-      responseText = responseText.replace(/^```\n/, '').replace(/\n```$/, '');
-    }
-    
-    // Additional cleanup: remove any trailing incomplete content
-    if (isLikelyTruncated) {
-      // Try to salvage by finding the last complete object/array
-      const lastValidBrace = responseText.lastIndexOf('}');
-      const lastValidBracket = responseText.lastIndexOf(']');
-      const lastValidPos = Math.max(lastValidBrace, lastValidBracket);
-      
-      if (lastValidPos > responseText.length * 0.8) { // Only if we're keeping >80% of content
-        console.log(`⚙️ [GENERATE] Attempting to salvage truncated JSON by trimming to position ${lastValidPos}`);
-        responseText = responseText.substring(0, lastValidPos + 1);
-      }
-    }
-    
-    try {
-      planJson = JSON.parse(responseText);
-      logger.info('✅ Plan JSON parsed successfully', {
-        responseLength: responseText.length,
-        wasTruncated: isLikelyTruncated
-      });
-    } catch (parseError: any) {
-      logger.error('❌ JSON parse failed', { 
-        error: parseError.message,
-        errorPosition: parseError.message.match(/position (\d+)/)?.[1],
-        responseLength: responseText.length,
-        responsePreview: responseText.substring(0, 500),
-        responseTail: responseText.substring(Math.max(0, responseText.length - 500)),
-        truncated: isLikelyTruncated
-      });
-      
-      // Provide helpful error message
-      let errorMessage = 'Failed to generate valid plan. ';
-      if (isLikelyTruncated) {
-        errorMessage += `Response was truncated at ${responseText.length} characters. Try a shorter plan duration or split into multiple plans.`;
-      } else {
-        errorMessage += `JSON parsing failed: ${parseError.message}`;
-      }
-      
-      return NextResponse.json({ 
-        error: errorMessage,
-        details: parseError.message,
-        responseLength: responseText.length,
-        truncated: isLikelyTruncated,
-        suggestion: isLikelyTruncated ? 'Try reducing plan duration (e.g., 3-5 days instead of 7+)' : 'Please try again'
-      }, { status: 500 });
-    }
-
-    // Verifier
     const verifiedPlan = verifyPlan(planJson, input);
     const mergedWarnings = Array.from(new Set([...(verifiedPlan.warnings || []), ...runtimeWarnings]));
+
+    const planCostMetrics: Record<string, any> = {
+      provider: planCostMetadata.provider || (appVersion === 'current' ? 'google-generative-ai' : 'oss-template'),
+      model: planCostMetadata.model || (appVersion === 'current' ? selectedModelName : 'rule-based'),
+      inputTokens,
+      outputTokens,
+      totalTokens,
+      estimatedCost: `$${estimatedCost.toFixed(6)}`,
+    };
+    if (planCostMetadata.mode) {
+      planCostMetrics.mode = planCostMetadata.mode;
+    }
+    if (planCostMetadata.fastLane) {
+      planCostMetrics.strategy = 'fast-lane';
+    }
+    if (planCostMetadata.notes) {
+      planCostMetrics.notes = planCostMetadata.notes;
+    }
+    if (appVersion === 'current') {
+      planCostMetrics.savedTokens = Math.max(0, 1200 - inputTokens);
+    }
 
     const planId = `plan_${uuidv4().replace(/-/g, '').slice(0, 12)}`;
     const planData = {
@@ -712,14 +769,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       plan: verifiedPlan.plan,
       warnings: mergedWarnings,
       analytics: verifiedPlan.analytics,
-      costMetrics: {
-        inputTokens,
-        outputTokens,
-        totalTokens,
-        estimatedCost: `$${estimatedCost.toFixed(6)}`,
-        savedTokens: Math.max(0, 1200 - inputTokens),
-        extremeMode: 'Ultra-cost-optimized: 24h cache, 3 req/day, 1024 max tokens'
-      }
+      costMetrics: planCostMetrics
     };
 
     // Store in memory cache
@@ -757,14 +807,9 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
           days: verifiedPlan.plan?.days || [],
         },
         analytics: verifiedPlan.analytics,
-        costMetrics: {
-          inputTokens,
-          outputTokens,
-          totalTokens,
-          model: 'gemini-2.5-flash',
-        },
+        costMetrics: planCostMetrics,
         createdAt: planData.createdAt,
-        source: "gemini", // ✅ Track AI provider
+        source: appVersion === 'current' ? "gemini" : "oss", // ✅ Track AI provider
       });
       console.log('✅ [GENERATE] Plan persisted to database with name:', planName);
     } catch (dbError: any) {
@@ -784,15 +829,18 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
     
     const todaysRuns = globalDailyPlanCount.get(today) ?? 0;
     
-    logger.info('🎉 Plan generated - COST OPTIMIZED MODE', {
+    logger.info('🎉 Plan generated', {
       planId,
       profileId: input.profileId,
+      variant: appVersion,
       duration: `${duration}ms`,
       warningsCount: verifiedPlan.warnings.length,
       cost: `$${estimatedCost.toFixed(6)}`,
-      tokensSaved: Math.max(0, 1200 - inputTokens),
-      todaysRuns,
-      dailyPlanLimit: MAX_DAILY_PLAN_RUNS || null,
+      tokensSaved: appVersion === 'current' ? Math.max(0, 1200 - inputTokens) : undefined,
+      todaysRuns: appVersion === 'current' ? todaysRuns : undefined,
+      dailyPlanLimit: appVersion === 'current' ? MAX_DAILY_PLAN_RUNS || null : undefined,
+      provider: planCostMetadata.provider || (appVersion === 'current' ? 'google-generative-ai' : 'oss-template'),
+      model: planCostMetadata.model || (appVersion === 'current' ? selectedModelName : 'rule-based'),
     });
 
     if (PLAN_CACHE_ENABLED) {
@@ -932,6 +980,134 @@ function normalizeDurationToDays(duration: { unit?: string; value?: number } | u
     return value * 30;
   }
   return value;
+}
+
+const OSS_MODEL_ID = process.env.OSS_MODEL_ID || 'mistralai/Mistral-7B-Instruct-v0.1';
+const OSS_MODEL_ENDPOINT =
+  process.env.OSS_MODEL_ENDPOINT || `https://api-inference.huggingface.co/models/${OSS_MODEL_ID}`;
+const OSS_MODEL_API_KEY = process.env.OSS_MODEL_API_KEY || process.env.HUGGINGFACE_API_KEY;
+
+async function generatePlanWithOssModel(input: any, normalizedDays: number) {
+  if (OSS_MODEL_API_KEY) {
+    try {
+      const prompt = buildOssPrompt(input, normalizedDays);
+      const response = await fetch(OSS_MODEL_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${OSS_MODEL_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          inputs: prompt,
+          parameters: {
+            max_new_tokens: Math.min(2048, normalizedDays * 512),
+            temperature: 0.6,
+            top_p: 0.8,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`[OSS] HuggingFace inference failed: ${errorText}`);
+      }
+
+      const data = await response.json();
+      const generatedText = Array.isArray(data)
+        ? data[0]?.generated_text ?? JSON.stringify(data)
+        : data.generated_text ?? (typeof data === 'string' ? data : JSON.stringify(data));
+      const cleaned = cleanupModelResponse(generatedText);
+      const parsedPlan = JSON.parse(cleaned);
+
+      return {
+        plan: parsedPlan,
+        warnings: [`OSS mode powered by HuggingFace model ${OSS_MODEL_ID}`],
+        costMetrics: {
+          provider: 'huggingface',
+          model: OSS_MODEL_ID,
+        },
+        estimatedCost: 0,
+      };
+    } catch (error) {
+      console.error('[OSS] Falling back to deterministic plan:', error);
+      return buildRuleBasedPlan(input, normalizedDays, 'HuggingFace call failed; using deterministic fallback.');
+    }
+  }
+
+  return buildRuleBasedPlan(input, normalizedDays, 'OSS model key missing; using deterministic plan.');
+}
+
+function buildOssPrompt(input: any, normalizedDays: number) {
+  const goals = input.goals.map((g: any) => g.name).join(', ') || 'general wellness';
+  return `You are an open-source wellness planner. Create a JSON plan with keys { "meta", "weekly_plan" }.
+The user is ${input.profileSnapshot.name || 'the member'}, ${input.profileSnapshot.age} years, ${input.profileSnapshot.gender}.
+Primary focus: ${input.plan_type.primary}. Goals: ${goals}. Diet: ${input.profileSnapshot.dietary.type}.
+Duration: ${normalizedDays} days. Each day must include morning_yoga, midday_workout, meals (breakfast, lunch, dinner) and evening_reflection.
+Return concise JSON with arrays, no markdown, max ${Math.min(normalizedDays, 5)} days if needed.`;
+}
+
+function cleanupModelResponse(text: string) {
+  let output = text.trim();
+  if (output.startsWith('```json')) {
+    output = output.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+  } else if (output.startsWith('```')) {
+    output = output.replace(/^```\s*/, '').replace(/\s*```$/, '');
+  }
+  return output;
+}
+
+function buildRuleBasedPlan(input: any, normalizedDays: number, warning: string) {
+  const days: any[] = [];
+  const activityPool = [
+    {
+      type: 'yoga',
+      name: 'Sun Salutation Flow',
+      duration: 20,
+      description: 'Warm-up flow focusing on breath, mobility, and spine health.',
+    },
+    {
+      type: 'fitness',
+      name: 'Bodyweight Strength Circuit',
+      duration: 30,
+      description: '3 rounds of squats, pushups, lunges, and planks with mindful breathing.',
+    },
+    {
+      type: 'mindfulness',
+      name: 'Box Breathing',
+      duration: 10,
+      description: 'Inhale 4s, hold 4s, exhale 4s, hold 4s — repeat for nervous system reset.',
+    },
+  ];
+  const mealPool = [
+    { type: 'breakfast', name: 'Overnight Oats', calories: 360, description: 'Rolled oats with chia, almond milk, berries.' },
+    { type: 'lunch', name: 'Power Bowl', calories: 520, description: 'Quinoa, roasted veggies, chickpeas, tahini.' },
+    { type: 'dinner', name: 'Herbed Lentil Stew', calories: 480, description: 'Slow-cooked lentils with greens and sourdough.' },
+  ];
+
+  for (let i = 0; i < normalizedDays; i++) {
+    days.push({
+      date: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
+      activities: activityPool.map((activity) => ({
+        ...activity,
+        description: `${activity.description} Tailored for ${input.plan_type.primary} focus.`,
+      })),
+      meals: mealPool,
+    });
+  }
+
+  return {
+    plan: {
+      meta: {
+        title: `${input.plan_type.primary} OSS Wellness Plan`,
+        duration_days: normalizedDays,
+        generated_at: new Date().toISOString(),
+      },
+      days,
+    },
+    warnings: [warning],
+    costMetrics: { provider: 'oss-template', model: 'rule-based' },
+    estimatedCost: 0,
+  };
 }
 
 function verifyPlan(planJson: any, input: any) {
