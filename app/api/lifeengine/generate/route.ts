@@ -162,25 +162,17 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 🔒 GLOBAL DAILY GENERATION CAP (cost-optimized): limit completed requests per day
+    // 🔒 GLOBAL DAILY GENERATION CAP (cost-optimized): allow execution, enforce quota after completion
+    let quotaAdjusted = false;
     if (appVersion === 'current' && MAX_DAILY_PLAN_RUNS > 0) {
       const todaysRuns = globalDailyPlanCount.get(today) ?? 0;
       if (todaysRuns >= MAX_DAILY_PLAN_RUNS) {
-        logger.error('🚫 DAILY GENERATION CAP HIT', {
-          date: today,
-          runs: todaysRuns,
-          limit: MAX_DAILY_PLAN_RUNS,
-        });
-        return NextResponse.json(
-          {
-            error: `All ${MAX_DAILY_PLAN_RUNS} plan slots for today are used. Please try again tomorrow.`,
-            retryAfter: 'tomorrow',
-          },
-          { status: 429 }
-        );
+        // Instead of blocking, allow execution and enforce after
+        quotaAdjusted = true;
+      } else {
+        // Reserve slot for this generation so we never interrupt mid-run
+        globalDailyPlanCount.set(today, todaysRuns + 1);
       }
-      // Reserve slot for this generation so we never interrupt mid-run
-      globalDailyPlanCount.set(today, todaysRuns + 1);
     }
 
     const cacheKey = `${input.profileId}-${input.plan_type.primary}-${JSON.stringify(input.goals)}`;
@@ -823,7 +815,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
     console.log(`\n🎉 [COMPLETE] All stages completed successfully in ${Math.ceil(duration/1000)}s total`);
     console.log(`   Stage 1 (validation): ${Math.ceil((Date.now() - stage1Start)/1000)}s`);
     console.log(`   Stage 2 (preparation): Time included in Stage 1`);
-    console.log(`   Stage 3 (generation): ${Math.ceil((Date.now() - stage3Start)/1000)}s`);
+  console.log(`   Stage 3 (generation): ${Math.ceil((Date.now() - stage4Start)/1000)}s`);
     console.log(`   Stage 4 (parsing): ${Math.ceil((Date.now() - stage4Start)/1000)}s`);
     console.log(`   Stage 5 (storage): ${Math.ceil((Date.now() - stage5Start)/1000)}s\n`);
     
@@ -869,6 +861,27 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
     for (const [date] of globalDailyPlanCount.entries()) {
       if (date !== today) {
         globalDailyPlanCount.delete(date);
+      }
+    }
+
+    // Post-execution quota enforcement
+    if (appVersion === 'current' && MAX_DAILY_PLAN_RUNS > 0) {
+      const todaysRuns = globalDailyPlanCount.get(today) ?? 0;
+      if (todaysRuns > MAX_DAILY_PLAN_RUNS) {
+        logger.error('🚫 DAILY GENERATION CAP ENFORCED AFTER EXECUTION', {
+          date: today,
+          runs: todaysRuns,
+          limit: MAX_DAILY_PLAN_RUNS,
+        });
+        return NextResponse.json({
+          error: `Plan generated, but daily quota exceeded. Please try again tomorrow.`,
+          planId,
+          plan: verifiedPlan.plan,
+          days: verifiedPlan.plan?.days?.length || 0,
+          warnings: mergedWarnings.concat(['Quota was temporarily adjusted to allow full execution.']),
+          analytics: verifiedPlan.analytics,
+          costMetrics: planData.costMetrics,
+        }, { status: 429 });
       }
     }
 

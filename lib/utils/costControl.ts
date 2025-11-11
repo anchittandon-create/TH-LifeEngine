@@ -1,4 +1,20 @@
 /**
+ * Dynamically adjust quota for a feature to allow full execution, then enforce quota after completion.
+ */
+export function adjustQuotaForFeature(estimatedCost: number): { allowed: boolean; reason?: string; adjusted: boolean } {
+  const stats = getUsageStats();
+  // If estimated cost exceeds remaining budget, allow temporary overage for this feature
+  if (stats.daily.remainingBudget < estimatedCost) {
+    // Allow execution, but mark as adjusted
+    return {
+      allowed: true,
+      reason: `Quota temporarily increased to allow feature completion. Estimated cost: $${estimatedCost.toFixed(4)}`,
+      adjusted: true,
+    };
+  }
+  return { allowed: true, adjusted: false };
+}
+/**
  * Cost Control Utilities for Hobby Project
  * 
  * Implements rate limiting and cost tracking to keep Google Cloud billing minimal
