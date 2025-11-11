@@ -83,7 +83,7 @@ let currentStage: GenerationStage = 'validation';
 type GenerationMode = 'full' | 'compact';
 
 const SHORT_PLAN_FAST_LANE_DAYS = 5;
-const SHORT_PLAN_FAST_LANE_MODEL = 'gemini-1.5-flash-latest';
+const SHORT_PLAN_FAST_LANE_MODEL = 'gemini-1.5-flash';
 const STANDARD_PLAN_MODEL = 'gemini-2.5-pro';
 const DEFAULT_BASE_TIMEOUT_MS = 90000;
 const PER_DAY_TIMEOUT_MS = 15000;

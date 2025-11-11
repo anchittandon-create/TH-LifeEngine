@@ -29,9 +29,11 @@ export function AppVersionProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   const handleVersionChange = (nextVersion: AppVersion) => {
+    if (version === nextVersion) return;
     setVersion(nextVersion);
     if (typeof window !== "undefined") {
       window.localStorage.setItem(STORAGE_KEY, nextVersion);
+      window.location.reload();
     }
   };
 
