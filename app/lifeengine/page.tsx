@@ -1,10 +1,16 @@
 import Link from 'next/link';
 import { Button } from '../../components/ui/Button';
+import LogoutButton from '@/components/LogoutButton';
 import styles from './page.module.css';
 
 export default function Home() {
   return (
     <div className={styles.container}>
+      {/* Logout Button */}
+      <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 50 }}>
+        <LogoutButton />
+      </div>
+
       {/* Hero Section */}
       <section className={`card ${styles.hero}`}>
         <div className={styles.logo}>

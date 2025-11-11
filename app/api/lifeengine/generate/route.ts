@@ -4,6 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@/lib/logging/logger';
 import { db } from '@/lib/utils/db';
+import { isAuthenticated } from '@/lib/auth';
 import type { ProfileRow } from '@/lib/utils/db';
 
 const logger = new Logger('system');
@@ -83,6 +84,22 @@ export async function POST(req: NextRequest) {
   const startTime = Date.now();
   
   try {
+    // 🔒 AUTHENTICATION CHECK
+    const authenticated = await isAuthenticated();
+    if (!authenticated) {
+      logger.warn('Unauthorized API access attempt', {
+        endpoint: '/api/lifeengine/generate',
+        ip: req.headers.get('x-forwarded-for') || 'unknown',
+        userAgent: req.headers.get('user-agent') || 'unknown',
+        timestamp: new Date().toISOString(),
+      });
+      
+      return NextResponse.json(
+        { error: 'Unauthorized. Please login to access this API.' },
+        { status: 401 }
+      );
+    }
+
     // ⏱️ STAGE 1/5: Request Validation
     currentStage = 'validation';
     console.log('⏱️ [STAGE 1/5: validation] Validating and normalizing request...');

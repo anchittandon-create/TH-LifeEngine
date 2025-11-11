@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { isAuthenticated } from '@/lib/auth';
 
 type RequestPayload = {
   prompt: string;
@@ -10,6 +11,20 @@ type RequestPayload = {
 
 export async function POST(req: Request) {
   try {
+    // 🔒 AUTHENTICATION CHECK
+    const authenticated = await isAuthenticated();
+    if (!authenticated) {
+      console.warn('[Auth] Unauthorized API access attempt:', {
+        endpoint: '/api/lifeengine/custom-gpt-generate',
+        timestamp: new Date().toISOString(),
+      });
+      
+      return NextResponse.json(
+        { error: 'Unauthorized. Please login to access this API.' },
+        { status: 401 }
+      );
+    }
+
     const { prompt, profileId, model } = (await req.json()) as RequestPayload;
 
     if (!prompt || typeof prompt !== "string") {

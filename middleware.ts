@@ -1,12 +1,43 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { isRequestAuthenticated } from '@/lib/auth';
 
 // Rate limiting for API endpoints (in-memory)
 const rateLimitBuckets = new Map<string, { count: number; timestamp: number }>();
 const RATE_LIMIT_WINDOW_MS = 15_000; // 15 seconds
 const RATE_LIMIT_MAX_REQUESTS = 15;
 
+// Public paths that don't require authentication
+const PUBLIC_PATHS = [
+  '/login',
+  '/api/auth/login',
+  '/_next',
+  '/favicon.ico',
+];
+
 export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Check if path is public
+  const isPublicPath = PUBLIC_PATHS.some(path => pathname.startsWith(path));
+
+  // If not a public path, check authentication
+  if (!isPublicPath) {
+    const authenticated = isRequestAuthenticated(request);
+    
+    if (!authenticated) {
+      // Redirect to login page
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
+  // If authenticated and trying to access login page, redirect to home
+  if (pathname === '/login' && isRequestAuthenticated(request)) {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
   // Rate limiting for /api/v1/plans POST (Custom GPT Actions protection)
   if (
     request.nextUrl.pathname === '/api/v1/plans' &&
