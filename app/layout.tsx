@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "./responsive.css";
+import { AppVersionProvider } from "@/components/providers/AppVersionProvider";
 
 export const metadata: Metadata = {
   title: "TH+ LifeEngine",
@@ -23,7 +24,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
-      <body className="auto-scale">{children}</body>
+      <body className="auto-scale">
+        <AppVersionProvider>{children}</AppVersionProvider>
+      </body>
     </html>
   );
 }
