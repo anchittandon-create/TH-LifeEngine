@@ -724,11 +724,11 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       const ossResult = await generatePlanWithOssModel(input, normalizedDays);
       planJson = ossResult.plan;
       runtimeWarnings.push(...(ossResult.warnings || []));
-      inputTokens = ossResult.inputTokens ?? 0;
-      outputTokens = ossResult.outputTokens ?? 0;
-      totalTokens = ossResult.totalTokens ?? 0;
-      estimatedCost = ossResult.estimatedCost ?? 0;
-      planCostMetadata = ossResult.costMetrics ?? { provider: 'oss-template', model: 'rule-based' };
+      inputTokens = (ossResult as any).inputTokens ?? 0;
+      outputTokens = (ossResult as any).outputTokens ?? 0;
+      totalTokens = (ossResult as any).totalTokens ?? 0;
+      estimatedCost = (ossResult as any).estimatedCost ?? 0;
+      planCostMetadata = (ossResult as any).costMetrics ?? { provider: 'oss-template', model: 'rule-based' };
       console.log(`✅ [STAGE 3/5: generation] Completed in ${Math.ceil((Date.now() - stage3Start)/1000)}s`);
     }
 
