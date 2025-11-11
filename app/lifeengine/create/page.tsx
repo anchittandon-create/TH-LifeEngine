@@ -228,7 +228,10 @@ export default function CreatePlan() {
       console.error('❌ [CreatePlan] Generation failed:', err);
       
       const errorMessage = formatErrorMessage(err);
-      setError(`Plan generation failed: ${errorMessage}. Please try again or contact support if the issue persists.`);
+      const timeoutHint = errorMessage.toLowerCase().includes('timeout')
+        ? ' Try one of the new 1, 3, or 5 day plans or reduce the duration before retrying.'
+        : '';
+      setError(`Plan generation failed: ${errorMessage}.${timeoutHint} Please try again or contact support if the issue persists.`);
       
       // Log detailed error for debugging
       console.error('Detailed error:', {

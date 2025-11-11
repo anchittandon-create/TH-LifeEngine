@@ -80,6 +80,21 @@ export const maxDuration = 300; // 5 minutes (Pro plan maximum)
 type GenerationStage = 'validation' | 'preparation' | 'generation' | 'parsing' | 'storage';
 let currentStage: GenerationStage = 'validation';
 
+type GenerationMode = 'full' | 'compact';
+
+class GenerationTimeoutError extends Error {
+  timeoutMs: number;
+
+  constructor(timeoutMs: number) {
+    super(`Generation timed out after ${Math.ceil(timeoutMs / 1000)} seconds.`);
+    this.name = 'GenerationTimeoutError';
+    this.timeoutMs = timeoutMs;
+  }
+}
+
+const LONG_PLAN_COMPACT_THRESHOLD_DAYS = 14;
+const SHORT_PLAN_HINT_DAYS = 5;
+
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
   
@@ -213,7 +228,7 @@ export async function POST(req: NextRequest) {
     console.log(`✅ [STAGE 2/5: preparation] Completed in ${Math.ceil((Date.now() - stage2Start)/1000)}s`);
 
     // TH-LifeEngine v2.0 System Prompt - Comprehensive Wellness Coach
-    const systemPrompt = `# 🧠 TH‑LifeEngine — Complete Plan Generation System (v2.0)
+    const BASE_SYSTEM_PROMPT = `# 🧠 TH‑LifeEngine — Complete Plan Generation System (v2.0)
 
 You are **TH‑LifeEngine**, an advanced AI wellness planner that acts as a certified personal coach for **fitness, yoga, diet, mental health, sleep, and holistic living**.
 
@@ -324,6 +339,30 @@ EVERY meal must include:
 4. All quantities, times, and durations must be explicit and measurable
 5. Adapt to user's diet, conditions, goals, and schedule
 6. Output as valid JSON matching the required structure`;
+
+    const buildSystemPrompt = (mode: GenerationMode, daysCount: number) => {
+      let prompt = BASE_SYSTEM_PROMPT;
+      
+      if (mode === 'compact') {
+        prompt += `
+
+## ⚡ Compact Mode (Auto Retry)
+- Keep JSON lean but fully actionable; prefer concise bullet instructions over paragraphs
+- Reuse repeating meals or workouts with a short note (e.g., "repeat_of": "Day 2") instead of rewriting long blocks
+- Highlight weekly patterns and progression in "weekly_guidance"
+- Always keep safety notes, macros, and timers even when summarizing`;
+      }
+
+      if (daysCount <= SHORT_PLAN_HINT_DAYS) {
+        prompt += `
+
+## 🚀 Short Sprint Focus (${daysCount} day${daysCount === 1 ? "" : "s"})
+- Prioritize rapid-reset routines with measurable wins each day
+- Keep instructions high-energy and time-efficient so users can complete everything within the allotted schedule`;
+      }
+
+      return prompt;
+    };
 
     // User-specific prompt with profile data
     const userPrompt = `Create a comprehensive wellness plan for:
@@ -447,75 +486,92 @@ Generate a complete day-by-day plan following ALL requirements above. Return as 
 
 IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and detailed.`;
 
-    const fullPrompt = `${systemPrompt}\n\n---\n\n${userPrompt}`;
-    const estimatedInputTokens = Math.ceil(fullPrompt.length / 4);
-    
-    logger.debug('Sending v2.0 detailed prompt to Gemini', { 
-      model: 'gemini-2.5-pro',
-      promptLength: fullPrompt.length,
-      estimatedInputTokens,
-      version: 'TH-LifeEngine v2.0'
-    });
-
-    // ⏱️ Dynamic timeout based on plan duration
-    // Longer plans need more time for AI to generate comprehensive content
-    // Note: Capped at 5 minutes to work with Vercel Pro plan (300s limit)
     const calculateTimeout = (duration: { unit: string; value: number }) => {
-      let daysCount = 0;
+      let totalDays = 0;
       
-      // Convert duration to days
       if (duration.unit === 'days') {
-        daysCount = duration.value;
+        totalDays = duration.value;
       } else if (duration.unit === 'weeks') {
-        daysCount = duration.value * 7;
+        totalDays = duration.value * 7;
       } else if (duration.unit === 'months') {
-        daysCount = duration.value * 30;
+        totalDays = duration.value * 30;
       }
       
-      // ✅ FIXED: More generous timeout calculation
-      // Base timeout: 90 seconds (was 60s - too short!)
-      // Additional time: 15 seconds per day (was 10s - not enough buffer)
-      // This gives plenty of buffer for API response time
       const baseTimeout = 90000; // 1.5 minutes
-      const additionalTime = daysCount * 15000; // 15s per day
-      
+      const additionalTime = totalDays * 15000; // 15s per day
       const totalTimeout = baseTimeout + additionalTime;
       const maxTimeout = 300000; // Cap at 5 minutes (Vercel Pro plan limit)
       
       return Math.min(totalTimeout, maxTimeout);
     };
     
-    const timeoutMs = calculateTimeout(input.duration);
-    const timeoutMinutes = Math.ceil(timeoutMs / 60000);
+    const runtimeWarnings: string[] = [];
+    const defaultMode: GenerationMode = daysCount > LONG_PLAN_COMPACT_THRESHOLD_DAYS ? 'compact' : 'full';
+    const attemptModes: GenerationMode[] = defaultMode === 'compact' ? ['compact'] : ['full', 'compact'];
+    let result: any = null;
+    let usedMode: GenerationMode = defaultMode;
+    let lastGenerationError: any = null;
     
-    console.log(`⏱️ [GENERATE] Dynamic timeout: ${timeoutMinutes} minutes (max 5 min on Vercel Pro) for ${input.duration.value} ${input.duration.unit} plan`);
-    
-    // ⏱️ STAGE 3/5: AI Content Generation (Main Stage)
-    currentStage = 'generation';
-    console.log(`⏱️ [STAGE 3/5: generation] Calling Gemini API with ${timeoutMinutes}min timeout...`);
-    const stage3Start = Date.now();
-    
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error(`Generation timeout: Request took longer than ${timeoutMinutes} minutes. For longer plans, please try reducing the duration or contact support.`)), timeoutMs);
-    });
+    for (const mode of attemptModes) {
+      const systemPrompt = buildSystemPrompt(mode, daysCount);
+      const fullPrompt = `${systemPrompt}\n\n---\n\n${userPrompt}`;
+      const estimatedInputTokens = Math.ceil(fullPrompt.length / 4);
+      
+      logger.debug('Sending v2.0 detailed prompt to Gemini', { 
+        model: 'gemini-2.5-pro',
+        promptLength: fullPrompt.length,
+        estimatedInputTokens,
+        version: 'TH-LifeEngine v2.0',
+        mode,
+      });
 
-    let result: any;
-    try {
-      console.log('🚀 [GENERATE] Starting Gemini API call...');
-      result = await Promise.race([
-        model.generateContent(fullPrompt),
-        timeoutPromise
-      ]);
-      console.log('✅ [GENERATE] Gemini API call completed');
-    } catch (timeoutError: any) {
-      const elapsedAtFailure = Math.ceil((Date.now() - startTime) / 1000);
-      console.error(`⏰ [STAGE 3/5: generation] FAILED after ${elapsedAtFailure}s:`, timeoutError.message);
-      throw new Error(`Generation timed out at stage "generation" after ${elapsedAtFailure}s. The AI took too long to respond. Please try again with a shorter plan duration.`);
+      const timeoutMs = calculateTimeout(input.duration);
+      const timeoutMinutes = Math.ceil(timeoutMs / 60000);
+      
+      console.log(`⏱️ [GENERATE] (${mode.toUpperCase()} MODE) Dynamic timeout: ${timeoutMinutes} minutes (max 5 min on Vercel Pro) for ${input.duration.value} ${input.duration.unit} plan`);
+      
+      currentStage = 'generation';
+      console.log(`⏱️ [STAGE 3/5: generation] Calling Gemini API with ${timeoutMinutes}min timeout...`);
+      const stage3Start = Date.now();
+      
+      try {
+        console.log('🚀 [GENERATE] Starting Gemini API call...');
+        result = await withTimeout(model.generateContent(fullPrompt), timeoutMs);
+        usedMode = mode;
+        console.log(`✅ [STAGE 3/5: generation] Completed in ${Math.ceil((Date.now() - stage3Start)/1000)}s`);
+        break;
+      } catch (error: any) {
+        lastGenerationError = error;
+        const elapsedAtFailure = Math.ceil((Date.now() - startTime) / 1000);
+        
+        if (error instanceof GenerationTimeoutError) {
+          console.error(`⏰ [STAGE 3/5: generation] ${mode.toUpperCase()} MODE timed out after ${elapsedAtFailure}s`);
+          if (mode === 'compact') {
+            throw new Error(`Generation timed out at stage "generation" after ${elapsedAtFailure}s. The AI took too long even in compact mode. Please try again with a shorter plan duration (1, 3, or 5 days) or retry later.`);
+          }
+          runtimeWarnings.push("Initial detailed generation timed out; automatically retried with compact mode.");
+          continue;
+        }
+        
+        if (isRetryableGeminiError(error) && mode !== 'compact') {
+          console.warn(`⚠️ [GENERATE] Gemini error detected (${error.message}). Retrying with compact mode...`);
+          runtimeWarnings.push("Gemini temporarily unavailable; switched to compact mode automatically.");
+          continue;
+        }
+        
+        throw new Error(error?.message || 'Gemini generation failed.');
+      }
+    }
+    
+    if (usedMode === 'compact' && !runtimeWarnings.some((warn) => warn.toLowerCase().includes('compact'))) {
+      runtimeWarnings.push('Compact mode used to keep the plan within AI response limits. Repeated meals or workouts may reference earlier days for efficiency.');
+    }
+    
+    if (!result) {
+      throw lastGenerationError || new Error('Gemini did not return a response.');
     }
     
     const response = await result.response;
-    
-    console.log(`✅ [STAGE 3/5: generation] Completed in ${Math.ceil((Date.now() - stage3Start)/1000)}s`);
     
     // ⏱️ STAGE 4/5: Response Parsing & Validation
     currentStage = 'parsing';
@@ -610,6 +666,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
 
     // Verifier
     const verifiedPlan = verifyPlan(planJson, input);
+    const mergedWarnings = Array.from(new Set([...(verifiedPlan.warnings || []), ...runtimeWarnings]));
 
     const planId = `plan_${uuidv4().replace(/-/g, '').slice(0, 12)}`;
     const planData = {
@@ -617,7 +674,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       profileId: input.profileId,
       createdAt: new Date().toISOString(),
       plan: verifiedPlan.plan,
-      warnings: verifiedPlan.warnings,
+      warnings: mergedWarnings,
       analytics: verifiedPlan.analytics,
       costMetrics: {
         inputTokens,
@@ -654,7 +711,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
         inputSummary, // ✅ Now includes input details for dashboard
         days: verifiedPlan.plan?.days?.length || 0,
         confidence: 0.9,
-        warnings: verifiedPlan.warnings || [],
+        warnings: mergedWarnings || [],
         planJSON: {
           id: planId,
           profileId: input.profileId,
@@ -740,7 +797,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       planId,
       plan: verifiedPlan.plan,
       days: verifiedPlan.plan?.days?.length || 0,
-      warnings: verifiedPlan.warnings,
+      warnings: mergedWarnings,
       analytics: verifiedPlan.analytics,
       costMetrics: planData.costMetrics,
     });
@@ -763,6 +820,43 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       durationSec
     }, { status: 500 });
   }
+}
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutHandle = setTimeout(() => reject(new GenerationTimeoutError(timeoutMs)), timeoutMs);
+  });
+
+  return Promise.race([
+    promise
+      .then((result) => {
+        if (timeoutHandle) clearTimeout(timeoutHandle);
+        return result;
+      })
+      .catch((error) => {
+        if (timeoutHandle) clearTimeout(timeoutHandle);
+        throw error;
+      }),
+    timeoutPromise,
+  ]);
+}
+
+function isRetryableGeminiError(error: any) {
+  if (!error) return false;
+  const message = (error.message || String(error)).toLowerCase();
+  const retryableTokens = [
+    '429',
+    'rate limit',
+    'quota',
+    'resource has been exhausted',
+    'temporarily unavailable',
+    'deadline exceeded',
+    'unavailable',
+    'timeout',
+    'try again',
+  ];
+  return retryableTokens.some((token) => message.includes(token));
 }
 
 function calculateBMR(profile: any) {

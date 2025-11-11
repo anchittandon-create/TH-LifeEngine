@@ -10,7 +10,7 @@ export interface CustomGPTFormData {
   gender: string;
   
   // Plan Configuration
-  duration: string; // "1_week", "2_weeks", "3_weeks", "1_month", "3_months", "6_months"
+  duration: string; // "1_day", "3_days", "1_week", "2_weeks", "3_months", etc.
   planTypes: string[]; // ["yoga", "fitness", "diet", etc.]
   goals: string[]; // ["weight_loss", "stress_relief", etc.]
   
@@ -506,18 +506,22 @@ Continue plan generation until the entire structure feels **complete, detailed, 
  * Parse duration label for display
  */
 function parseDurationLabel(duration: string): string {
-  const match = duration.match(/(\d+)_(week|month)s?/);
-  if (!match) return duration;
+  const match = duration.match(/(\d+)_(day|week|month)s?/);
+  if (!match) return duration.replace(/_/g, " ");
   
   const [, num, unit] = match;
-  return `${num} ${unit}${num !== "1" ? "s" : ""}`;
+  const labelUnit =
+    unit === "day" ? "day" : unit === "week" ? "week" : "month";
+  return `${num} ${labelUnit}${num !== "1" ? "s" : ""}`;
 }
 
 /**
  * Parse duration to number of days
  */
 function parseDurationDays(duration: string): number {
-  if (duration.includes("week")) {
+  if (duration.includes("day")) {
+    return parseInt(duration.match(/\d+/)?.[0] || "1", 10);
+  } else if (duration.includes("week")) {
     const weeks = parseInt(duration.match(/\d+/)?.[0] || "1", 10);
     return weeks * 7;
   } else if (duration.includes("month")) {

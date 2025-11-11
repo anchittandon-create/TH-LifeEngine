@@ -16,6 +16,7 @@ import {
   PlanFormState,
   defaultPlanFormState,
   getDietLabel,
+  DEFAULT_PLAN_DURATION_VALUE,
 } from "@/lib/lifeengine/planConfig";
 
 export type PlanFormData = PlanFormState & {
@@ -34,7 +35,7 @@ export const defaultPlanFormData: PlanFormData = {
   preferredTime: "morning",
   ...defaultPlanFormState,
   planTypes: [],
-  duration: DURATION_OPTIONS[0].value, // Changed from [2] to [0] since we only have 2 duration options now
+  duration: DEFAULT_PLAN_DURATION_VALUE,
   intensity: INTENSITY_OPTIONS[1].value,
   focusAreas: [],
   goals: [],

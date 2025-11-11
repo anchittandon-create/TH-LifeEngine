@@ -27,6 +27,9 @@ export const PLAN_TYPE_OPTIONS = [
 ] as const;
 
 export const DURATION_OPTIONS = [
+  { label: "1 Day • Rapid Reset", value: "1_day" },
+  { label: "3 Days • Weekend Sprint", value: "3_days" },
+  { label: "5 Days • Workweek Focus", value: "5_days" },
   { label: "1 Week", value: "1_week" },
   { label: "2 Weeks", value: "2_weeks" },
   { label: "3 Weeks", value: "3_weeks" },
@@ -34,6 +37,8 @@ export const DURATION_OPTIONS = [
   { label: "3 Months", value: "3_months" },
   { label: "6 Months", value: "6_months" },
 ] as const;
+
+export const DEFAULT_PLAN_DURATION_VALUE = "1_week";
 
 export const INTENSITY_OPTIONS = [
   { label: "Regenerative (Low)", value: "low" },
@@ -219,7 +224,7 @@ export type PlanFormState = {
 
 export const defaultPlanFormState: PlanFormState = {
   planTypes: [PLAN_TYPE_OPTIONS[0].value],
-  duration: DURATION_OPTIONS[0].value,
+  duration: DEFAULT_PLAN_DURATION_VALUE,
   intensity: INTENSITY_OPTIONS[1].value,
   focusAreas: [],
   format: FORMAT_OPTIONS[0].value,
