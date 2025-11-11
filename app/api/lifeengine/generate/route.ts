@@ -511,6 +511,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
     let result: any = null;
     let usedMode: GenerationMode = defaultMode;
     let lastGenerationError: any = null;
+    let stage3Start = startTime;
     
     for (const mode of attemptModes) {
       const systemPrompt = buildSystemPrompt(mode, daysCount);
@@ -532,7 +533,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       
       currentStage = 'generation';
       console.log(`⏱️ [STAGE 3/5: generation] Calling Gemini API with ${timeoutMinutes}min timeout...`);
-      const stage3Start = Date.now();
+      stage3Start = Date.now();
       
       try {
         console.log('🚀 [GENERATE] Starting Gemini API call...');
