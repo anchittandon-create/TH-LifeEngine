@@ -809,7 +809,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
         analytics: verifiedPlan.analytics,
         costMetrics: planCostMetrics,
         createdAt: planData.createdAt,
-        source: appVersion === 'current' ? "gemini" : "oss", // ✅ Track AI provider
+        source: appVersion === 'current' ? "gemini" : "rule-engine", // ✅ Track AI provider
       });
       console.log('✅ [GENERATE] Plan persisted to database with name:', planName);
     } catch (dbError: any) {
