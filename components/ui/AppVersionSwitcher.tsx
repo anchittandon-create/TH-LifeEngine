@@ -5,7 +5,7 @@ import { useAppVersion } from "@/components/providers/AppVersionProvider";
 const OPTIONS = [
   {
     value: "current",
-    label: "Current Application",
+    label: "Completely Working Version",
     helper: "Full feature set (OpenAI, Gemini, paid APIs)",
   },
   {

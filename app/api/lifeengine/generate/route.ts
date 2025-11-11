@@ -68,8 +68,8 @@ const MAX_REQUESTS_PER_DAY = Number(process.env.LIFEENGINE_MAX_REQUESTS_PER_DAY 
 const dailyRequestCount = new Map<string, { date: string; count: number }>();
 
 // 💰 COST CIRCUIT BREAKER: Global daily budget protection
-const globalDailySpend = new Map<string, { date: string; totalCost: number }>();
-const MAX_DAILY_BUDGET_USD = 0.50; // Hard stop at $0.50/day (~₹42)
+const globalDailyPlanCount = new Map<string, number>();
+const MAX_DAILY_PLAN_RUNS = Number(process.env.LIFEENGINE_MAX_DAILY_PLAN_RUNS ?? "40"); // default 40 plans/day
 
 // ⏱️ CRITICAL: Set Vercel function timeout to maximum for Pro plan
 // Without this, Vercel uses default 60s timeout which is too short!
@@ -161,19 +161,25 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 💰 GLOBAL BUDGET CIRCUIT BREAKER: Check total daily spend
-    const globalSpend = globalDailySpend.get(today);
-    if (globalSpend && globalSpend.totalCost >= MAX_DAILY_BUDGET_USD) {
-      logger.error('🚨 DAILY BUDGET EXCEEDED - API BLOCKED', {
-        currentSpend: globalSpend.totalCost,
-        budget: MAX_DAILY_BUDGET_USD,
-        date: today
-      });
-      return NextResponse.json({
-        error: `Daily budget of $${MAX_DAILY_BUDGET_USD} exceeded. API temporarily disabled.`,
-        currentSpend: `$${globalSpend.totalCost.toFixed(4)}`,
-        retryAfter: 'tomorrow'
-      }, { status: 503 });
+    // 🔒 GLOBAL DAILY GENERATION CAP (cost-optimized): limit completed requests per day
+    if (MAX_DAILY_PLAN_RUNS > 0) {
+      const todaysRuns = globalDailyPlanCount.get(today) ?? 0;
+      if (todaysRuns >= MAX_DAILY_PLAN_RUNS) {
+        logger.error('🚫 DAILY GENERATION CAP HIT', {
+          date: today,
+          runs: todaysRuns,
+          limit: MAX_DAILY_PLAN_RUNS,
+        });
+        return NextResponse.json(
+          {
+            error: `All ${MAX_DAILY_PLAN_RUNS} plan slots for today are used. Please try again tomorrow.`,
+            retryAfter: 'tomorrow',
+          },
+          { status: 429 }
+        );
+      }
+      // Reserve slot for this generation so we never interrupt mid-run
+      globalDailyPlanCount.set(today, todaysRuns + 1);
     }
 
     const cacheKey = `${input.profileId}-${input.plan_type.primary}-${JSON.stringify(input.goals)}`;
@@ -776,20 +782,17 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
     console.log(`   Stage 4 (parsing): ${Math.ceil((Date.now() - stage4Start)/1000)}s`);
     console.log(`   Stage 5 (storage): ${Math.ceil((Date.now() - stage5Start)/1000)}s\n`);
     
-    // 💰 Update global daily spend tracking
-    const currentGlobalSpend = globalDailySpend.get(today) || { date: today, totalCost: 0 };
-    currentGlobalSpend.totalCost += estimatedCost;
-    globalDailySpend.set(today, currentGlobalSpend);
+    const todaysRuns = globalDailyPlanCount.get(today) ?? 0;
     
-    logger.info('🎉 Plan generated - EXTREME COST MODE', {
+    logger.info('🎉 Plan generated - COST OPTIMIZED MODE', {
       planId,
       profileId: input.profileId,
       duration: `${duration}ms`,
       warningsCount: verifiedPlan.warnings.length,
       cost: `$${estimatedCost.toFixed(6)}`,
       tokensSaved: Math.max(0, 1200 - inputTokens),
-      dailySpend: `$${currentGlobalSpend.totalCost.toFixed(4)}/${MAX_DAILY_BUDGET_USD}`,
-      remainingBudget: `$${(MAX_DAILY_BUDGET_USD - currentGlobalSpend.totalCost).toFixed(4)}`
+      todaysRuns,
+      dailyPlanLimit: MAX_DAILY_PLAN_RUNS || null,
     });
 
     if (PLAN_CACHE_ENABLED) {
@@ -815,9 +818,9 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
         }
       }
     }
-    for (const [date, data] of globalDailySpend.entries()) {
+    for (const [date] of globalDailyPlanCount.entries()) {
       if (date !== today) {
-        globalDailySpend.delete(date);
+        globalDailyPlanCount.delete(date);
       }
     }
 
