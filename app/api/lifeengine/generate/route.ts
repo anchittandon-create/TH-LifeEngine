@@ -162,17 +162,25 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 🔒 GLOBAL DAILY GENERATION CAP (cost-optimized): allow execution, enforce quota after completion
-    let quotaAdjusted = false;
+    // 🔒 GLOBAL DAILY GENERATION CAP (cost-optimized): block only after previous runs complete
+    let shouldTrackPlanCompletion = false;
     if (appVersion === 'current' && MAX_DAILY_PLAN_RUNS > 0) {
-      const todaysRuns = globalDailyPlanCount.get(today) ?? 0;
-      if (todaysRuns >= MAX_DAILY_PLAN_RUNS) {
-        // Instead of blocking, allow execution and enforce after
-        quotaAdjusted = true;
-      } else {
-        // Reserve slot for this generation so we never interrupt mid-run
-        globalDailyPlanCount.set(today, todaysRuns + 1);
+      const completedRuns = globalDailyPlanCount.get(today) ?? 0;
+      if (completedRuns >= MAX_DAILY_PLAN_RUNS) {
+        logger.error('🚫 DAILY GENERATION CAP HIT', {
+          date: today,
+          runs: completedRuns,
+          limit: MAX_DAILY_PLAN_RUNS,
+        });
+        return NextResponse.json(
+          {
+            error: `Daily quota reached (${MAX_DAILY_PLAN_RUNS} plans). Please try again tomorrow.`,
+            retryAfter: 'tomorrow',
+          },
+          { status: 429 }
+        );
       }
+      shouldTrackPlanCompletion = true;
     }
 
     const cacheKey = `${input.profileId}-${input.plan_type.primary}-${JSON.stringify(input.goals)}`;
@@ -547,10 +555,10 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       }
       const defaultMode: GenerationMode = daysCount > LONG_PLAN_COMPACT_THRESHOLD_DAYS ? 'compact' : 'full';
       const attemptModes: GenerationMode[] = defaultMode === 'compact' ? ['compact'] : ['full', 'compact'];
-      let result: any = null;
-      let usedMode: GenerationMode = defaultMode;
-      let lastGenerationError: any = null;
-      let stage3Start = startTime;
+    let result: any = null;
+    let usedMode: GenerationMode = defaultMode;
+    let lastGenerationError: any = null;
+    let stage3Start = startTime;
       
       for (const mode of attemptModes) {
         const systemPrompt = buildSystemPrompt(mode, daysCount);
@@ -712,7 +720,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
     } else {
       currentStage = 'generation';
       console.log('⏱️ [STAGE 3/5: generation] Using open-source (OSS) plan generator...');
-      const stage3Start = Date.now();
+      stage3Start = Date.now();
       const ossResult = await generatePlanWithOssModel(input, normalizedDays);
       planJson = ossResult.plan;
       runtimeWarnings.push(...(ossResult.warnings || []));
@@ -819,8 +827,11 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
     console.log(`   Stage 4 (parsing): ${Math.ceil((Date.now() - stage4Start)/1000)}s`);
     console.log(`   Stage 5 (storage): ${Math.ceil((Date.now() - stage5Start)/1000)}s\n`);
     
-    const todaysRuns = globalDailyPlanCount.get(today) ?? 0;
-    
+    let todaysRuns = globalDailyPlanCount.get(today) ?? 0;
+    if (shouldTrackPlanCompletion) {
+      todaysRuns += 1;
+      globalDailyPlanCount.set(today, todaysRuns);
+    }
     logger.info('🎉 Plan generated', {
       planId,
       profileId: input.profileId,
@@ -829,8 +840,8 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       warningsCount: verifiedPlan.warnings.length,
       cost: `$${estimatedCost.toFixed(6)}`,
       tokensSaved: appVersion === 'current' ? Math.max(0, 1200 - inputTokens) : undefined,
-      todaysRuns: appVersion === 'current' ? todaysRuns : undefined,
-      dailyPlanLimit: appVersion === 'current' ? MAX_DAILY_PLAN_RUNS || null : undefined,
+      todaysRuns: shouldTrackPlanCompletion ? todaysRuns : undefined,
+      dailyPlanLimit: shouldTrackPlanCompletion ? MAX_DAILY_PLAN_RUNS || null : undefined,
       provider: planCostMetadata.provider || (appVersion === 'current' ? 'google-generative-ai' : 'oss-template'),
       model: planCostMetadata.model || (appVersion === 'current' ? selectedModelName : 'rule-based'),
     });
@@ -861,27 +872,6 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
     for (const [date] of globalDailyPlanCount.entries()) {
       if (date !== today) {
         globalDailyPlanCount.delete(date);
-      }
-    }
-
-    // Post-execution quota enforcement
-    if (appVersion === 'current' && MAX_DAILY_PLAN_RUNS > 0) {
-      const todaysRuns = globalDailyPlanCount.get(today) ?? 0;
-      if (todaysRuns > MAX_DAILY_PLAN_RUNS) {
-        logger.error('🚫 DAILY GENERATION CAP ENFORCED AFTER EXECUTION', {
-          date: today,
-          runs: todaysRuns,
-          limit: MAX_DAILY_PLAN_RUNS,
-        });
-        return NextResponse.json({
-          error: `Plan generated, but daily quota exceeded. Please try again tomorrow.`,
-          planId,
-          plan: verifiedPlan.plan,
-          days: verifiedPlan.plan?.days?.length || 0,
-          warnings: mergedWarnings.concat(['Quota was temporarily adjusted to allow full execution.']),
-          analytics: verifiedPlan.analytics,
-          costMetrics: planData.costMetrics,
-        }, { status: 429 });
       }
     }
 
