@@ -216,7 +216,9 @@ export async function POST(req: NextRequest) {
     let result: any = null;
     let usedMode: GenerationMode = 'full';
     let lastGenerationError: any = null;
-    let stage3Start = startTime;
+    let stage3Start: number | null = null;
+
+    let timeoutFallbackData: Awaited<ReturnType<typeof generatePlanWithOssModel>> | null = null;
 
     if (appVersion === 'current') {
       if (!process.env.GOOGLE_API_KEY) {
@@ -597,7 +599,9 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
           console.log('🚀 [GENERATE] Starting Gemini API call...');
           result = await withTimeout(geminiModel.generateContent(fullPrompt), timeoutMs);
           usedMode = mode;
+        if (stage3Start) {
           console.log(`✅ [STAGE 3/5: generation] Completed in ${Math.ceil((Date.now() - stage3Start)/1000)}s`);
+        }
           break;
         } catch (error: any) {
           lastGenerationError = error;
@@ -605,6 +609,15 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
           
           if (error instanceof GenerationTimeoutError) {
             console.error(`⏰ [STAGE 3/5: generation] ${mode.toUpperCase()} MODE timed out after ${elapsedAtFailure}s`);
+            if (!timeoutFallbackData) {
+              try {
+                timeoutFallbackData = await generatePlanWithOssModel(input, normalizedDays);
+                runtimeWarnings.push("Gemini timed out; served OSS fallback plan instead.");
+                break;
+              } catch (fallbackError) {
+                console.error('OSS fallback after timeout failed:', fallbackError);
+              }
+            }
             if (mode === 'compact') {
               throw new Error(`Generation timed out at stage "generation" after ${elapsedAtFailure}s. The AI took too long even in compact mode. Please try again with a shorter plan duration (1, 3, or 5 days) or retry later.`);
             }
@@ -622,17 +635,30 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
         }
       }
       
-      if (usedMode === 'compact' && !runtimeWarnings.some((warn) => warn.toLowerCase().includes('compact'))) {
-        runtimeWarnings.push('Compact mode used to keep the plan within AI response limits. Repeated meals or workouts may reference earlier days for efficiency.');
-      }
-      
+    if (usedMode === 'compact' && !runtimeWarnings.some((warn) => warn.toLowerCase().includes('compact'))) {
+      runtimeWarnings.push('Compact mode used to keep the plan within AI response limits. Repeated meals or workouts may reference earlier days for efficiency.');
+    }
+    
+    if (timeoutFallbackData) {
+      planJson = timeoutFallbackData.plan;
+      runtimeWarnings.push(...(timeoutFallbackData.warnings || []));
+      const fallbackCost = timeoutFallbackData.costMetrics ?? { provider: 'oss-template', model: 'rule-engine' };
+      planCostMetadata = {
+        ...fallbackCost,
+        notes: 'Timeout fallback - OSS plan served',
+      };
+      estimatedCost = timeoutFallbackData.estimatedCost ?? 0;
+      inputTokens = timeoutFallbackData.inputTokens ?? 0;
+      outputTokens = timeoutFallbackData.outputTokens ?? 0;
+      totalTokens = timeoutFallbackData.totalTokens ?? 0;
+      logger.info('✅ OSS fallback plan generated after Gemini timeout.');
+    } else {
       if (!result) {
         throw lastGenerationError || new Error('Gemini did not return a response.');
       }
       
       const response = await result.response;
       
-      // Track token usage for cost monitoring
       const usageMetadata = response.usageMetadata;
       inputTokens = usageMetadata?.promptTokenCount || 0;
       outputTokens = usageMetadata?.candidatesTokenCount || 0;
@@ -640,7 +666,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       estimatedCost = ((inputTokens / 1000000) * 0.075) + ((outputTokens / 1000000) * 0.30);
 
       logger.info('✅ Cost-optimized mode: Gemini API usage', {
-        model: 'gemini-2.5-pro',
+        model: selectedModelName,
         inputTokens: `${inputTokens} tokens (saved ~${Math.max(0, 1200 - inputTokens)} tokens!)`,
         outputTokens: `${outputTokens} tokens (max: 16384)`,
         totalTokens,
@@ -650,12 +676,10 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       
       let responseText = response.text().trim();
       
-      // Log response for debugging
       console.log('📦 [RAW RESPONSE]:', responseText.substring(0, 500));
       console.log('📦 [RESPONSE LENGTH]:', responseText.length);
       console.log('📦 [LAST 200 CHARS]:', responseText.substring(responseText.length - 200));
       
-      // Check if response was truncated (incomplete JSON)
       const lastChar = responseText[responseText.length - 1];
       const isLikelyTruncated = lastChar !== '}' && lastChar !== ']';
       
@@ -664,7 +688,6 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
         console.warn('⚠️ [GENERATE] Consider increasing maxOutputTokens or using shorter plan duration');
       }
       
-      // Strip markdown code blocks if present
       if (responseText.startsWith('```json')) {
         responseText = responseText.replace(/^```json\n/, '').replace(/\n```$/, '');
       } else if (responseText.startsWith('```')) {
@@ -713,6 +736,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
           suggestion: isLikelyTruncated ? 'Try reducing plan duration (e.g., 3-5 days instead of 7+)' : 'Please try again'
         }, { status: 500 });
       }
+    }
 
       planCostMetadata = {
         provider: 'google-generative-ai',
@@ -732,7 +756,9 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       totalTokens = (ossResult as any).totalTokens ?? 0;
       estimatedCost = (ossResult as any).estimatedCost ?? 0;
       planCostMetadata = (ossResult as any).costMetrics ?? { provider: 'oss-template', model: 'rule-based' };
-      console.log(`✅ [STAGE 3/5: generation] Completed in ${Math.ceil((Date.now() - stage3Start)/1000)}s`);
+      if (stage3Start) {
+        console.log(`✅ [STAGE 3/5: generation] Completed in ${Math.ceil((Date.now() - stage3Start)/1000)}s`);
+      }
     }
 
     // ⏱️ STAGE 4/5: Response Normalization & Validation
@@ -1037,6 +1063,9 @@ async function generatePlanWithOssModel(input: any, normalizedDays: number) {
           model: OSS_MODEL_ID,
         },
         estimatedCost: 0,
+        inputTokens: undefined,
+        outputTokens: undefined,
+        totalTokens: undefined,
       };
     } catch (error) {
       console.error('[OSS] Falling back to deterministic plan:', error);
@@ -1117,6 +1146,9 @@ function buildRuleBasedPlan(input: any, normalizedDays: number, warning: string)
     warnings: [warning],
     costMetrics: { provider: 'oss-template', model: 'rule-based' },
     estimatedCost: 0,
+    inputTokens: 0,
+    outputTokens: 0,
+    totalTokens: 0,
   };
 }
 
