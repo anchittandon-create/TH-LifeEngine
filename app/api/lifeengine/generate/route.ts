@@ -728,13 +728,38 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
           errorMessage += `JSON parsing failed: ${parseError.message}`;
         }
         
-        return NextResponse.json({ 
-          error: errorMessage,
-          details: parseError.message,
-          responseLength: responseText.length,
-          truncated: isLikelyTruncated,
-          suggestion: isLikelyTruncated ? 'Try reducing plan duration (e.g., 3-5 days instead of 7+)' : 'Please try again'
-        }, { status: 500 });
+        if (isLikelyTruncated) {
+          try {
+            const fallbackPlan = await generatePlanWithOssModel(input, normalizedDays);
+            planJson = fallbackPlan.plan;
+            runtimeWarnings.push('Gemini response truncated; served OSS fallback plan.');
+            planCostMetadata = {
+              ...(fallbackPlan.costMetrics ?? { provider: 'oss-template', model: 'rule-engine' }),
+              notes: 'Truncation fallback - OSS plan served',
+            };
+            estimatedCost = fallbackPlan.estimatedCost ?? 0;
+            inputTokens = fallbackPlan.inputTokens ?? 0;
+            outputTokens = fallbackPlan.outputTokens ?? 0;
+            totalTokens = fallbackPlan.totalTokens ?? 0;
+          } catch (fallbackError) {
+            console.error('Fallback generation after truncation failed:', fallbackError);
+            return NextResponse.json({ 
+              error: errorMessage,
+              details: parseError.message,
+              responseLength: responseText.length,
+              truncated: isLikelyTruncated,
+              suggestion: 'Fallback plan generation failed after truncation. Please try again.'
+            }, { status: 500 });
+          }
+        } else {
+          return NextResponse.json({ 
+            error: errorMessage,
+            details: parseError.message,
+            responseLength: responseText.length,
+            truncated: isLikelyTruncated,
+            suggestion: 'Please try again'
+          }, { status: 500 });
+        }
       }
     }
 
