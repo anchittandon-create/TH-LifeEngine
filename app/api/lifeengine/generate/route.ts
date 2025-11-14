@@ -83,8 +83,8 @@ let currentStage: GenerationStage = 'validation';
 type GenerationMode = 'full' | 'compact';
 
 const SHORT_PLAN_FAST_LANE_DAYS = 5;
-const SHORT_PLAN_FAST_LANE_MODEL = 'gemini-2.5-flash';
-const STANDARD_PLAN_MODEL = 'gemini-2.5-pro';
+const STANDARD_PLAN_MODEL = process.env.GEMINI_STANDARD_MODEL || 'gemini-2.5-pro';
+const SHORT_PLAN_FAST_LANE_MODEL = process.env.GEMINI_FAST_MODEL || STANDARD_PLAN_MODEL;
 const DEFAULT_BASE_TIMEOUT_MS = 90000;
 const PER_DAY_TIMEOUT_MS = 15000;
 const MAX_TIMEOUT_MS = 300000;
@@ -221,7 +221,8 @@ export async function POST(req: NextRequest) {
 
       const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
       const daysCount = Math.max(1, normalizeDurationToDays(input.duration));
-      isShortPlanFastLane = daysCount <= SHORT_PLAN_FAST_LANE_DAYS;
+      const fastLaneEligible = SHORT_PLAN_FAST_LANE_MODEL !== STANDARD_PLAN_MODEL && daysCount <= SHORT_PLAN_FAST_LANE_DAYS;
+      isShortPlanFastLane = fastLaneEligible;
       
       const estimatedTokensNeeded = Math.min(
         4000 + (daysCount * 2000),
@@ -230,14 +231,14 @@ export async function POST(req: NextRequest) {
       
       console.log(`📊 [GENERATE] Allocating ${estimatedTokensNeeded} tokens for ${daysCount}-day plan`);
       
-      selectedModelName = isShortPlanFastLane ? SHORT_PLAN_FAST_LANE_MODEL : STANDARD_PLAN_MODEL;
+      selectedModelName = fastLaneEligible ? SHORT_PLAN_FAST_LANE_MODEL : STANDARD_PLAN_MODEL;
       const selectedTemperature = isShortPlanFastLane ? 0.6 : 0.7;
       const selectedTopP = isShortPlanFastLane ? 0.7 : 0.8;
       const selectedTopK = isShortPlanFastLane ? 10 : 20;
       const shortPlanTokenCap = Math.min(estimatedTokensNeeded, 12000);
       const selectedMaxTokens = isShortPlanFastLane ? shortPlanTokenCap : estimatedTokensNeeded;
       
-      if (isShortPlanFastLane) {
+      if (fastLaneEligible) {
         console.log('⚡ [GENERATE] Short-plan fast lane enabled: routing through Gemini Flash for speed.', {
           daysCount,
           model: selectedModelName,
