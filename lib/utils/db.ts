@@ -5,7 +5,11 @@ import { hasVercelBlobStorage } from "./env";
 import type { Profile } from "@/lib/ai/schemas";
 
 const BLOB_KEY = "lifeengine.state.json";
-const LOCAL_STORAGE_PATH = path.join(process.cwd(), 'lifeengine.state.json');
+const LOCAL_STORAGE_PATH = process.env.LIFEENGINE_STATE_PATH
+  ? process.env.LIFEENGINE_STATE_PATH
+  : process.env.VERCEL
+    ? path.join('/tmp', 'lifeengine.state.json')
+    : path.join(process.cwd(), 'lifeengine.state.json');
 
 export type Sex = "F" | "M" | "Other";
 

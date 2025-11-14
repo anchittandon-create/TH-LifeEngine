@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/utils/db";
 
+declare global {
+  // Reuse the in-memory plan cache populated by the generation route when persistence fails
+  var TH_PLANS: Map<string, any> | undefined;
+}
+
+const MEMORY_PLAN_CACHE = globalThis.TH_PLANS ?? (globalThis.TH_PLANS = new Map<string, any>());
+
 const QuerySchema = z.object({
   planId: z.string().min(1),
 });
@@ -15,6 +22,17 @@ export async function GET(req: Request) {
     const { planId: parsedPlanId } = QuerySchema.parse({ planId });
     const planRow = await db.getPlan(parsedPlanId);
     if (!planRow) {
+      const memoryPlan = MEMORY_PLAN_CACHE.get(parsedPlanId);
+      if (memoryPlan) {
+        return NextResponse.json({
+          plan: memoryPlan.plan,
+          planName: memoryPlan.planName,
+          source: memoryPlan.source,
+          warnings: memoryPlan.warnings,
+          analytics: memoryPlan.analytics,
+          costMetrics: memoryPlan.costMetrics,
+        });
+      }
       return NextResponse.json({ error: "Plan not found" }, { status: 404 });
     }
     

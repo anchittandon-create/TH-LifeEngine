@@ -213,6 +213,22 @@ export default function CreatePlan() {
       }, 30000);
       
       const result = await generatePlan(payload);
+      if (typeof window !== 'undefined' && result?.plan) {
+        try {
+          const cachedPayload = {
+            plan: result.plan,
+            warnings: result.warnings || [],
+            analytics: result.analytics || null,
+            planName: `Plan for ${formData.fullName}`,
+          };
+          window.sessionStorage.setItem(
+            `th_plan_cache_${result.planId}`,
+            JSON.stringify(cachedPayload)
+          );
+        } catch (error) {
+          console.warn('Failed to cache plan locally:', error);
+        }
+      }
       
       clearTimeout(timer1);
       clearTimeout(timer2);

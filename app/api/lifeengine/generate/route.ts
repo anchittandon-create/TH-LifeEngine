@@ -763,18 +763,15 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
     }
 
     const planId = `plan_${uuidv4().replace(/-/g, '').slice(0, 12)}`;
-    const planData = {
+    const planData: any = {
       planId,
       profileId: input.profileId,
       createdAt: new Date().toISOString(),
       plan: verifiedPlan.plan,
       warnings: mergedWarnings,
       analytics: verifiedPlan.analytics,
-      costMetrics: planCostMetrics
+      costMetrics: planCostMetrics,
     };
-
-    // Store in memory cache
-    TH_PLANS.set(planId, planData);
     
     console.log(`✅ [STAGE 4/5: parsing] Completed in ${Math.ceil((Date.now() - stage4Start)/1000)}s`);
     
@@ -791,6 +788,13 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       // Build input summary for dashboard
       const inputSummary = `${input.plan_type.primary}${input.plan_type.secondary.length ? ' + ' + input.plan_type.secondary.join(', ') : ''} | ${input.duration.value} ${input.duration.unit} | ${input.experience_level}`;
       
+      planData.planName = planName;
+      planData.source = appVersion === 'current' ? 'gemini' : 'rule-engine';
+      planData.inputSummary = inputSummary;
+
+      // Store in memory cache (used as a hot fallback before persistence catches up)
+      TH_PLANS.set(planId, planData);
+
       await db.savePlan({
         planId,
         profileId: input.profileId,

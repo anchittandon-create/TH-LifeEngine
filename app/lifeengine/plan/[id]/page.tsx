@@ -68,7 +68,8 @@ export default function PlanDetailPage({ params }: Props) {
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    loadPlan();
+    const cacheHit = hydrateFromSession();
+    loadPlan(!cacheHit);
   }, [params.id]);
 
   const notebookDays = useMemo<NotebookDay[]>(() => {
@@ -91,14 +92,54 @@ export default function PlanDetailPage({ params }: Props) {
     }
   }, [notebookDays]);
 
-  const loadPlan = async (retryCount = 0) => {
-    setLoading(true);
+  const persistPlanToSession = (payload: any) => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.sessionStorage.setItem(
+        `th_plan_cache_${params.id}`,
+        JSON.stringify(payload)
+      );
+    } catch (error) {
+      console.warn('Failed to persist plan cache:', error);
+    }
+  };
+
+  const hydrateFromSession = () => {
+    if (typeof window === 'undefined') return false;
+    try {
+      const cached = window.sessionStorage.getItem(`th_plan_cache_${params.id}`);
+      if (!cached) return false;
+      const parsed = JSON.parse(cached);
+      if (parsed.plan?.weekly_schedule) {
+        setCustomPlan(parsed.plan as LifeEnginePlan);
+        setRulePlan(null);
+      } else if (parsed.plan?.days) {
+        setRulePlan(parsed.plan as RulePlan);
+        setCustomPlan(null);
+      } else {
+        return false;
+      }
+      setError(null);
+      setLoading(false);
+      return true;
+    } catch (error) {
+      console.warn('Failed to hydrate plan from session cache:', error);
+      window.sessionStorage.removeItem(`th_plan_cache_${params.id}`);
+      return false;
+    }
+  };
+
+  const loadPlan = async (showSpinner = true, retryCount = 0) => {
+    if (showSpinner) {
+      setLoading(true);
+    }
     setError(null);
     try {
       // Try the new API format first (Gemini plans)
       const detailRes = await fetch(`/api/lifeengine/plan/detail?planId=${params.id}`);
       if (detailRes.ok) {
         const detailData = await detailRes.json();
+        persistPlanToSession(detailData);
         
         // Check if it's a custom GPT plan (has weekly_schedule)
         if (detailData.plan?.weekly_schedule) {
@@ -125,7 +166,7 @@ export default function PlanDetailPage({ params }: Props) {
         if (response.status === 404 && retryCount < 3) {
           console.log(`Plan not found yet, retrying in ${(retryCount + 1) * 500}ms... (attempt ${retryCount + 1}/3)`);
           await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 500));
-          return loadPlan(retryCount + 1);
+          return loadPlan(true, retryCount + 1);
         }
         throw new Error("Failed to load plan");
       }
@@ -134,11 +175,14 @@ export default function PlanDetailPage({ params }: Props) {
       console.log('✅ Loaded plan from fallback API');
       setRulePlan(data.plan);
       setCustomPlan(null);
+      persistPlanToSession({ plan: data.plan });
     } catch (err: any) {
       console.error('❌ Failed to load plan:', err);
       setError(err.message || "Failed to load plan");
     } finally {
-      setLoading(false);
+      if (showSpinner) {
+        setLoading(false);
+      }
     }
   };
 
