@@ -213,6 +213,11 @@ export async function POST(req: NextRequest) {
     let isShortPlanFastLane = false;
     let model: ReturnType<GoogleGenerativeAI['getGenerativeModel']> | null = null;
 
+    let result: any = null;
+    let usedMode: GenerationMode = 'full';
+    let lastGenerationError: any = null;
+    let stage3Start = startTime;
+
     if (appVersion === 'current') {
       if (!process.env.GOOGLE_API_KEY) {
         logger.error('GOOGLE_API_KEY not configured');
@@ -556,10 +561,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown code blocks. Be thorough and deta
       }
       const defaultMode: GenerationMode = daysCount > LONG_PLAN_COMPACT_THRESHOLD_DAYS ? 'compact' : 'full';
       const attemptModes: GenerationMode[] = defaultMode === 'compact' ? ['compact'] : ['full', 'compact'];
-    let result: any = null;
-    let usedMode: GenerationMode = defaultMode;
-    let lastGenerationError: any = null;
-    let stage3Start = startTime;
+      usedMode = defaultMode;
       
       for (const mode of attemptModes) {
         const systemPrompt = buildSystemPrompt(mode, daysCount);
