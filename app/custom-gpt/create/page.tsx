@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { PlanForm, PlanFormData, defaultPlanFormData, validatePlanFormData } from "@/components/lifeengine/PlanForm";
 import type { CustomGPTFormData } from "@/lib/openai/promptBuilder";
+import { buildCustomGPTPrompt } from "@/lib/openai/promptBuilder";
 
 export default function CustomGPTPage() {
   const router = useRouter();
@@ -13,6 +14,27 @@ export default function CustomGPTPage() {
   const [loadingMessage, setLoadingMessage] = useState<string>("Preparing your plan...");
   const [error, setError] = useState<string>("");
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [copiedPrompt, setCopiedPrompt] = useState(false);
+
+  const customGPTData = useMemo<CustomGPTFormData>(() => ({
+    fullName: formData.fullName,
+    age: formData.age,
+    gender: formData.gender,
+    duration: formData.duration,
+    planTypes: formData.planTypes,
+    goals: formData.goals,
+    dietType: formData.dietType,
+    activityLevel: formData.activityLevel,
+    chronicConditions: formData.chronicConditions,
+    sleepHours: formData.sleepHours,
+    stressLevel: formData.stressLevel,
+    workSchedule: formData.workSchedule,
+    preferredTime: formData.preferredTime,
+    intensity: formData.intensity,
+    focusAreas: formData.focusAreas,
+  }), [formData]);
+
+  const promptPreview = useMemo(() => buildCustomGPTPrompt(customGPTData), [customGPTData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -182,31 +204,65 @@ export default function CustomGPTPage() {
           </div>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <PlanForm formData={formData} setFormData={setFormData} errors={formErrors} />
+        {/* Form & Prompt Layout */}
+        <div className="grid gap-8 lg:grid-cols-5">
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-8 lg:col-span-3">
+            <PlanForm formData={formData} setFormData={setFormData} errors={formErrors} />
 
-          {/* Submit Section */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-blue-200 sticky bottom-4 z-10">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex-1">
-                <h3 className="text-lg font-bold text-gray-900 mb-1">
-                  Ready to Generate Your Plan?
-                </h3>
-                <p className="text-sm text-gray-600">
-                  GPT-4 will create a {formData.duration || "personalized"} wellness plan in ~30-60 seconds
-                </p>
+            <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-blue-200 sticky bottom-4 z-10">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">
+                    Ready to Generate Your Plan?
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    GPT-4 will create a {formData.duration || "personalized"} wellness plan in ~30-60 seconds
+                  </p>
+                </div>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full md:w-auto px-6 py-3 text-base font-semibold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-2xl shadow-lg hover:shadow-2xl transition disabled:opacity-60"
+                >
+                  {loading ? "Generating..." : "🤖 Generate with GPT-4"}
+                </Button>
+              </div>
+            </div>
+          </form>
+
+          {/* Prompt Preview */}
+          <aside className="lg:col-span-2 bg-white/90 backdrop-blur-sm border-2 border-purple-200 shadow-xl rounded-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-purple-500 font-semibold">Prompt Preview</p>
+                <h2 className="text-lg font-bold text-gray-900">What GPT-4 Receives</h2>
               </div>
               <Button
-                type="submit"
-                disabled={loading}
-                className="px-8 py-4 text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                type="button"
+                variant="ghost"
+                className="text-sm font-semibold text-purple-600 hover:text-purple-700"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(promptPreview);
+                    setCopiedPrompt(true);
+                    setTimeout(() => setCopiedPrompt(false), 2000);
+                  } catch (error) {
+                    console.error("Failed to copy prompt:", error);
+                  }
+                }}
               >
-                {loading ? "Generating..." : "🤖 Generate with GPT-4"}
+                {copiedPrompt ? "Copied!" : "Copy"}
               </Button>
             </div>
-          </div>
-        </form>
+            <p className="text-sm text-gray-600">
+              The detailed prompt drives GPT-4’s reasoning far more than a static snapshot. Review or tweak it before generating.
+            </p>
+            <div className="max-h-[60vh] overflow-auto rounded-xl border border-purple-100 bg-purple-50 p-4 text-xs leading-relaxed text-purple-900 whitespace-pre-wrap font-mono">
+              {promptPreview}
+            </div>
+          </aside>
+        </div>
 
         {/* Footer Info */}
         <div className="mt-8 text-center text-sm text-gray-500">
